@@ -34,6 +34,7 @@ contract StrategyBuilderTest is Test {
 
     address feeManager = makeAddr("fee-manager");
     address receiver = makeAddr("receiver");
+    address executor = makeAddr("executor");
 
     uint256 constant CALL_GAS_LIMIT = 300_000;
     uint256 constant VERIFICATION_GAS_LIMIT = 1000000;
@@ -245,5 +246,46 @@ contract StrategyBuilderTest is Test {
         entryPoint.handleOps(userOps, beneficiary);
 
         assert(IERC20(token).balanceOf(receiver) > 0);
+    }
+
+    //////////////////////////////////
+    ////// activateAutomation ////////
+    //////////////////////////////////
+
+    function test_addAutomation_Success() external {
+        uint256 amount = 1 ether;
+
+        strategyWithoutConditionAdded(amount);
+
+        address _conditionAddress = makeAddr("condition");
+        IStrategyBuilderPlugin.Condition memory _automationCondition =
+            IStrategyBuilderPlugin.Condition({conditionAddress: _conditionAddress, id: 1, result1: 0, result0: 0});
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: 1,
+            initCode: "",
+            callData: abi.encodeCall(
+                StrategyBuilderPlugin.activateAutomation, (1, 1, address(0), 1 ether, _automationCondition)
+                ),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
     }
 }

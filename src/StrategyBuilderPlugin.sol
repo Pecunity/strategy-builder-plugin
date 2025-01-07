@@ -57,13 +57,13 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         _;
     }
 
-    modifier automationExist(uint16 _id){
-        //TODO: Implement!!!
+    modifier automationExist(uint16 _id) {
+        //ToDo: Implement!!!
         _;
     }
 
-    modifier automationDoesNotExist(uint16 _id){
-        //TODO: Implement!!!
+    modifier automationDoesNotExist(uint16 _id) {
+        //ToDo: Implement!!!
         _;
     }
 
@@ -104,13 +104,42 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     }
 
     function deleteStrategy(uint16 _id) external strategyExist(_id) {
+        //ToDo: Check if a automation with this strategy is active.
+
         delete strategies[msg.sender][_id];
 
         emit StrategyDeleted(_id);
     }
 
-    function executeStrategy(uint16 _id) external {
+    function executeStrategy(uint16 _id) external strategyExist(_id) {
         _executeStrategy(msg.sender, _id);
+    }
+
+    function activateAutomation(
+        uint16 _id,
+        uint16 _strategyId,
+        address _paymentToken,
+        uint256 _maxFeeAmount,
+        Condition calldata _condition
+    ) external automationDoesNotExist(_id) strategyExist(_strategyId) {
+        //ToDo: Check if condition is a valid contract and condition exist
+
+        Automation storage _newAutomation = automations[msg.sender][_id];
+
+        _newAutomation.condition = _condition;
+        _newAutomation.strategyId = _strategyId;
+        _newAutomation.paymentToken = _paymentToken;
+        _newAutomation.maxFeeAmount = _maxFeeAmount;
+
+        emit AutomationActivated(_id, _strategyId, _condition, _paymentToken, _maxFeeAmount);
+    }
+
+    function deleteAutomation(uint16 _id) external automationExist(_id) {
+        //ToDo: Remove this automation from the strategyArray!!
+
+        delete automations[msg.sender][_id];
+
+        emit AutomationDeleted(_id);
     }
 
     function executeAutomation(uint16 _id, address _wallet, address _beneficary) external {
@@ -128,7 +157,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         uint256 _feeNetto = _executeStrategy(_wallet, _automation.strategyId);
 
         //Calculate the resultant fee
-        //TODO: Implement the feeManager function
+        //ToDo: Implement the feeManager function
         uint256 _resultantFee = _feeNetto;
 
         if (_resultantFee > _automation.maxFeeAmount) {
@@ -147,7 +176,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // ┃       Internal functions         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function _executeStrategy(address _wallet, uint16 _id) internal strategyExist(_id) returns (uint256 fee) {
+    function _executeStrategy(address _wallet, uint16 _id) internal returns (uint256 fee) {
         fee = _executeStep(_wallet, _id, 0);
 
         emit StrategyExecuted(_id);
@@ -225,7 +254,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     function _payAutomation(address _paymentToken, uint256 _fee, address _beneficary, address _creator) internal {}
 
     function _updateCondition(Condition memory _condition) internal {
-        //TODO: Update or delete Condition
+        //ToDo: Update or delete Condition
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -248,9 +277,10 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         manifest.dependencyInterfaceIds = new bytes4[](1);
         manifest.dependencyInterfaceIds[0] = type(IPlugin).interfaceId;
 
-        manifest.executionFunctions = new bytes4[](2);
+        manifest.executionFunctions = new bytes4[](3);
         manifest.executionFunctions[0] = this.addStrategy.selector;
         manifest.executionFunctions[1] = this.executeStrategy.selector;
+        manifest.executionFunctions[2] = this.activateAutomation.selector;
 
         // you can think of ManifestFunction as a reference to a function somewhere,
         // we want to say "use this function" for some purpose - in this case,
@@ -265,7 +295,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         // here we will link together the increment function with the single owner user op validation
         // this basically says "use this user op validation function and make sure everythings okay before calling increment"
         // this will ensure that only an owner of the account can call increment
-        manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](2);
+        manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](3);
         manifest.userOpValidationFunctions[0] = ManifestAssociatedFunction({
             executionSelector: this.addStrategy.selector,
             associatedFunction: ownerUserOpValidationFunction
@@ -276,10 +306,15 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
             associatedFunction: ownerUserOpValidationFunction
         });
 
+        manifest.userOpValidationFunctions[2] = ManifestAssociatedFunction({
+            executionSelector: this.activateAutomation.selector,
+            associatedFunction: ownerUserOpValidationFunction
+        });
+
         // finally here we will always deny runtime calls to the increment function as we will only call it through user ops
         // this avoids a potential issue where a future plugin may define
         // a runtime validation function for it and unauthorized calls may occur due to that
-        manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](2);
+        manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](3);
         manifest.preRuntimeValidationHooks[0] = ManifestAssociatedFunction({
             executionSelector: this.addStrategy.selector,
             associatedFunction: ManifestFunction({
@@ -291,6 +326,15 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
 
         manifest.preRuntimeValidationHooks[1] = ManifestAssociatedFunction({
             executionSelector: this.executeStrategy.selector,
+            associatedFunction: ManifestFunction({
+                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
+                functionId: 0,
+                dependencyIndex: 0
+            })
+        });
+
+        manifest.preRuntimeValidationHooks[2] = ManifestAssociatedFunction({
+            executionSelector: this.activateAutomation.selector,
             associatedFunction: ManifestFunction({
                 functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
                 functionId: 0,
@@ -322,6 +366,6 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     }
 
     function automation(address _wallet, uint16 _id) external view returns (Automation memory) {
-        returns automations[_wallet][_id];
+        return automations[_wallet][_id];
     }
 }
