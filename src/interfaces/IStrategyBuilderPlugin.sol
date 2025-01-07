@@ -4,11 +4,19 @@ pragma solidity ^0.8.19;
 interface IStrategyBuilderPlugin {
     enum FunctionId {USER_OP_VALIDATION_SESSION_KEY}
 
+    enum ActionType {
+        EXTERNAL,
+        INTERNAL
+    }
+
     /* ====== Structs ====== */
 
     struct Action {
         bytes4 selector;
         bytes parameter;
+        address target;
+        uint256 value;
+        ActionType actionType;
     }
 
     struct Condition {
@@ -24,8 +32,8 @@ interface IStrategyBuilderPlugin {
     }
 
     struct Strategy {
-        StrategyStep[] steps;
         address creator;
+        StrategyStep[] steps;
     }
 
     struct Automation {

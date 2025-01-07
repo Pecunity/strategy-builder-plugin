@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {UpgradeableModularAccount} from "erc6900/reference-implementation/src/account/UpgradeableModularAccount.sol";
@@ -18,6 +18,10 @@ import {UserOperation} from "@eth-infinitism/account-abstraction/interfaces/User
 import {StrategyBuilderPlugin} from "../src/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "../src/interfaces/IStrategyBuilderPlugin.sol";
 
+import {Token} from "../src/test/mocks/MockToken.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IFeeManager} from "../src/interfaces/IFeeManager.sol";
+
 contract StrategyBuilderTest is Test {
     using ECDSA for bytes32;
 
@@ -28,8 +32,16 @@ contract StrategyBuilderTest is Test {
     uint256 owner1Key;
     address payable beneficiary;
 
+    address feeManager = makeAddr("fee-manager");
+    address receiver = makeAddr("receiver");
+
     uint256 constant CALL_GAS_LIMIT = 300_000;
     uint256 constant VERIFICATION_GAS_LIMIT = 1000000;
+
+    Token token;
+
+    uint256 constant MAX_TOKEN_SUPPLY = 1_000_000 * 1e18;
+    uint256 constant FIXED_FEE = 100;
 
     function setUp() public {
         // we'll be using the entry point so we can send a user operation through
@@ -51,7 +63,7 @@ contract StrategyBuilderTest is Test {
         account1 = UpgradeableModularAccount(payable(factory.createAccount(owner1, 0)));
         vm.deal(address(account1), 100 ether);
 
-        strategyBuilderPlugin = new StrategyBuilderPlugin();
+        strategyBuilderPlugin = new StrategyBuilderPlugin(feeManager);
         bytes32 manifestHash = keccak256(abi.encode(strategyBuilderPlugin.pluginManifest()));
 
         // we will have a single function dependency for our counter contract: the single owner user op validation
@@ -69,6 +81,12 @@ contract StrategyBuilderTest is Test {
             pluginInstallData: "0x",
             dependencies: dependencies
         });
+
+        vm.prank(owner1);
+        token = new Token("Mock Token","MOCK",MAX_TOKEN_SUPPLY);
+
+        vm.prank(owner1);
+        token.transfer(address(account1), MAX_TOKEN_SUPPLY);
     }
 
     /////////////////////////////
@@ -83,7 +101,10 @@ contract StrategyBuilderTest is Test {
         IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
         actions[0] = IStrategyBuilderPlugin.Action({
             selector: UpgradeableModularAccount.execute.selector,
-            parameter: abi.encode(1, 1, 1)
+            parameter: abi.encode(1, 1, 1),
+            actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL,
+            target: receiver,
+            value: 1
         });
 
         IStrategyBuilderPlugin.StrategyStep memory step =
@@ -119,6 +140,110 @@ contract StrategyBuilderTest is Test {
         userOps[0] = userOp;
         entryPoint.handleOps(userOps, beneficiary);
 
-        assert(false);
+        //Assert
+
+        // address creator = strategyBuilderPlugin.strategies(address(account1), _id).creator;
+        // console.log(creator);
+
+        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), _id);
+        assertEq(strategy.creator, _creator);
+
+        assertEq(strategy.steps[0].actions.length, 2);
+    }
+
+    /////////////////////////////////
+    ////// executeStrategy //////////
+    /////////////////////////////////
+
+    function strategyWithoutConditionAdded(uint256 transferAmount) internal {
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](1);
+
+        IStrategyBuilderPlugin.Condition memory emptyCondition;
+
+        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
+        actions[0] = IStrategyBuilderPlugin.Action({
+            selector: IERC20.transfer.selector,
+            parameter: abi.encode(receiver, transferAmount),
+            actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL,
+            target: address(token),
+            value: 0
+        });
+
+        IStrategyBuilderPlugin.StrategyStep memory step =
+            IStrategyBuilderPlugin.StrategyStep({condition: emptyCondition, actions: actions});
+
+        steps[0] = step;
+        address _creator = makeAddr("creator");
+        uint16 _id = 1;
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: 0,
+            initCode: "",
+            callData: abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+    }
+
+    function test_executeStrategy_Success(uint256 amount) external {
+        amount = bound(amount, 1, MAX_TOKEN_SUPPLY - 1);
+
+        strategyWithoutConditionAdded(amount);
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: 1,
+            initCode: "",
+            callData: abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        //Mock Fee Manager calls
+        vm.mockCall(
+            feeManager,
+            abi.encodeWithSelector(IFeeManager.getFeeType.selector),
+            abi.encode(IFeeManager.FeeType.FixedFee)
+        );
+
+        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        uint256 balance = IERC20(token).balanceOf(address(account1));
+        console.log(balance);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        assert(IERC20(token).balanceOf(receiver) > 0);
     }
 }

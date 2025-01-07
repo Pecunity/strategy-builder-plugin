@@ -11,7 +11,16 @@ import {
     PluginMetadata,
     IPlugin
 } from "modular-account-libs/interfaces/IPlugin.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IStrategyBuilderPlugin} from "./interfaces/IStrategyBuilderPlugin.sol";
+import {ICondition} from "./interfaces/ICondition.sol";
+import {IFeeManager} from "./interfaces/IFeeManager.sol";
+
+error StrategyBuilderPlugin__StrategyDoesNotExist();
+error StrategyBuilderPlugin__StrategyAlreadyExist();
+error StrategyBuilderPlugin__AutomationNotExecutable(address condition, uint16 id);
+error StrategyBuilderPlugin__FeeExceedMaxFee();
 
 contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // metadata used by the pluginMetadata() method down below
@@ -25,14 +34,55 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // in other words, we'll say "make sure the person calling increment is an owner of the account using our single plugin"
     uint256 internal constant _MANIFEST_DEPENDENCY_INDEX_OWNER_USER_OP_VALIDATION = 0;
 
-    mapping(address wallet => mapping(uint16 strategyId => Strategy strategy)) public strategies;
-    mapping(address wallet => mapping(uint16 automationId => Automation automation)) public automations;
+    IFeeManager public immutable feeManager;
+
+    mapping(address => mapping(uint16 => Strategy)) private strategies;
+    mapping(address => mapping(uint16 => Automation)) private automations;
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃       Modifier            ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    modifier strategyExist(uint16 _id) {
+        if (strategies[msg.sender][_id].steps.length == 0) {
+            revert StrategyBuilderPlugin__StrategyDoesNotExist();
+        }
+        _;
+    }
+
+    modifier strategyDoesNotExist(uint16 _id) {
+        if (strategies[msg.sender][_id].steps.length > 0) {
+            revert StrategyBuilderPlugin__StrategyAlreadyExist();
+        }
+        _;
+    }
+
+    modifier automationExist(uint16 _id){
+        //TODO: Implement!!!
+        _;
+    }
+
+    modifier automationDoesNotExist(uint16 _id){
+        //TODO: Implement!!!
+        _;
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃       Constructor         ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    constructor(address _feeManager) {
+        feeManager = IFeeManager(_feeManager);
+    }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Execution functions    ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function addStrategy(uint16 _id, address _creator, StrategyStep[] calldata _steps) external {
+    function addStrategy(uint16 _id, address _creator, StrategyStep[] calldata _steps)
+        external
+        strategyDoesNotExist(_id)
+    {
         Strategy storage newStrategy = strategies[msg.sender][_id];
 
         newStrategy.creator = _creator;
@@ -51,6 +101,131 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         }
 
         emit StrategyAdded(_id, _creator, newStrategy);
+    }
+
+    function deleteStrategy(uint16 _id) external strategyExist(_id) {
+        delete strategies[msg.sender][_id];
+
+        emit StrategyDeleted(_id);
+    }
+
+    function executeStrategy(uint16 _id) external {
+        _executeStrategy(msg.sender, _id);
+    }
+
+    function executeAutomation(uint16 _id, address _wallet, address _beneficary) external {
+        Automation memory _automation = automations[_wallet][_id];
+
+        //Check the condition
+        (uint8 _conditionResult,) = _checkCondition(_wallet, _automation.condition);
+
+        if (_conditionResult == 0) {
+            revert StrategyBuilderPlugin__AutomationNotExecutable(
+                _automation.condition.conditionAddress, _automation.condition.id
+            );
+        }
+
+        uint256 _feeNetto = _executeStrategy(_wallet, _automation.strategyId);
+
+        //Calculate the resultant fee
+        //TODO: Implement the feeManager function
+        uint256 _resultantFee = _feeNetto;
+
+        if (_resultantFee > _automation.maxFeeAmount) {
+            revert StrategyBuilderPlugin__FeeExceedMaxFee();
+        }
+
+        address _strategyCreator = strategies[_wallet][_automation.strategyId].creator;
+        _payAutomation(_automation.paymentToken, _resultantFee, _beneficary, _strategyCreator);
+
+        _updateCondition(_automation.condition);
+
+        emit AutomationExecuted(_id, _automation.paymentToken, _resultantFee);
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃       Internal functions         ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function _executeStrategy(address _wallet, uint16 _id) internal strategyExist(_id) returns (uint256 fee) {
+        fee = _executeStep(_wallet, _id, 0);
+
+        emit StrategyExecuted(_id);
+    }
+
+    function _executeStep(address _wallet, uint16 _id, uint16 _index) internal returns (uint256 fee) {
+        StrategyStep memory _step = strategies[_wallet][_id].steps[_index];
+
+        //Check Condition
+        (uint8 _conditionResult, uint16 _nextIndex) = _checkCondition(_wallet, _step.condition);
+
+        if (_conditionResult == 1) {
+            //Execute all actions from the step
+            for (uint256 i = 0; i < _step.actions.length; i++) {
+                uint256 _actionFee = _executeAction(_wallet, _step.actions[i]);
+                fee += _actionFee;
+            }
+
+            emit StrategyStepExecuted(_id, _index, _step.actions);
+        }
+
+        if (_nextIndex != 0) {
+            //if there is a next step go to it
+            uint256 _feeNextStep = _executeStep(_wallet, _id, _nextIndex);
+            fee += _feeNextStep;
+        }
+    }
+
+    function _executeAction(address _wallet, Action memory _action) internal returns (uint256) {
+        IFeeManager.FeeType _feeType = feeManager.getFeeType(_action.selector);
+
+        if (_feeType == IFeeManager.FeeType.PostCallFee) {
+            address _basisFeeToken = feeManager.getBasisFeeToken(_action.selector, _action.parameter);
+            uint256 _tokenBalance = IERC20(_basisFeeToken).balanceOf(_wallet);
+            _execute(_wallet, _action);
+            return feeManager.calculateFeeForPostCallAction(
+                _action.selector, _basisFeeToken, IERC20(_basisFeeToken).balanceOf(_wallet) - _tokenBalance
+            );
+        } else if (_feeType == IFeeManager.FeeType.FixedFee) {
+            _execute(_wallet, _action);
+            return feeManager.getFixedFee(_action.selector);
+        } else {
+            _execute(_wallet, _action);
+            return feeManager.calculateFeeForPreCallAction(_action.selector, _action.parameter);
+        }
+    }
+
+    function _execute(address _wallet, Action memory _action) internal {
+        bytes memory data = abi.encodePacked(_action.selector, _action.parameter);
+        if (_action.actionType == ActionType.EXTERNAL) {
+            IPluginExecutor(_wallet).executeFromPluginExternal(_action.target, _action.value, data);
+        } else {
+            IPluginExecutor(_wallet).executeFromPlugin(data);
+        }
+    }
+
+    function _checkCondition(address _wallet, Condition memory _condition)
+        internal
+        view
+        returns (uint8 conditionResult, uint16 nextStep)
+    {
+        if (_condition.conditionAddress == address(0)) {
+            nextStep = _condition.result1;
+            conditionResult = 1;
+        } else {
+            conditionResult = ICondition(_condition.conditionAddress).checkCondition(_wallet, _condition.id);
+            if (conditionResult == 1) {
+                nextStep = _condition.result1;
+            } else {
+                nextStep = _condition.result0;
+            }
+        }
+    }
+
+    function _payAutomation(address _paymentToken, uint256 _fee, address _beneficary, address _creator) internal {}
+
+    function _updateCondition(Condition memory _condition) internal {
+        //TODO: Update or delete Condition
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -73,8 +248,9 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         manifest.dependencyInterfaceIds = new bytes4[](1);
         manifest.dependencyInterfaceIds[0] = type(IPlugin).interfaceId;
 
-        manifest.executionFunctions = new bytes4[](1);
+        manifest.executionFunctions = new bytes4[](2);
         manifest.executionFunctions[0] = this.addStrategy.selector;
+        manifest.executionFunctions[1] = this.executeStrategy.selector;
 
         // you can think of ManifestFunction as a reference to a function somewhere,
         // we want to say "use this function" for some purpose - in this case,
@@ -89,16 +265,21 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         // here we will link together the increment function with the single owner user op validation
         // this basically says "use this user op validation function and make sure everythings okay before calling increment"
         // this will ensure that only an owner of the account can call increment
-        manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](1);
+        manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](2);
         manifest.userOpValidationFunctions[0] = ManifestAssociatedFunction({
             executionSelector: this.addStrategy.selector,
+            associatedFunction: ownerUserOpValidationFunction
+        });
+
+        manifest.userOpValidationFunctions[1] = ManifestAssociatedFunction({
+            executionSelector: this.executeStrategy.selector,
             associatedFunction: ownerUserOpValidationFunction
         });
 
         // finally here we will always deny runtime calls to the increment function as we will only call it through user ops
         // this avoids a potential issue where a future plugin may define
         // a runtime validation function for it and unauthorized calls may occur due to that
-        manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](1);
+        manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](2);
         manifest.preRuntimeValidationHooks[0] = ManifestAssociatedFunction({
             executionSelector: this.addStrategy.selector,
             associatedFunction: ManifestFunction({
@@ -107,6 +288,18 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
                 dependencyIndex: 0
             })
         });
+
+        manifest.preRuntimeValidationHooks[1] = ManifestAssociatedFunction({
+            executionSelector: this.executeStrategy.selector,
+            associatedFunction: ManifestFunction({
+                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
+                functionId: 0,
+                dependencyIndex: 0
+            })
+        });
+
+        manifest.permitAnyExternalAddress = true;
+        manifest.canSpendNativeToken = true;
 
         return manifest;
     }
@@ -118,5 +311,17 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         metadata.version = VERSION;
         metadata.author = AUTHOR;
         return metadata;
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    External View Functions       ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function strategy(address _wallet, uint16 _id) external view returns (Strategy memory) {
+        return strategies[_wallet][_id];
+    }
+
+    function automation(address _wallet, uint16 _id) external view returns (Automation memory) {
+        returns automations[_wallet][_id];
     }
 }
