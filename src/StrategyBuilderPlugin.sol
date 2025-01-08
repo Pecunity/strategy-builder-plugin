@@ -21,8 +21,16 @@ error StrategyBuilderPlugin__StrategyDoesNotExist();
 error StrategyBuilderPlugin__StrategyAlreadyExist();
 error StrategyBuilderPlugin__AutomationNotExecutable(address condition, uint16 id);
 error StrategyBuilderPlugin__FeeExceedMaxFee();
+error StrategyBuilderPlugin__AutomationNotExist();
+error StrategyBuilderPlugin__AutomationAlreadyExist();
+error StrategyBuilderPlugin__StrategyIsInUse();
+error StrategyBuilderPlugin__ChangeActionInConditionFailed();
+error StrategyBuilderPlugin__ChangeStrategyInConditionFailed();
+error StrategyBuilderPlugin__UpdateConditionFailed(address condition, uint16 id);
 
 contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
+    using SafeERC20 for IERC20;
+
     // metadata used by the pluginMetadata() method down below
     string public constant NAME = "Strategy Builder Plugin";
     string public constant VERSION = "0.0.1";
@@ -37,6 +45,8 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     IFeeManager public immutable feeManager;
 
     mapping(address => mapping(uint16 => Strategy)) private strategies;
+    mapping(address => mapping(uint16 => uint16[])) private strategiesUsed; //All automations where the strategy is used
+    mapping(address => mapping(uint16 => uint16)) private automationsToIndex; //Maps each automation ID to its index in the owner's used strategy array.
     mapping(address => mapping(uint16 => Automation)) private automations;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -58,12 +68,16 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     }
 
     modifier automationExist(uint16 _id) {
-        //ToDo: Implement!!!
+        if (automations[msg.sender][_id].condition.conditionAddress == address(0)) {
+            revert StrategyBuilderPlugin__AutomationNotExist();
+        }
         _;
     }
 
     modifier automationDoesNotExist(uint16 _id) {
-        //ToDo: Implement!!!
+        if (automations[msg.sender][_id].condition.conditionAddress != address(0)) {
+            revert StrategyBuilderPlugin__AutomationAlreadyExist();
+        }
         _;
     }
 
@@ -94,6 +108,10 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
             StrategyStep storage newStep = newStrategy.steps.push();
             newStep.condition = step.condition;
 
+            if (step.condition.conditionAddress != address(0)) {
+                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, _id, true);
+            }
+
             // Loop through the actions and add them to the step
             for (uint256 j = 0; j < step.actions.length; j++) {
                 newStep.actions.push(step.actions[j]);
@@ -104,7 +122,18 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     }
 
     function deleteStrategy(uint16 _id) external strategyExist(_id) {
-        //ToDo: Check if a automation with this strategy is active.
+        if (strategiesUsed[msg.sender][_id].length > 0) {
+            revert StrategyBuilderPlugin__StrategyIsInUse();
+        }
+
+        Strategy memory _strategy = strategies[msg.sender][_id];
+
+        for (uint256 i = 0; i < _strategy.steps.length; i++) {
+            Condition memory _condition = _strategy.steps[i].condition;
+            if (_condition.conditionAddress != address(0)) {
+                _changeStrategyInCondition(msg.sender, _condition.conditionAddress, _condition.id, _id, false);
+            }
+        }
 
         delete strategies[msg.sender][_id];
 
@@ -122,7 +151,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         uint256 _maxFeeAmount,
         Condition calldata _condition
     ) external automationDoesNotExist(_id) strategyExist(_strategyId) {
-        //ToDo: Check if condition is a valid contract and condition exist
+        _changeActionInCondition(msg.sender, _condition.conditionAddress, _condition.id, _id, true);
 
         Automation storage _newAutomation = automations[msg.sender][_id];
 
@@ -131,11 +160,29 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         _newAutomation.paymentToken = _paymentToken;
         _newAutomation.maxFeeAmount = _maxFeeAmount;
 
+        strategiesUsed[msg.sender][_strategyId].push(_id);
+        automationsToIndex[msg.sender][_id] = uint16(strategiesUsed[msg.sender][_strategyId].length - 1);
+
         emit AutomationActivated(_id, _strategyId, _condition, _paymentToken, _maxFeeAmount);
     }
 
     function deleteAutomation(uint16 _id) external automationExist(_id) {
-        //ToDo: Remove this automation from the strategyArray!!
+        Automation memory _automation = automations[msg.sender][_id];
+
+        uint16[] storage _usedInAutomations = strategiesUsed[msg.sender][_automation.strategyId];
+
+        uint16 _actualAutomationIndex = automationsToIndex[msg.sender][_id];
+        uint256 _lastAutomationIndex = _usedInAutomations.length - 1;
+        if (_actualAutomationIndex != _lastAutomationIndex) {
+            uint16 _lastAutomation = _usedInAutomations[_lastAutomationIndex];
+            _usedInAutomations[_actualAutomationIndex] = _lastAutomation;
+            automationsToIndex[msg.sender][_lastAutomation] = _actualAutomationIndex;
+        }
+        _usedInAutomations.pop();
+
+        _changeActionInCondition(
+            msg.sender, _automation.condition.conditionAddress, _automation.condition.id, _id, false
+        );
 
         delete automations[msg.sender][_id];
 
@@ -167,7 +214,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         address _strategyCreator = strategies[_wallet][_automation.strategyId].creator;
         _payAutomation(_automation.paymentToken, _resultantFee, _beneficary, _strategyCreator);
 
-        _updateCondition(_automation.condition);
+        _updateCondition(_wallet, _automation.condition, _id);
 
         emit AutomationExecuted(_id, _automation.paymentToken, _resultantFee);
     }
@@ -251,10 +298,60 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         }
     }
 
-    function _payAutomation(address _paymentToken, uint256 _fee, address _beneficary, address _creator) internal {}
+    function _changeActionInCondition(
+        address _wallet,
+        address _condition,
+        uint16 _conditionId,
+        uint16 _action,
+        bool _add
+    ) internal {
+        bytes memory data = _add
+            ? abi.encodeCall(ICondition.addAutomationToCondition, (_conditionId, _action))
+            : abi.encodeCall(ICondition.removeAutomationFromCondition, (_conditionId, _action));
 
-    function _updateCondition(Condition memory _condition) internal {
-        //ToDo: Update or delete Condition
+        bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
+        bool _success = abi.decode(result, (bool));
+        if (!_success) {
+            revert StrategyBuilderPlugin__ChangeActionInConditionFailed();
+        }
+    }
+
+    function _changeStrategyInCondition(
+        address _wallet,
+        address _condition,
+        uint16 _conditionId,
+        uint16 _strategy,
+        bool _add
+    ) internal {
+        bytes memory data = _add
+            ? abi.encodeCall(ICondition.addStrategyToCondition, (_conditionId, _strategy))
+            : abi.encodeCall(ICondition.removeStrategyFromCondition, (_conditionId, _strategy));
+
+        bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
+        bool _success = abi.decode(result, (bool));
+        if (!_success) {
+            revert StrategyBuilderPlugin__ChangeStrategyInConditionFailed();
+        }
+    }
+
+    function _payAutomation(address _paymentToken, uint256 _fee, address _beneficary, address _creator) internal {
+        if (_paymentToken != address(0)) {
+            // bytes memory approveData = abi.ecnodeCall(IERC20.safeApprove, (feeManager.inkwell(), _fee));
+        }
+    }
+
+    function _updateCondition(address _wallet, Condition memory _condition, uint16 _actionId) internal {
+        if (ICondition(_condition.conditionAddress).isUpdateable(_wallet, _condition.id)) {
+            bytes memory _data = abi.encodeCall(ICondition.updateCondition, (_condition.id));
+            bytes memory _result =
+                IPluginExecutor(_wallet).executeFromPluginExternal(_condition.conditionAddress, 0, _data);
+            bool _success = abi.decode(_result, (bool));
+            if (!_success) {
+                revert StrategyBuilderPlugin__UpdateConditionFailed(_condition.conditionAddress, _condition.id);
+            }
+        } else {
+            _changeActionInCondition(_wallet, _condition.conditionAddress, _condition.id, _actionId, false);
+        }
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -277,10 +374,12 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         manifest.dependencyInterfaceIds = new bytes4[](1);
         manifest.dependencyInterfaceIds[0] = type(IPlugin).interfaceId;
 
-        manifest.executionFunctions = new bytes4[](3);
+        manifest.executionFunctions = new bytes4[](5);
         manifest.executionFunctions[0] = this.addStrategy.selector;
         manifest.executionFunctions[1] = this.executeStrategy.selector;
         manifest.executionFunctions[2] = this.activateAutomation.selector;
+        manifest.executionFunctions[3] = this.deleteStrategy.selector;
+        manifest.executionFunctions[4] = this.deleteAutomation.selector;
 
         // you can think of ManifestFunction as a reference to a function somewhere,
         // we want to say "use this function" for some purpose - in this case,
@@ -295,7 +394,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         // here we will link together the increment function with the single owner user op validation
         // this basically says "use this user op validation function and make sure everythings okay before calling increment"
         // this will ensure that only an owner of the account can call increment
-        manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](3);
+        manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](5);
         manifest.userOpValidationFunctions[0] = ManifestAssociatedFunction({
             executionSelector: this.addStrategy.selector,
             associatedFunction: ownerUserOpValidationFunction
@@ -311,10 +410,20 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
             associatedFunction: ownerUserOpValidationFunction
         });
 
+        manifest.userOpValidationFunctions[3] = ManifestAssociatedFunction({
+            executionSelector: this.deleteStrategy.selector,
+            associatedFunction: ownerUserOpValidationFunction
+        });
+
+        manifest.userOpValidationFunctions[4] = ManifestAssociatedFunction({
+            executionSelector: this.deleteAutomation.selector,
+            associatedFunction: ownerUserOpValidationFunction
+        });
+
         // finally here we will always deny runtime calls to the increment function as we will only call it through user ops
         // this avoids a potential issue where a future plugin may define
         // a runtime validation function for it and unauthorized calls may occur due to that
-        manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](3);
+        manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](5);
         manifest.preRuntimeValidationHooks[0] = ManifestAssociatedFunction({
             executionSelector: this.addStrategy.selector,
             associatedFunction: ManifestFunction({
@@ -335,6 +444,24 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
 
         manifest.preRuntimeValidationHooks[2] = ManifestAssociatedFunction({
             executionSelector: this.activateAutomation.selector,
+            associatedFunction: ManifestFunction({
+                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
+                functionId: 0,
+                dependencyIndex: 0
+            })
+        });
+
+        manifest.preRuntimeValidationHooks[3] = ManifestAssociatedFunction({
+            executionSelector: this.deleteAutomation.selector,
+            associatedFunction: ManifestFunction({
+                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
+                functionId: 0,
+                dependencyIndex: 0
+            })
+        });
+
+        manifest.preRuntimeValidationHooks[4] = ManifestAssociatedFunction({
+            executionSelector: this.deleteStrategy.selector,
             associatedFunction: ManifestFunction({
                 functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
                 functionId: 0,

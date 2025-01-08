@@ -19,6 +19,7 @@ import {StrategyBuilderPlugin} from "../src/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "../src/interfaces/IStrategyBuilderPlugin.sol";
 
 import {Token} from "../src/test/mocks/MockToken.sol";
+import {MockCondition} from "../src/test/mocks/MockCondition.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IFeeManager} from "../src/interfaces/IFeeManager.sol";
 
@@ -36,10 +37,11 @@ contract StrategyBuilderTest is Test {
     address receiver = makeAddr("receiver");
     address executor = makeAddr("executor");
 
-    uint256 constant CALL_GAS_LIMIT = 300_000;
+    uint256 constant CALL_GAS_LIMIT = 400_000;
     uint256 constant VERIFICATION_GAS_LIMIT = 1000000;
 
     Token token;
+    MockCondition condition;
 
     uint256 constant MAX_TOKEN_SUPPLY = 1_000_000 * 1e18;
     uint256 constant FIXED_FEE = 100;
@@ -88,6 +90,11 @@ contract StrategyBuilderTest is Test {
 
         vm.prank(owner1);
         token.transfer(address(account1), MAX_TOKEN_SUPPLY);
+
+        condition = new MockCondition();
+        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        vm.prank(address(account1));
+        condition.addCondition(0, _condition);
     }
 
     /////////////////////////////
@@ -156,10 +163,11 @@ contract StrategyBuilderTest is Test {
     ////// executeStrategy //////////
     /////////////////////////////////
 
-    function strategyWithoutConditionAdded(uint256 transferAmount) internal {
+    function strategyWithConditionAdded(uint256 transferAmount) internal {
         IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](1);
 
-        IStrategyBuilderPlugin.Condition memory emptyCondition;
+        IStrategyBuilderPlugin.Condition memory _condition;
+        _condition.conditionAddress = address(condition);
 
         IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
         actions[0] = IStrategyBuilderPlugin.Action({
@@ -171,7 +179,7 @@ contract StrategyBuilderTest is Test {
         });
 
         IStrategyBuilderPlugin.StrategyStep memory step =
-            IStrategyBuilderPlugin.StrategyStep({condition: emptyCondition, actions: actions});
+            IStrategyBuilderPlugin.StrategyStep({condition: _condition, actions: actions});
 
         steps[0] = step;
         address _creator = makeAddr("creator");
@@ -206,7 +214,7 @@ contract StrategyBuilderTest is Test {
     function test_executeStrategy_Success(uint256 amount) external {
         amount = bound(amount, 1, MAX_TOKEN_SUPPLY - 1);
 
-        strategyWithoutConditionAdded(amount);
+        strategyWithConditionAdded(amount);
 
         // create a user operation which has the calldata to specify we'd like to increment
         UserOperation memory userOp = UserOperation({
@@ -248,6 +256,46 @@ contract StrategyBuilderTest is Test {
         assert(IERC20(token).balanceOf(receiver) > 0);
     }
 
+    /////////////////////////////////
+    ////// deleteStrategy ///////////
+    /////////////////////////////////
+
+    function test_deleteStrategy_Success() external {
+        uint16 _id = 1;
+        uint256 transfer = 1 ether;
+        strategyWithConditionAdded(transfer);
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: 1,
+            initCode: "",
+            callData: abi.encodeCall(StrategyBuilderPlugin.deleteStrategy, (_id)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), _id);
+        assertEq(strategy.creator, address(0));
+
+        assertEq(strategy.steps.length, 0);
+    }
+
     //////////////////////////////////
     ////// activateAutomation ////////
     //////////////////////////////////
@@ -255,11 +303,10 @@ contract StrategyBuilderTest is Test {
     function test_addAutomation_Success() external {
         uint256 amount = 1 ether;
 
-        strategyWithoutConditionAdded(amount);
+        strategyWithConditionAdded(amount);
 
-        address _conditionAddress = makeAddr("condition");
         IStrategyBuilderPlugin.Condition memory _automationCondition =
-            IStrategyBuilderPlugin.Condition({conditionAddress: _conditionAddress, id: 1, result1: 0, result0: 0});
+            IStrategyBuilderPlugin.Condition({conditionAddress: address(condition), id: 1, result1: 0, result0: 0});
 
         // create a user operation which has the calldata to specify we'd like to increment
         UserOperation memory userOp = UserOperation({
@@ -287,5 +334,15 @@ contract StrategyBuilderTest is Test {
         UserOperation[] memory userOps = new UserOperation[](1);
         userOps[0] = userOp;
         entryPoint.handleOps(userOps, beneficiary);
+
+        address conditionAddress = strategyBuilderPlugin.automation(address(account1), 1).condition.conditionAddress;
+
+        assertEq(conditionAddress, address(condition));
     }
+
+    //////////////////////
+    ////// HELPER ////////
+    //////////////////////
+
+    function activateAutomation() internal {}
 }
