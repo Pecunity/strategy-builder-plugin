@@ -12,10 +12,10 @@ import {
     IPlugin
 } from "modular-account-libs/interfaces/IPlugin.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IStrategyBuilderPlugin} from "./interfaces/IStrategyBuilderPlugin.sol";
 import {ICondition} from "./interfaces/ICondition.sol";
 import {IFeeManager} from "./interfaces/IFeeManager.sol";
+import {IInkwell} from "./interfaces/IInkwell.sol";
 
 error StrategyBuilderPlugin__StrategyDoesNotExist();
 error StrategyBuilderPlugin__StrategyAlreadyExist();
@@ -29,8 +29,6 @@ error StrategyBuilderPlugin__ChangeStrategyInConditionFailed();
 error StrategyBuilderPlugin__UpdateConditionFailed(address condition, uint16 id);
 
 contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
-    using SafeERC20 for IERC20;
-
     // metadata used by the pluginMetadata() method down below
     string public constant NAME = "Strategy Builder Plugin";
     string public constant VERSION = "0.0.1";
@@ -204,15 +202,14 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         uint256 _feeNetto = _executeStrategy(_wallet, _automation.strategyId);
 
         //Calculate the resultant fee
-        //ToDo: Implement the feeManager function
-        uint256 _resultantFee = _feeNetto;
+        uint256 _resultantFee = feeManager.prepareForPayment(_feeNetto, _automation.paymentToken);
 
         if (_resultantFee > _automation.maxFeeAmount) {
             revert StrategyBuilderPlugin__FeeExceedMaxFee();
         }
 
         address _strategyCreator = strategies[_wallet][_automation.strategyId].creator;
-        _payAutomation(_automation.paymentToken, _resultantFee, _beneficary, _strategyCreator);
+        _payAutomation(_wallet, _automation.paymentToken, _resultantFee, _beneficary, _strategyCreator);
 
         _updateCondition(_wallet, _automation.condition, _id);
 
@@ -334,10 +331,35 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         }
     }
 
-    function _payAutomation(address _paymentToken, uint256 _fee, address _beneficary, address _creator) internal {
+    function _payAutomation(address _wallet, address _paymentToken, uint256 _fee, address _beneficary, address _creator)
+        internal
+    {
+        uint256 _paymentAmount;
+
         if (_paymentToken != address(0)) {
-            // bytes memory approveData = abi.ecnodeCall(IERC20.safeApprove, (feeManager.inkwell(), _fee));
+            _paymentAmount = _swapToOCTO(_wallet, _paymentToken, _fee);
+        } else {
+            _paymentAmount = _fee;
         }
+
+        address _octoInk = feeManager.octoInk();
+        address _tokenDistributor = feeManager.tokenDistributor();
+
+        bytes memory _approveData = abi.encodeCall(IERC20.approve, (_tokenDistributor, _paymentAmount));
+        IPluginExecutor(_wallet).executeFromPluginExternal(_octoInk, 0, _approveData);
+
+        bytes memory _handleFeeData = abi.encodeCall(IFeeManager.handleFee, (_paymentAmount, _beneficary, _creator));
+        IPluginExecutor(_wallet).executeFromPluginExternal(address(feeManager), 0, _handleFeeData);
+    }
+
+    function _swapToOCTO(address _wallet, address _paymentToken, uint256 _fee) internal returns (uint256) {
+        address _inkwell = feeManager.inkwell();
+        bytes memory _data = abi.encodeCall(IERC20.approve, (_inkwell, _fee));
+        IPluginExecutor(_wallet).executeFromPluginExternal(_paymentToken, 0, _data);
+
+        //Buy the equivalent amount of octoInk
+        bytes memory _buyData = abi.encodeCall(IInkwell.buy, (_fee, _paymentToken));
+        IPluginExecutor(_wallet).executeFromPluginExternal(_inkwell, 0, _buyData);
     }
 
     function _updateCondition(address _wallet, Condition memory _condition, uint16 _actionId) internal {
