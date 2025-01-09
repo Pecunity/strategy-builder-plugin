@@ -15,7 +15,7 @@ import {IEntryPoint} from "@eth-infinitism/account-abstraction/interfaces/IEntry
 import {EntryPoint} from "@eth-infinitism/account-abstraction/core/EntryPoint.sol";
 import {UserOperation} from "@eth-infinitism/account-abstraction/interfaces/UserOperation.sol";
 
-import {StrategyBuilderPlugin} from "../src/StrategyBuilderPlugin.sol";
+import {StrategyBuilderPlugin, StrategyBuilderPlugin__AutomationNotExecutable} from "../src/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "../src/interfaces/IStrategyBuilderPlugin.sol";
 
 import {Token} from "../src/test/mocks/MockToken.sol";
@@ -36,8 +36,9 @@ contract StrategyBuilderTest is Test {
     address feeManager = makeAddr("fee-manager");
     address receiver = makeAddr("receiver");
     address executor = makeAddr("executor");
+    address octoInk = makeAddr("octo-ink");
 
-    uint256 constant CALL_GAS_LIMIT = 400_000;
+    uint256 constant CALL_GAS_LIMIT = 800_000;
     uint256 constant VERIFICATION_GAS_LIMIT = 1000000;
 
     Token token;
@@ -210,6 +211,51 @@ contract StrategyBuilderTest is Test {
         assert(IERC20(token).balanceOf(receiver) > 0);
     }
 
+    function test_executeStrategy_TwoSteps(uint256 amount) external {
+        amount = bound(amount, 1, MAX_TOKEN_SUPPLY - 1);
+
+        strategyWithTwoStepsAdd(amount);
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: nonce,
+            initCode: "",
+            callData: abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        //Mock Fee Manager calls
+        vm.mockCall(
+            feeManager,
+            abi.encodeWithSelector(IFeeManager.getFeeType.selector),
+            abi.encode(IFeeManager.FeeType.FixedFee)
+        );
+
+        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        uint256 balance = IERC20(token).balanceOf(address(account1));
+        console.log(balance);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        assert(IERC20(token).balanceOf(receiver) > 0);
+    }
+
     /////////////////////////////////
     ////// deleteStrategy ///////////
     /////////////////////////////////
@@ -303,7 +349,7 @@ contract StrategyBuilderTest is Test {
 
         strategyWithConditionAdded(amount);
 
-        activateAutomation();
+        activateAutomation(0);
 
         mockFeeManager();
 
@@ -311,6 +357,68 @@ contract StrategyBuilderTest is Test {
 
         vm.prank(executor);
         strategyBuilderPlugin.executeAutomation(1, address(account1), executor);
+    }
+
+    function test_executeAutomation_ConditionIsFalse() external {
+        uint256 amount = 1 ether;
+
+        strategyWithConditionAdded(amount);
+
+        MockCondition.Condition memory _condition = MockCondition.Condition({result: false, active: true});
+        vm.prank(address(account1));
+        condition.addCondition(1, _condition);
+        activateAutomation(1);
+
+        mockFeeManager();
+
+        address executor = makeAddr("executor");
+
+        vm.prank(executor);
+        vm.expectRevert(
+            abi.encodeWithSelector(StrategyBuilderPlugin__AutomationNotExecutable.selector, address(condition), 1)
+        );
+        strategyBuilderPlugin.executeAutomation(1, address(account1), executor);
+    }
+
+    //////////////////////////////////
+    ////// deleteAutomation /////////
+    //////////////////////////////////
+
+    function test_deleteAutomation_Success() external {
+        uint256 amount = 1 ether;
+
+        strategyWithConditionAdded(amount);
+
+        activateAutomation(0);
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: nonce,
+            initCode: "",
+            callData: abi.encodeCall(StrategyBuilderPlugin.deleteAutomation, (1)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        StrategyBuilderPlugin.Automation memory _automation = strategyBuilderPlugin.automation(address(account1), 1);
+
+        assertEq(_automation.condition.conditionAddress, address(0));
     }
 
     //////////////////////
@@ -370,9 +478,75 @@ contract StrategyBuilderTest is Test {
         nonce++;
     }
 
-    function activateAutomation() internal {
-        IStrategyBuilderPlugin.Condition memory _automationCondition =
-            IStrategyBuilderPlugin.Condition({conditionAddress: address(condition), id: 0, result1: 0, result0: 0});
+    function strategyWithTwoStepsAdd(uint256 transferAmount) internal {
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](2);
+
+        IStrategyBuilderPlugin.Condition memory _condition;
+        _condition.conditionAddress = address(0);
+        _condition.result1 = 1;
+
+        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](1);
+        actions[0] = IStrategyBuilderPlugin.Action({
+            selector: IERC20.transfer.selector,
+            parameter: abi.encode(receiver, transferAmount),
+            actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL,
+            target: address(token),
+            value: 0
+        });
+
+        IStrategyBuilderPlugin.StrategyStep memory step =
+            IStrategyBuilderPlugin.StrategyStep({condition: _condition, actions: actions});
+
+        steps[0] = step;
+
+        MockCondition.Condition memory _falseCondition = MockCondition.Condition({result: false, active: true});
+        vm.prank(address(account1));
+        condition.addCondition(1, _falseCondition);
+
+        IStrategyBuilderPlugin.Condition memory _conditionStepTwo;
+        _conditionStepTwo.conditionAddress = address(condition);
+        _conditionStepTwo.id = 1;
+
+        steps[1] = IStrategyBuilderPlugin.StrategyStep({condition: _conditionStepTwo, actions: actions});
+
+        address _creator = makeAddr("creator");
+        uint16 _id = 1;
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: nonce,
+            initCode: "",
+            callData: abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        nonce++;
+    }
+
+    function activateAutomation(uint16 conditionId) internal {
+        IStrategyBuilderPlugin.Condition memory _automationCondition = IStrategyBuilderPlugin.Condition({
+            conditionAddress: address(condition),
+            id: conditionId,
+            result1: 0,
+            result0: 0
+        });
 
         UserOperation memory userOp = UserOperation({
             sender: address(account1),
@@ -411,5 +585,13 @@ contract StrategyBuilderTest is Test {
         );
 
         vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
+
+        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.prepareForPayment.selector), abi.encode(FIXED_FEE));
+
+        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.octoInk.selector), abi.encode(octoInk));
+
+        vm.mockCall(octoInk, abi.encodeWithSelector(IERC20.approve.selector), abi.encode(true));
+
+        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.handleFee.selector), abi.encode(true));
     }
 }

@@ -335,7 +335,9 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         internal
     {
         bytes memory _approveData = abi.encodeCall(IERC20.approve, (address(feeManager), _fee));
-        IPluginExecutor(_wallet).executeFromPluginExternal(_paymentToken, 0, _approveData);
+        IPluginExecutor(_wallet).executeFromPluginExternal(
+            _paymentToken == address(0) ? feeManager.octoInk() : _paymentToken, 0, _approveData
+        );
 
         bytes memory _handleFeeData =
             abi.encodeCall(IFeeManager.handleFee, (_fee, _beneficary, _creator, _paymentToken));
