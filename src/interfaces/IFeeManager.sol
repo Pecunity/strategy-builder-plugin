@@ -34,7 +34,9 @@ interface IFeeManager {
     function octoInk() external view returns (address);
     function inkwell() external view returns (address);
 
-    function handleFee(uint256 feeAmount, address executor, address creator) external returns (bool);
+    function handleFee(uint256 feeAmount, address executor, address creator, address paymentToken)
+        external
+        returns (bool);
 
     function tokenDistributor() external view returns (address);
     function getFeeType(bytes4 functionSelector) external view returns (FeeType);

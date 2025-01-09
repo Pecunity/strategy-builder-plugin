@@ -334,32 +334,12 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     function _payAutomation(address _wallet, address _paymentToken, uint256 _fee, address _beneficary, address _creator)
         internal
     {
-        uint256 _paymentAmount;
+        bytes memory _approveData = abi.encodeCall(IERC20.approve, (address(feeManager), _fee));
+        IPluginExecutor(_wallet).executeFromPluginExternal(_paymentToken, 0, _approveData);
 
-        if (_paymentToken != address(0)) {
-            _paymentAmount = _swapToOCTO(_wallet, _paymentToken, _fee);
-        } else {
-            _paymentAmount = _fee;
-        }
-
-        address _octoInk = feeManager.octoInk();
-        address _tokenDistributor = feeManager.tokenDistributor();
-
-        bytes memory _approveData = abi.encodeCall(IERC20.approve, (_tokenDistributor, _paymentAmount));
-        IPluginExecutor(_wallet).executeFromPluginExternal(_octoInk, 0, _approveData);
-
-        bytes memory _handleFeeData = abi.encodeCall(IFeeManager.handleFee, (_paymentAmount, _beneficary, _creator));
+        bytes memory _handleFeeData =
+            abi.encodeCall(IFeeManager.handleFee, (_fee, _beneficary, _creator, _paymentToken));
         IPluginExecutor(_wallet).executeFromPluginExternal(address(feeManager), 0, _handleFeeData);
-    }
-
-    function _swapToOCTO(address _wallet, address _paymentToken, uint256 _fee) internal returns (uint256) {
-        address _inkwell = feeManager.inkwell();
-        bytes memory _data = abi.encodeCall(IERC20.approve, (_inkwell, _fee));
-        IPluginExecutor(_wallet).executeFromPluginExternal(_paymentToken, 0, _data);
-
-        //Buy the equivalent amount of octoInk
-        bytes memory _buyData = abi.encodeCall(IInkwell.buy, (_fee, _paymentToken));
-        IPluginExecutor(_wallet).executeFromPluginExternal(_inkwell, 0, _buyData);
     }
 
     function _updateCondition(address _wallet, Condition memory _condition, uint16 _actionId) internal {
