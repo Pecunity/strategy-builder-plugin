@@ -41,7 +41,11 @@ abstract contract BaseCondition is ICondition {
         return false;
     }
 
-    function _isConditionActive(address _wallet, uint16 _id) internal virtual returns (bool) {
+    function conditionActive(address wallet, uint16 id) external view returns (bool) {
+        _isConditionActive(wallet, id);
+    }
+
+    function _isConditionActive(address _wallet, uint16 _id) internal view virtual returns (bool) {
         return false;
     }
 

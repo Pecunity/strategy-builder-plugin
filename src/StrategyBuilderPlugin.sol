@@ -15,7 +15,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IStrategyBuilderPlugin} from "./interfaces/IStrategyBuilderPlugin.sol";
 import {ICondition} from "./interfaces/ICondition.sol";
 import {IFeeManager} from "./interfaces/IFeeManager.sol";
-import {IInkwell} from "./interfaces/IInkwell.sol";
 
 error StrategyBuilderPlugin__StrategyDoesNotExist();
 error StrategyBuilderPlugin__StrategyAlreadyExist();

@@ -21,4 +21,6 @@ interface ICondition {
     function removeAutomationFromCondition(uint16 id, uint16 automation) external returns (bool);
 
     function removeStrategyFromCondition(uint16 id, uint16 strategy) external returns (bool);
+
+    function conditionActive(address wallet, uint16 id) external view returns (bool);
 }
