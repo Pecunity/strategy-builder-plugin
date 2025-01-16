@@ -28,29 +28,29 @@ abstract contract BaseCondition is ICondition {
         _;
     }
 
-    function checkCondition(address wallet, uint16 id) public view virtual returns (uint8) {
+    function checkCondition(address, uint16) public view virtual returns (uint8) {
         return 0;
     }
 
-    function isUpdateable(address wallet, uint16 id) public view virtual returns (bool) {
+    function isUpdateable(address, uint16) public view virtual returns (bool) {
         return false;
     }
 
-    function updateCondition(uint16 id) public virtual returns (bool) {
+    function updateCondition(uint16) public virtual returns (bool) {
         // Default implementation for updateCondition (override in derived contracts)
         return false;
     }
 
-    function conditionActive(address wallet, uint16 id) external view returns (bool) {
-        _isConditionActive(wallet, id);
+    function conditionActive(address _wallet, uint16 _id) external view returns (bool) {
+        return _isConditionActive(_wallet, _id);
     }
 
-    function _isConditionActive(address _wallet, uint16 _id) internal view virtual returns (bool) {
+    function _isConditionActive(address, uint16) internal view virtual returns (bool) {
         return false;
     }
 
-    function deleteCondition(uint16 id) public virtual {
-        if (conditionAutomations[msg.sender][id].length > 0 || conditionStrategies[msg.sender][id].length > 0) {
+    function deleteCondition(uint16 _id) public virtual {
+        if (conditionAutomations[msg.sender][_id].length > 0 || conditionStrategies[msg.sender][_id].length > 0) {
             revert BaseCondition__ConditionIsInUse();
         }
     }

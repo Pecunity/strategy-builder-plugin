@@ -15,7 +15,7 @@ contract MockCondition is BaseCondition {
         conditions[msg.sender][id] = condition;
     }
 
-    function _isConditionActive(address _wallet, uint16 _id) internal view override returns (bool) {
+    function _isConditionActive(address, uint16 _id) internal view override returns (bool) {
         return conditions[msg.sender][_id].active;
     }
 
