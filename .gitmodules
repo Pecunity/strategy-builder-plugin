@@ -13,3 +13,9 @@
 [submodule "lib/modular-account-libs"]
 	path = lib/modular-account-libs
 	url = https://github.com/erc6900/modular-account-libs
+[submodule "lib/v2-core"]
+	path = lib/v2-core
+	url = https://github.com/Uniswap/v2-core
+[submodule "lib/v2-periphery"]
+	path = lib/v2-periphery
+	url = https://github.com/Uniswap/v2-periphery
