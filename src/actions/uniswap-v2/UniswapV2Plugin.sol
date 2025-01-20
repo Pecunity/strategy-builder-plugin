@@ -120,30 +120,32 @@ contract UniswapV2Plugin is BasePlugin {
         emit TokenSwap(path, amountsOut);
     }
 
-    // function swapPercentageTokensForTokens(uint256 percentage, address[] calldata path)
-    //     external
-    //     validPercentage(percentage)
-    // {
-    //     swapExactTokensForTokens(_percentageShare(path[0], percentage), 0, path);
-    // }
+    function swapPercentageTokensForTokens(uint256 percentage, address[] calldata path)
+        external
+        validPercentage(percentage)
+    {
+        swapExactTokensForTokens(_percentageShare(path[0], percentage), 0, path);
+    }
 
-    // function swapTokensForExactTokens(uint256 amountOut, uint256 amountInMax, address[] calldata path)
-    //     external
-    //     nonZeroAmount(amountOut)
-    // {
-    //     _approveToken(path[0], amountInMax);
+    function swapTokensForExactTokens(uint256 amountOut, uint256 amountInMax, address[] calldata path)
+        external
+        nonZeroAmount(amountOut)
+    {
+        _approveToken(path[0], amountInMax);
 
-    //     uint256[] memory amountsOut =
-    //         router.swapTokensForExactTokens(amountOut, amountInMax, path, address(this), _deadline());
+        // uint256[] memory amountsOut =
+        //     router.swapTokensForExactTokens(amountOut, amountInMax, path, address(this), _deadline());
+        uint256[] memory amountsOut =
+            msg.sender.swapTokensForExactTokens(address(router), amountOut, amountInMax, path, msg.sender, _deadline());
 
-    //     uint256 allowance = IERC20(path[0]).allowance(address(this), address(router));
+        uint256 allowance = IERC20(path[0]).allowance(msg.sender, address(router));
 
-    //     if (allowance > 0) {
-    //         IERC20(path[0]).approve(address(router), 0);
-    //     }
+        if (allowance > 0) {
+            _approveToken(path[0], 0);
+        }
 
-    //     emit TokenSwap(path, amountsOut);
-    // }
+        emit TokenSwap(path, amountsOut);
+    }
 
     // function swapExactETHForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path)
     //     public
