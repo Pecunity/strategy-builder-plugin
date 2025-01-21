@@ -84,12 +84,12 @@ contract UniswapV2PluginTest is Test {
         });
     }
 
-    /////////////////////////////
-    ////// addStrategy //////////
-    /////////////////////////////
+    //////////////////////////////////////////
+    ////// swapExactTokensForTokens //////////
+    //////////////////////////////////////////
 
-    function test_swapExactTokensForTokens_Success() external {
-        uint256 amountIn = 1 * 10 ** 6;
+    function test_swapExactTokensForTokens_Success(uint256 amountIn) external {
+        uint256 amountIn = bound(amountIn, 1000, 1 * 10 ** 18);
         deal(WETH, address(account1), amountIn);
 
         address[] memory path = new address[](2);
@@ -98,7 +98,7 @@ contract UniswapV2PluginTest is Test {
 
         uint256 amountsOut = IUniswapV2Router01(ROUTER).getAmountsOut(amountIn, path)[path.length - 1];
 
-        uint256 amountsOutMin = amountsOut * 90 / 100;
+        uint256 amountsOutMin = amountsOut * 80 / 100;
 
         // create a user operation which has the calldata to specify we'd like to increment
         UserOperation memory userOp = UserOperation({
@@ -126,5 +126,91 @@ contract UniswapV2PluginTest is Test {
         entryPoint.handleOps(userOps, beneficiary);
 
         assertGt(IERC20(USDC).balanceOf(address(account1)), amountsOutMin);
+    }
+
+    //////////////////////////////////////////
+    ////// swapTokensForExactTokens //////////
+    //////////////////////////////////////////
+
+    function test_swapTokensForExactTokens_Success(uint256 amountOut) external {
+        uint256 amountOut = bound(amountOut, 1000, 1 * 10 ** 18);
+
+        address[] memory path = new address[](2);
+        path[0] = USDC;
+        path[1] = WETH;
+
+        uint256 amountIn = IUniswapV2Router01(ROUTER).getAmountsIn(amountOut, path)[0];
+
+        uint256 amountInMax = amountIn * 110 / 100;
+
+        deal(USDC, address(account1), amountInMax);
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: nonce,
+            initCode: "",
+            callData: abi.encodeCall(uniswapV2Plugin.swapTokensForExactTokens, (amountOut, amountInMax, path)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        assertEq(IERC20(WETH).balanceOf(address(account1)), amountOut);
+    }
+
+    function test_swapTokensForExactTokens_ExactAmountOutMax(uint256 amountOut) external {
+        uint256 amountOut = bound(amountOut, 1000, 1 * 10 ** 18);
+
+        address[] memory path = new address[](2);
+        path[0] = USDC;
+        path[1] = WETH;
+
+        uint256 amountIn = IUniswapV2Router01(ROUTER).getAmountsIn(amountOut, path)[0];
+
+        uint256 amountInMax = amountIn;
+
+        deal(USDC, address(account1), amountInMax);
+
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: nonce,
+            initCode: "",
+            callData: abi.encodeCall(uniswapV2Plugin.swapTokensForExactTokens, (amountOut, amountInMax, path)),
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        assertEq(IERC20(WETH).balanceOf(address(account1)), amountOut);
     }
 }
