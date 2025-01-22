@@ -17,7 +17,10 @@ import {UserOperation} from "@eth-infinitism/account-abstraction/interfaces/User
 
 import {UniswapV2Plugin} from "../../src/actions/uniswap-v2/UniswapV2Plugin.sol";
 import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
+import {IUniswapV2Factory} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
+
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Token} from "../../src/test/mocks/MockToken.sol";
 
 contract UniswapV2PluginTest is Test {
     using ECDSA for bytes32;
@@ -100,30 +103,7 @@ contract UniswapV2PluginTest is Test {
 
         uint256 amountsOutMin = amountsOut * 80 / 100;
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(uniswapV2Plugin.swapExactTokensForTokens, (amountIn, amountsOutMin, path)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        sendUserOperation(abi.encodeCall(uniswapV2Plugin.swapExactTokensForTokens, (amountIn, amountsOutMin, path)));
 
         assertGt(IERC20(USDC).balanceOf(address(account1)), amountsOutMin);
     }
@@ -145,30 +125,7 @@ contract UniswapV2PluginTest is Test {
 
         deal(USDC, address(account1), amountInMax);
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(uniswapV2Plugin.swapTokensForExactTokens, (amountOut, amountInMax, path)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        sendUserOperation(abi.encodeCall(uniswapV2Plugin.swapTokensForExactTokens, (amountOut, amountInMax, path)));
 
         assertEq(IERC20(WETH).balanceOf(address(account1)), amountOut);
     }
@@ -186,12 +143,53 @@ contract UniswapV2PluginTest is Test {
 
         deal(USDC, address(account1), amountInMax);
 
+        sendUserOperation(abi.encodeCall(uniswapV2Plugin.swapTokensForExactTokens, (amountOut, amountInMax, path)));
+
+        assertEq(IERC20(WETH).balanceOf(address(account1)), amountOut);
+    }
+
+    //////////////////////////////////////////
+    ////// swapTokensForExactTokens //////////
+    //////////////////////////////////////////
+
+    function test_addLiqudity_Success() external {
+        // uint256 tokenASupply = 10_000_000 * 10 ** 18;
+        // uint256 tokenBSupply = 20_000_000 * 10 ** 18;
+
+        // vm.prank(address(account1));
+        // Token tokenA = new Token("tokenA","A",tokenASupply);
+        // Token tokenB = new Token("tokenA","A",tokenBSupply);
+        address tokenA = USDC;
+        address tokenB = WETH;
+
+        uint256 tokenAmountA = 1 * 10 ** 18;
+        uint256 tokenAmountB = 2 * 10 ** 18;
+
+        deal(tokenA, address(account1), tokenAmountA);
+        deal(tokenB, address(account1), tokenAmountB);
+
+        sendUserOperation(
+            abi.encodeCall(uniswapV2Plugin.addLiquidity, (tokenA, tokenB, tokenAmountA, tokenAmountB, 0, 0))
+        );
+
+        address router = uniswapV2Plugin.uniswapV2RouterAddress();
+
+        address factory = IUniswapV2Router01(router).factory();
+
+        address pair = IUniswapV2Factory(factory).getPair(tokenA, tokenB);
+
+        assertGt(IERC20(pair).balanceOf(address(account1)), 0);
+    }
+
+    /* ====== HELPER FUNCTIONS ====== */
+
+    function sendUserOperation(bytes memory callData) internal {
         // create a user operation which has the calldata to specify we'd like to increment
         UserOperation memory userOp = UserOperation({
             sender: address(account1),
             nonce: nonce,
             initCode: "",
-            callData: abi.encodeCall(uniswapV2Plugin.swapTokensForExactTokens, (amountOut, amountInMax, path)),
+            callData: callData,
             callGasLimit: CALL_GAS_LIMIT,
             verificationGasLimit: VERIFICATION_GAS_LIMIT,
             preVerificationGas: 0,
@@ -211,6 +209,6 @@ contract UniswapV2PluginTest is Test {
         userOps[0] = userOp;
         entryPoint.handleOps(userOps, beneficiary);
 
-        assertEq(IERC20(WETH).balanceOf(address(account1)), amountOut);
+        nonce++;
     }
 }

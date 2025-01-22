@@ -514,6 +514,10 @@ contract UniswapV2Base {
         }
     }
 
+    function uniswapV2RouterAddress() external view returns (address) {
+        return address(router);
+    }
+
     /*
     s = optimal swap amount
     r = amount of reserve for token a

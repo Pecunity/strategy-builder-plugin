@@ -13,3 +13,12 @@ docs/
 
 # Dotenv file
 .env
+
+# Hardhat
+cache_hardhat/
+artifacts/
+
+lcov.info
+
+
+node_modules/

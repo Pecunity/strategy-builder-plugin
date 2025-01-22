@@ -50,10 +50,11 @@ contract UniswapV2Plugin is UniswapV2Base, BasePlugin {
         manifest.dependencyInterfaceIds = new bytes4[](1);
         manifest.dependencyInterfaceIds[0] = type(IPlugin).interfaceId;
 
-        manifest.executionFunctions = new bytes4[](3);
+        manifest.executionFunctions = new bytes4[](4);
         manifest.executionFunctions[0] = this.swapExactTokensForTokens.selector;
         manifest.executionFunctions[1] = this.swapPercentageTokensForTokens.selector;
         manifest.executionFunctions[2] = this.swapTokensForExactTokens.selector;
+        manifest.executionFunctions[3] = this.addLiquidity.selector;
 
         ManifestFunction memory ownerUserOpValidationFunction = ManifestFunction({
             functionType: ManifestAssociatedFunctionType.DEPENDENCY,
@@ -78,7 +79,7 @@ contract UniswapV2Plugin is UniswapV2Base, BasePlugin {
         });
 
         manifest.userOpValidationFunctions[3] = ManifestAssociatedFunction({
-            executionSelector: this.swapExactETHForTokens.selector,
+            executionSelector: this.addLiquidity.selector,
             associatedFunction: ownerUserOpValidationFunction
         });
 
@@ -114,7 +115,7 @@ contract UniswapV2Plugin is UniswapV2Base, BasePlugin {
         });
 
         manifest.preRuntimeValidationHooks[3] = ManifestAssociatedFunction({
-            executionSelector: this.swapExactETHForTokens.selector,
+            executionSelector: this.addLiquidity.selector,
             associatedFunction: ManifestFunction({
                 functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
                 functionId: 0,

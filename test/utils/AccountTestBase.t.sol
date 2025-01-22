@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.25;
+pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
 
@@ -14,7 +14,6 @@ import {MSCAFactoryFixture} from "erc6900/reference-implementation/test/mocks/MS
 /// SingleOwnerPlugin. To use it, inherit from `AccountTestBase` instead of `Test` in your test contract,
 // and you will have access to the initialized state variables declared here.
 abstract contract AccountTestBase is Test {
-
     // The EntryPoint contract.
     EntryPoint public entryPoint;
     // A beneficiary address for use with `EntryPoint.handleOps(...)`.
