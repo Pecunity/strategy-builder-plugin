@@ -6,3 +6,4 @@ export { IFeeManager__factory } from "./IFeeManager__factory";
 export { IInkwell__factory } from "./IInkwell__factory";
 export { IParameterCalculation__factory } from "./IParameterCalculation__factory";
 export { IStrategyBuilderPlugin__factory } from "./IStrategyBuilderPlugin__factory";
+export { IStrategyBuilderStorage__factory } from "./IStrategyBuilderStorage__factory";

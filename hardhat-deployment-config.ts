@@ -10,6 +10,19 @@ export const deploymentConfig: IDeploymentConfig = {
     name: "arbitrumSepolia",
     uniswapV2Router: "0x2bC5d014a1C1f9Fd76618304Cf3121199e438bDd",
     poolAddressProviderAaveV3: "0xB25a5D144626a0D488e52AE717A051a2E9997076",
-    octoDefiFeeManager: "",
+    octoDefiFeeManager: "0xB25a5D144626a0D488e52AE717A051a2E9997076",
   },
+};
+
+export const defaultConfig = {
+  octoDefiFeeManager: "0xB25a5D144626a0D488e52AE717A051a2E9997076",
+};
+
+export const getNetworkIdFromName = async (networkIdName: string) => {
+  for (const id in deploymentConfig) {
+    if (deploymentConfig[id]["name"] === networkIdName) {
+      return Number(id);
+    }
+  }
+  return null;
 };

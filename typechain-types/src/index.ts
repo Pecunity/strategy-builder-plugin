@@ -10,3 +10,4 @@ export type { interfaces };
 import type * as test from "./test";
 export type { test };
 export type { StrategyBuilderPlugin } from "./StrategyBuilderPlugin";
+export type { StrategyBuilderStorage } from "./StrategyBuilderStorage";

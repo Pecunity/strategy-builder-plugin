@@ -6,3 +6,4 @@ export type { IFeeManager } from "./IFeeManager";
 export type { IInkwell } from "./IInkwell";
 export type { IParameterCalculation } from "./IParameterCalculation";
 export type { IStrategyBuilderPlugin } from "./IStrategyBuilderPlugin";
+export type { IStrategyBuilderStorage } from "./IStrategyBuilderStorage";

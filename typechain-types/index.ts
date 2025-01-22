@@ -62,8 +62,12 @@ export type { IParameterCalculation } from "./src/interfaces/IParameterCalculati
 export { IParameterCalculation__factory } from "./factories/src/interfaces/IParameterCalculation__factory";
 export type { IStrategyBuilderPlugin } from "./src/interfaces/IStrategyBuilderPlugin";
 export { IStrategyBuilderPlugin__factory } from "./factories/src/interfaces/IStrategyBuilderPlugin__factory";
+export type { IStrategyBuilderStorage } from "./src/interfaces/IStrategyBuilderStorage";
+export { IStrategyBuilderStorage__factory } from "./factories/src/interfaces/IStrategyBuilderStorage__factory";
 export type { StrategyBuilderPlugin } from "./src/StrategyBuilderPlugin";
 export { StrategyBuilderPlugin__factory } from "./factories/src/StrategyBuilderPlugin__factory";
+export type { StrategyBuilderStorage } from "./src/StrategyBuilderStorage";
+export { StrategyBuilderStorage__factory } from "./factories/src/StrategyBuilderStorage__factory";
 export type { MockCondition } from "./src/test/mocks/MockCondition";
 export { MockCondition__factory } from "./factories/src/test/mocks/MockCondition__factory";
 export type { Token } from "./src/test/mocks/MockToken.sol/Token";

@@ -114,9 +114,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IStrategyBuilderPlugin__factory>;
     getContractFactory(
+      name: "IStrategyBuilderStorage",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IStrategyBuilderStorage__factory>;
+    getContractFactory(
       name: "StrategyBuilderPlugin",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.StrategyBuilderPlugin__factory>;
+    getContractFactory(
+      name: "StrategyBuilderStorage",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StrategyBuilderStorage__factory>;
     getContractFactory(
       name: "MockCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -252,10 +260,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IStrategyBuilderPlugin>;
     getContractAt(
+      name: "IStrategyBuilderStorage",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IStrategyBuilderStorage>;
+    getContractAt(
       name: "StrategyBuilderPlugin",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.StrategyBuilderPlugin>;
+    getContractAt(
+      name: "StrategyBuilderStorage",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StrategyBuilderStorage>;
     getContractAt(
       name: "MockCondition",
       address: string | ethers.Addressable,
@@ -368,9 +386,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyBuilderPlugin>;
     deployContract(
+      name: "IStrategyBuilderStorage",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStrategyBuilderStorage>;
+    deployContract(
       name: "StrategyBuilderPlugin",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderPlugin>;
+    deployContract(
+      name: "StrategyBuilderStorage",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.StrategyBuilderStorage>;
     deployContract(
       name: "MockCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -506,10 +532,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyBuilderPlugin>;
     deployContract(
+      name: "IStrategyBuilderStorage",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStrategyBuilderStorage>;
+    deployContract(
       name: "StrategyBuilderPlugin",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderPlugin>;
+    deployContract(
+      name: "StrategyBuilderStorage",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.StrategyBuilderStorage>;
     deployContract(
       name: "MockCondition",
       args: any[],

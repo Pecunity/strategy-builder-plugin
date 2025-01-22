@@ -6,3 +6,4 @@ export * as condition from "./condition";
 export * as interfaces from "./interfaces";
 export * as test from "./test";
 export { StrategyBuilderPlugin__factory } from "./StrategyBuilderPlugin__factory";
+export { StrategyBuilderStorage__factory } from "./StrategyBuilderStorage__factory";

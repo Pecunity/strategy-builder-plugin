@@ -26,7 +26,15 @@ function getInfuraNetwork(name: string): NetworkUserConfig {
 }
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.24",
+  solidity: {
+    version: "0.8.24", // Your Solidity version
+    settings: {
+      optimizer: {
+        enabled: true, // Enable optimization
+        runs: 200, // Set the number of optimization runs (200 is a common balance)
+      },
+    },
+  },
   networks: {
     arbitrumSepolia: getInfuraNetwork("arbitrum-sepolia"),
   },
