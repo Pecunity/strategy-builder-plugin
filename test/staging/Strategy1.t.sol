@@ -20,6 +20,11 @@ import {
 } from "../../src/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "../../src/interfaces/IStrategyBuilderPlugin.sol";
 import {FeeManagerMock} from "../../src/test/mocks/FeeManagerMock.sol";
+import {UniswapV2Plugin} from "../../src/actions/uniswap-v2/UniswapV2Plugin.sol";
+import {UniswapV2Base} from "../../src/actions/uniswap-v2/UniswapV2Base.sol";
+import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
+import {IUniswapV2Factory} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Strategy1Test is Test {
     using ECDSA for bytes32;
@@ -27,6 +32,7 @@ contract Strategy1Test is Test {
     IEntryPoint entryPoint;
     UpgradeableModularAccount account1;
     StrategyBuilderPlugin strategyBuilderPlugin;
+    UniswapV2Plugin uniswapV2Plugin;
     address owner1;
     uint256 owner1Key;
     address payable beneficiary;
@@ -103,5 +109,94 @@ contract Strategy1Test is Test {
             pluginInstallData: "0x",
             dependencies: dependencies
         });
+
+        // install the uniswap plugin
+
+        uniswapV2Plugin = new UniswapV2Plugin(ROUTER);
+        bytes32 manifestHashUniswapPlugin = keccak256(abi.encode(uniswapV2Plugin.pluginManifest()));
+
+        // install this plugin on the account as the owner
+        vm.prank(owner1);
+        account1.installPlugin({
+            plugin: address(uniswapV2Plugin),
+            manifestHash: manifestHashUniswapPlugin,
+            pluginInstallData: "0x",
+            dependencies: dependencies
+        });
+    }
+
+    function test_executeStrategy_Success(uint256 _amountIn) external {
+        // swap exact tokens for tokens after a special time
+        uint256 amountIn = bound(_amountIn, 1000, 1 * 10 ** 18);
+        deal(WETH, address(account1), amountIn);
+
+        address[] memory path = new address[](2);
+        path[0] = WETH;
+        path[1] = USDC;
+
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](1);
+
+        IStrategyBuilderPlugin.Condition memory emptyCondition;
+
+        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
+        actions[0] = IStrategyBuilderPlugin.Action({
+            selector: UniswapV2Base.swapExactTokensForTokens.selector,
+            parameter: abi.encode(amountIn, 0, path),
+            actionType: IStrategyBuilderPlugin.ActionType.INTERNAL,
+            target: address(0),
+            value: 1
+        });
+
+        IStrategyBuilderPlugin.StrategyStep memory step =
+            IStrategyBuilderPlugin.StrategyStep({condition: emptyCondition, actions: actions});
+
+        steps[0] = step;
+
+        address _creator = makeAddr("creator");
+        uint16 _id = 16;
+
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)));
+
+        //check strategy is created
+        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), _id);
+
+        assertGt(strategy.steps.length, 0);
+
+        //execute strategy
+
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (_id)));
+
+        assertGt(IERC20(USDC).balanceOf(address(account1)), 0);
+    }
+
+    /* ====== HELPER FUNCTIONS ====== */
+
+    function sendUserOperation(bytes memory callData) internal {
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: nonce,
+            initCode: "",
+            callData: callData,
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        nonce++;
     }
 }
