@@ -142,7 +142,7 @@ contract Strategy1Test is Test {
         actions[0] = IStrategyBuilderPlugin.Action({
             selector: UniswapV2Base.swapExactTokensForTokens.selector,
             parameter: abi.encode(amountIn, 0, path),
-            actionType: IStrategyBuilderPlugin.ActionType.INTERNAL,
+            actionType: IStrategyBuilderPlugin.ActionType.INTERNAL_ACTION,
             target: address(0),
             value: 1
         });

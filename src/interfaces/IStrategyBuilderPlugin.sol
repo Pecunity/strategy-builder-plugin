@@ -6,7 +6,7 @@ interface IStrategyBuilderPlugin {
 
     enum ActionType {
         EXTERNAL,
-        INTERNAL
+        INTERNAL_ACTION
     }
 
     /* ====== Structs ====== */
