@@ -5,6 +5,7 @@ import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUn
 import {IUniswapV2Factory} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IAction} from "../../interfaces/IAction.sol";
 
 error UniswapV2Base__FailedToApproveTokens();
 error UniswapV2Base__PoolPairDoesNotExist();
@@ -12,13 +13,7 @@ error UniswapV2Base__NotZeroAmountForBothTokensAllowed();
 error UniswapV2Base__NoValidPercentageAmount();
 error UniswapV2Base__NoZeroAmountValid();
 
-contract UniswapV2Actions {
-    struct PluginExecution {
-        address target;
-        uint256 value;
-        bytes data;
-    }
-
+contract UniswapV2Actions is IAction {
     uint256 constant DELTA_DEADLINE = 30 seconds;
     uint256 constant PERCENTAGE_FACTOR = 1000;
 
@@ -52,7 +47,7 @@ contract UniswapV2Actions {
 
     /* ====== Base Swap Functions ====== */
 
-    function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path)
+    function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to)
         public
         view
         nonZeroAmount(amountIn)
@@ -61,7 +56,7 @@ contract UniswapV2Actions {
         PluginExecution[] memory executions = new PluginExecution[](2);
         executions[0] = _approveToken(path[0], amountIn);
 
-        executions[1] = _swapExactTokensForTokens(amountIn, amountOutMin, path, msg.sender, _deadline());
+        executions[1] = _swapExactTokensForTokens(amountIn, amountOutMin, path, to, _deadline());
         return executions;
     }
 

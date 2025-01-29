@@ -20,7 +20,8 @@ import {
 } from "../../src/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "../../src/interfaces/IStrategyBuilderPlugin.sol";
 import {FeeManagerMock} from "../../src/test/mocks/FeeManagerMock.sol";
-import {UniswapV2Plugin} from "../../src/actions/uniswap-v2/UniswapV2Plugin.sol";
+import {UniswapV2Actions} from "../../src/actions/uniswap-v2/UniswapV2Actions.sol";
+import {IAction} from "../../src/interfaces/IAction.sol";
 import {UniswapV2Base} from "../../src/actions/uniswap-v2/UniswapV2Base.sol";
 import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import {IUniswapV2Factory} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
@@ -32,7 +33,7 @@ contract Strategy1Test is Test {
     IEntryPoint entryPoint;
     UpgradeableModularAccount account1;
     StrategyBuilderPlugin strategyBuilderPlugin;
-    UniswapV2Plugin uniswapV2Plugin;
+    UniswapV2Actions uniswapV2Actions;
     address owner1;
     uint256 owner1Key;
     address payable beneficiary;
@@ -110,19 +111,8 @@ contract Strategy1Test is Test {
             dependencies: dependencies
         });
 
-        // install the uniswap plugin
-
-        uniswapV2Plugin = new UniswapV2Plugin(ROUTER);
-        bytes32 manifestHashUniswapPlugin = keccak256(abi.encode(uniswapV2Plugin.pluginManifest()));
-
-        // install this plugin on the account as the owner
-        vm.prank(owner1);
-        account1.installPlugin({
-            plugin: address(uniswapV2Plugin),
-            manifestHash: manifestHashUniswapPlugin,
-            pluginInstallData: "0x",
-            dependencies: dependencies
-        });
+        // deploy the uniswap action contract
+        uniswapV2Actions = new UniswapV2Actions(ROUTER);
     }
 
     function test_executeStrategy_Success(uint256 _amountIn) external {
@@ -138,19 +128,23 @@ contract Strategy1Test is Test {
 
         IStrategyBuilderPlugin.Condition memory emptyCondition;
 
-        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
+        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](1);
         actions[0] = IStrategyBuilderPlugin.Action({
-            selector: UniswapV2Base.swapExactTokensForTokens.selector,
-            parameter: abi.encode(amountIn, 0, path),
+            selector: UniswapV2Actions.swapExactTokensForTokens.selector,
+            parameter: abi.encode(amountIn, 0, path, address(account1)),
             actionType: IStrategyBuilderPlugin.ActionType.INTERNAL_ACTION,
-            target: address(0),
-            value: 1
+            target: address(uniswapV2Actions),
+            value: 0
         });
 
         IStrategyBuilderPlugin.StrategyStep memory step =
             IStrategyBuilderPlugin.StrategyStep({condition: emptyCondition, actions: actions});
 
         steps[0] = step;
+
+        (, bytes memory result) = address(uniswapV2Actions).call(
+            abi.encodeCall(UniswapV2Actions.swapExactTokensForTokens, (amountIn, 0, path, address(account1)))
+        );
 
         address _creator = makeAddr("creator");
         uint16 _id = 16;

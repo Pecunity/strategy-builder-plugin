@@ -15,6 +15,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IStrategyBuilderPlugin} from "./interfaces/IStrategyBuilderPlugin.sol";
 import {ICondition} from "./interfaces/ICondition.sol";
 import {IFeeManager} from "./interfaces/IFeeManager.sol";
+import {IAction} from "./interfaces/IAction.sol";
 
 error StrategyBuilderPlugin__StrategyDoesNotExist();
 error StrategyBuilderPlugin__StrategyAlreadyExist();
@@ -272,7 +273,21 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         if (_action.actionType == ActionType.EXTERNAL) {
             IPluginExecutor(_wallet).executeFromPluginExternal(_action.target, _action.value, data);
         } else {
-            IPluginExecutor(_wallet).executeFromPlugin(data);
+            (bool success, bytes memory _result) = _action.target.call(data);
+            IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
+            for (uint256 i = 0; i < executions.length; i++) {
+                IPluginExecutor(_wallet).executeFromPluginExternal(
+                    executions[i].target, executions[i].value, executions[i].data
+                );
+                // if (executions.length != 2) {
+                //     revert StrategyBuilderPlugin__ChangeActionInConditionFailed();
+                // }
+            }
+            // for (uint256 i; i < executions.length; i++) {
+            //     bytes memory executionResult = IPluginExecutor(_wallet).executeFromPluginExternal(
+            //         executions[i].target, executions[i].value, executions[i].data
+            //     );
+            // }
         }
     }
 
@@ -355,6 +370,14 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         } else {
             _changeActionInCondition(_wallet, _condition.conditionAddress, _condition.id, _actionId, false);
         }
+    }
+
+    function _decodePluginExecutions(bytes memory encodedData)
+        private
+        pure
+        returns (IAction.PluginExecution[] memory)
+    {
+        return abi.decode(encodedData, (IAction.PluginExecution[]));
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
