@@ -54,15 +54,25 @@ contract UniswapV2Base is IAction {
     // ┃       Internal functions         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function _calculateMaxAmounts(address tokenA, address tokenB, address pair)
+    function _percentageShare(address token, uint256 percentage, address account) internal view returns (uint256) {
+        uint256 totalTokenAmount = IERC20(token).balanceOf(account);
+        return (percentage * totalTokenAmount) / PERCENTAGE_FACTOR;
+    }
+
+    function _percentageShareETH(uint256 percentage, address account) internal view returns (uint256) {
+        uint256 totalBalanceETH = account.balance;
+        return (totalBalanceETH * percentage) / PERCENTAGE_FACTOR;
+    }
+
+    function _calculateMaxAmounts(address tokenA, address tokenB, address pair, address account)
         internal
         view
         returns (uint256 maxAmountA, uint256 maxAmountB)
     {
         (uint112 reserveA, uint112 reserveB,) = IUniswapV2Pair(pair).getReserves();
 
-        uint256 balanceTokenA = IERC20(tokenA).balanceOf(msg.sender);
-        uint256 balanceTokenB = IERC20(tokenB).balanceOf(msg.sender);
+        uint256 balanceTokenA = IERC20(tokenA).balanceOf(account);
+        uint256 balanceTokenB = IERC20(tokenB).balanceOf(account);
 
         maxAmountA = balanceTokenA;
         maxAmountB = balanceTokenB;
@@ -136,47 +146,98 @@ contract UniswapV2Base is IAction {
         return block.timestamp + DELTA_DEADLINE;
     }
 
-    // function _swap(address tokenIn, address tokenOut, uint256 amountIn) internal returns (uint256) {
-    //     _approveToken(tokenIn, amountIn);
+    function _swap(address tokenIn, address tokenOut, uint256 amountIn, address to)
+        internal
+        view
+        returns (uint256, PluginExecution[] memory)
+    {
+        PluginExecution[] memory executions = new PluginExecution[](2);
 
-    //     address[] memory path = new address[](2);
-    //     path[0] = tokenIn;
-    //     path[1] = tokenOut;
+        executions[0] = _approveToken(tokenIn, amountIn);
 
-    //     uint256[] memory amountsOut =
-    //         msg.sender.swapExactTokensForTokens(address(router), amountIn, 0, path, msg.sender, _deadline());
+        address[] memory path = new address[](2);
+        path[0] = tokenIn;
+        path[1] = tokenOut;
 
-    //     emit TokenSwap(path, amountsOut);
+        uint256[] memory amountsOut = IUniswapV2Router01(router).getAmountsOut(amountIn, path);
+        executions[1] = _swapExactTokensForTokens(amountIn, 0, path, to, _deadline());
 
-    //     return amountsOut[1];
-    // }
+        return (amountsOut[1], executions);
+    }
 
-    // function _swapETH(address token, uint256 amountIn) internal returns (uint256) {
-    //     address[] memory path = new address[](2);
-    //     path[0] = router.WETH();
-    //     path[1] = token;
+    function _swapETH(address token, uint256 amountIn, address to)
+        internal
+        view
+        returns (uint256, PluginExecution[] memory)
+    {
+        PluginExecution[] memory executions = new PluginExecution[](1);
 
-    //     uint256[] memory amountsOut =
-    //         msg.sender.swapExactETHForTokens(address(router), amountIn, 0, path, msg.sender, _deadline());
-    //     emit TokenSwap(path, amountsOut);
+        address[] memory path = new address[](2);
+        path[0] = WETH;
+        path[1] = token;
 
-    //     return amountsOut[1];
-    // }
+        uint256[] memory amountsOut = IUniswapV2Router01(router).getAmountsOut(amountIn, path);
+        executions[0] = _swapExactETHForTokens(amountIn, 0, path, to, _deadline());
 
-    // function _swapToETH(address token, uint256 amountIn) internal returns (uint256) {
-    //     _approveToken(token, amountIn);
+        return (amountsOut[1], executions);
+    }
 
-    //     address[] memory path = new address[](2);
-    //     path[0] = token;
-    //     path[1] = router.WETH();
+    function _swapToETH(address token, uint256 amountIn, address to)
+        internal
+        returns (uint256, PluginExecution[] memory)
+    {
+        PluginExecution[] memory executions = new PluginExecution[](2);
 
-    //     uint256[] memory amountsOut =
-    //         msg.sender.swapExactTokensForETH(address(router), amountIn, 0, path, msg.sender, _deadline());
+        executions[0] = _approveToken(token, amountIn);
 
-    //     emit TokenSwap(path, amountsOut);
+        address[] memory path = new address[](2);
+        path[0] = token;
+        path[1] = WETH;
 
-    //     return amountsOut[1];
-    // }
+        uint256[] memory amountsOut = IUniswapV2Router01(router).getAmountsOut(amountIn, path);
+        executions[1] = _swapExactTokensForETH(amountIn, 0, path, to, _deadline());
+
+        return (amountsOut[1], executions);
+    }
+
+    function _swapExactTokensForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] memory path,
+        address to,
+        uint256 deadline
+    ) internal view returns (PluginExecution memory) {
+        bytes memory _data =
+            abi.encodeCall(IUniswapV2Router01.swapExactTokensForTokens, (amountIn, amountOutMin, path, to, deadline));
+
+        return PluginExecution({target: router, value: 0, data: _data});
+    }
+
+    function _swapExactTokensForETH(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] memory path,
+        address to,
+        uint256 deadline
+    ) internal view returns (PluginExecution memory) {
+        bytes memory _data =
+            abi.encodeCall(IUniswapV2Router01.swapExactTokensForETH, (amountIn, amountOutMin, path, to, deadline));
+
+        return PluginExecution({target: router, value: 0, data: _data});
+    }
+
+    function _swapExactETHForTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] memory path,
+        address to,
+        uint256 deadline
+    ) internal view returns (PluginExecution memory) {
+        bytes memory _data =
+            abi.encodeCall(IUniswapV2Router01.swapExactETHForTokens, (amountOutMin, path, to, deadline));
+
+        return PluginExecution({target: router, value: amountIn, data: _data});
+    }
 
     function _calculateSwapAmountForProvidingLiquidity(address pair, address tokenA, uint256 amountIn)
         internal

@@ -20,7 +20,7 @@ import {
 } from "../../src/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "../../src/interfaces/IStrategyBuilderPlugin.sol";
 import {FeeManagerMock} from "../../src/test/mocks/FeeManagerMock.sol";
-import {UniswapV2SwapBaseActions} from "../../src/actions/uniswap-v2/UniswapV2SwapBaseActions.sol";
+import {UniswapV2SwapActions} from "../../src/actions/uniswap-v2/UniswapV2SwapActions.sol";
 import {IAction} from "../../src/interfaces/IAction.sol";
 import {UniswapV2Base} from "../../src/actions/uniswap-v2/UniswapV2Base.sol";
 import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
@@ -33,7 +33,7 @@ contract Strategy1Test is Test {
     IEntryPoint entryPoint;
     UpgradeableModularAccount account1;
     StrategyBuilderPlugin strategyBuilderPlugin;
-    UniswapV2SwapBaseActions uniswapV2Actions;
+    UniswapV2SwapActions uniswapV2Actions;
     address owner1;
     uint256 owner1Key;
     address payable beneficiary;
@@ -112,7 +112,7 @@ contract Strategy1Test is Test {
         });
 
         // deploy the uniswap action contract
-        uniswapV2Actions = new UniswapV2SwapBaseActions(ROUTER);
+        uniswapV2Actions = new UniswapV2SwapActions(ROUTER);
     }
 
     function test_executeStrategy_Success(uint256 _amountIn) external {
@@ -130,7 +130,7 @@ contract Strategy1Test is Test {
 
         IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](1);
         actions[0] = IStrategyBuilderPlugin.Action({
-            selector: UniswapV2SwapBaseActions.swapExactTokensForTokens.selector,
+            selector: UniswapV2SwapActions.swapExactTokensForTokens.selector,
             parameter: abi.encode(amountIn, 0, path, address(account1)),
             actionType: IStrategyBuilderPlugin.ActionType.INTERNAL_ACTION,
             target: address(uniswapV2Actions),
@@ -143,7 +143,7 @@ contract Strategy1Test is Test {
         steps[0] = step;
 
         (, bytes memory result) = address(uniswapV2Actions).call(
-            abi.encodeCall(UniswapV2SwapBaseActions.swapExactTokensForTokens, (amountIn, 0, path, address(account1)))
+            abi.encodeCall(UniswapV2SwapActions.swapExactTokensForTokens, (amountIn, 0, path, address(account1)))
         );
 
         address _creator = makeAddr("creator");
