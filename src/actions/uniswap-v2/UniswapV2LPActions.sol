@@ -172,10 +172,15 @@ contract UniswapV2LPActions is UniswapV2Base {
 
         (uint256 maxAmountA, uint256 maxAmountB) = _calculateMaxAmounts(_tokenA, _tokenB, pair, to);
 
-        uint256 percentageAmountA = (maxAmountA * percentage) / PERCENTAGE_FACTOR;
-        uint256 percentageAmountB = (maxAmountB * percentage) / PERCENTAGE_FACTOR;
-
-        return addLiquidity(_tokenA, _tokenB, percentageAmountA, percentageAmountB, 0, 0, to);
+        return addLiquidity(
+            _tokenA,
+            _tokenB,
+            (maxAmountA * percentage) / PERCENTAGE_FACTOR,
+            (maxAmountB * percentage) / PERCENTAGE_FACTOR,
+            0,
+            0,
+            to
+        );
     }
 
     function removeLiquidityETHPercentage(address token, uint256 liquidityPercentage, address to)
@@ -236,11 +241,11 @@ contract UniswapV2LPActions is UniswapV2Base {
         uint8 executionAmount;
         PluginExecution[] memory swapExecutions;
         if (inputETH) {
-            (amountToken, swapExecutions) = _swapETH(token, swapAmount);
+            (amountToken, swapExecutions) = _swapETH(token, swapAmount, to);
             amountETH = amountIn - swapAmount;
             executionAmount = 1;
         } else {
-            (amountETH, swapExecutions) = _swapToETH(token, swapAmount);
+            (amountETH, swapExecutions) = _swapToETH(token, swapAmount, to);
             amountToken = amountIn - swapAmount;
             executionAmount = 2;
         }
