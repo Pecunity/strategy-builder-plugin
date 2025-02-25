@@ -126,35 +126,7 @@ contract StrategyBuilderTest is Test {
         address _creator = makeAddr("creator");
         uint16 _id = 16;
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
-
-        //Assert
-
-        // address creator = strategyBuilderPlugin.strategies(address(account1), _id).creator;
-        // console.log(creator);
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)));
 
         IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), _id);
         assertEq(strategy.creator, _creator);
@@ -171,21 +143,6 @@ contract StrategyBuilderTest is Test {
 
         strategyWithConditionAdded(amount);
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
         //Mock Fee Manager calls
         vm.mockCall(
             feeManager,
@@ -195,18 +152,7 @@ contract StrategyBuilderTest is Test {
 
         vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
 
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        uint256 balance = IERC20(token).balanceOf(address(account1));
-        console.log(balance);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)));
 
         assert(IERC20(token).balanceOf(receiver) > 0);
     }
@@ -216,21 +162,6 @@ contract StrategyBuilderTest is Test {
 
         strategyWithTwoStepsAdd(amount);
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
         //Mock Fee Manager calls
         vm.mockCall(
             feeManager,
@@ -240,18 +171,8 @@ contract StrategyBuilderTest is Test {
 
         vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
 
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        uint256 balance = IERC20(token).balanceOf(address(account1));
-        console.log(balance);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        // create a user operation which has the calldata to specify we'd like to increment
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)));
 
         assert(IERC20(token).balanceOf(receiver) > 0);
     }
@@ -265,30 +186,7 @@ contract StrategyBuilderTest is Test {
         uint256 transfer = 1 ether;
         strategyWithConditionAdded(transfer);
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(StrategyBuilderPlugin.deleteStrategy, (_id)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.deleteStrategy, (_id)));
 
         IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), _id);
         assertEq(strategy.creator, address(0));
@@ -308,32 +206,9 @@ contract StrategyBuilderTest is Test {
         IStrategyBuilderPlugin.Condition memory _automationCondition =
             IStrategyBuilderPlugin.Condition({conditionAddress: address(condition), id: 1, result1: 0, result0: 0});
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(
-                StrategyBuilderPlugin.activateAutomation, (1, 1, address(0), 1 ether, _automationCondition)
-                ),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        sendUserOperation(
+            abi.encodeCall(StrategyBuilderPlugin.activateAutomation, (1, 1, address(0), 1 ether, _automationCondition))
+        );
 
         address conditionAddress = strategyBuilderPlugin.automation(address(account1), 1).condition.conditionAddress;
 
@@ -391,30 +266,7 @@ contract StrategyBuilderTest is Test {
 
         activateAutomation(0);
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(StrategyBuilderPlugin.deleteAutomation, (1)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.deleteAutomation, (1)));
 
         StrategyBuilderPlugin.Automation memory _automation = strategyBuilderPlugin.automation(address(account1), 1);
 
@@ -447,35 +299,7 @@ contract StrategyBuilderTest is Test {
         address _creator = makeAddr("creator");
         uint16 _id = 1;
 
-        // vm.prank(address(owner1));
-        // address(account1).call(abi.encodeWithSelector(StrategyBuilderPlugin.addStrategy.selector, _id, _creator, steps));
-
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
-
-        nonce++;
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)));
     }
 
     function strategyWithTwoStepsAdd(uint256 transferAmount) internal {
@@ -513,31 +337,7 @@ contract StrategyBuilderTest is Test {
         uint16 _id = 1;
 
         // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
-
-        nonce++;
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)));
     }
 
     function activateAutomation(uint16 conditionId) internal {
@@ -548,33 +348,9 @@ contract StrategyBuilderTest is Test {
             result0: 0
         });
 
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: abi.encodeCall(
-                StrategyBuilderPlugin.activateAutomation, (1, 1, address(0), 1 ether, _automationCondition)
-                ),
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
-        });
-
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
-
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
-
-        nonce++;
+        sendUserOperation(
+            abi.encodeCall(StrategyBuilderPlugin.activateAutomation, (1, 1, address(0), 1 ether, _automationCondition))
+        );
     }
 
     function mockFeeManager() internal {
@@ -593,5 +369,36 @@ contract StrategyBuilderTest is Test {
         vm.mockCall(octoInk, abi.encodeWithSelector(IERC20.approve.selector), abi.encode(true));
 
         vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.handleFee.selector), abi.encode(true));
+    }
+
+    /* ====== HELPER FUNCTIONS ====== */
+
+    function sendUserOperation(bytes memory callData) internal {
+        // create a user operation which has the calldata to specify we'd like to increment
+        UserOperation memory userOp = UserOperation({
+            sender: address(account1),
+            nonce: nonce,
+            initCode: "",
+            callData: callData,
+            callGasLimit: CALL_GAS_LIMIT,
+            verificationGasLimit: VERIFICATION_GAS_LIMIT,
+            preVerificationGas: 0,
+            maxFeePerGas: 2,
+            maxPriorityFeePerGas: 1,
+            paymasterAndData: "",
+            signature: ""
+        });
+
+        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
+        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
+        userOp.signature = abi.encodePacked(r, s, v);
+
+        // send our single user operation to increment our count
+        UserOperation[] memory userOps = new UserOperation[](1);
+        userOps[0] = userOp;
+        entryPoint.handleOps(userOps, beneficiary);
+
+        nonce++;
     }
 }

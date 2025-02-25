@@ -24,7 +24,7 @@ error StrategyBuilderPlugin__FeeExceedMaxFee();
 error StrategyBuilderPlugin__AutomationNotExist();
 error StrategyBuilderPlugin__AutomationAlreadyExist();
 error StrategyBuilderPlugin__StrategyIsInUse();
-error StrategyBuilderPlugin__ChangeActionInConditionFailed();
+error StrategyBuilderPlugin__changeAutomationInConditionFailed();
 error StrategyBuilderPlugin__ChangeStrategyInConditionFailed();
 error StrategyBuilderPlugin__UpdateConditionFailed(address condition, uint16 id);
 
@@ -95,8 +95,11 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         external
         strategyDoesNotExist(_id)
     {
+        //TODO: Validate steps
+
         Strategy storage newStrategy = strategies[msg.sender][_id];
 
+        //TODO: Dont allow zero address!
         newStrategy.creator = _creator;
 
         for (uint256 i = 0; i < _steps.length; i++) {
@@ -112,6 +115,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
 
             // Loop through the actions and add them to the step
             for (uint256 j = 0; j < step.actions.length; j++) {
+                //TODO: Validate each action!
                 newStep.actions.push(step.actions[j]);
             }
         }
@@ -149,13 +153,15 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         uint256 _maxFeeAmount,
         Condition calldata _condition
     ) external automationDoesNotExist(_id) strategyExist(_strategyId) {
-        _changeActionInCondition(msg.sender, _condition.conditionAddress, _condition.id, _id, true);
+        _changeAutomationInCondition(msg.sender, _condition.conditionAddress, _condition.id, _id, true);
 
         Automation storage _newAutomation = automations[msg.sender][_id];
 
         _newAutomation.condition = _condition;
         _newAutomation.strategyId = _strategyId;
+        //TODO: Validate Payment token
         _newAutomation.paymentToken = _paymentToken;
+        //TODO: Validate maxFeeAmount
         _newAutomation.maxFeeAmount = _maxFeeAmount;
 
         strategiesUsed[msg.sender][_strategyId].push(_id);
@@ -178,7 +184,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         }
         _usedInAutomations.pop();
 
-        _changeActionInCondition(
+        _changeAutomationInCondition(
             msg.sender, _automation.condition.conditionAddress, _automation.condition.id, _id, false
         );
 
@@ -276,18 +282,11 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
             (bool success, bytes memory _result) = _action.target.call(data);
             IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
             for (uint256 i = 0; i < executions.length; i++) {
+                //TODO: Check target is unequal zero
                 IPluginExecutor(_wallet).executeFromPluginExternal(
                     executions[i].target, executions[i].value, executions[i].data
                 );
-                // if (executions.length != 2) {
-                //     revert StrategyBuilderPlugin__ChangeActionInConditionFailed();
-                // }
             }
-            // for (uint256 i; i < executions.length; i++) {
-            //     bytes memory executionResult = IPluginExecutor(_wallet).executeFromPluginExternal(
-            //         executions[i].target, executions[i].value, executions[i].data
-            //     );
-            // }
         }
     }
 
@@ -309,7 +308,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         }
     }
 
-    function _changeActionInCondition(
+    function _changeAutomationInCondition(
         address _wallet,
         address _condition,
         uint16 _conditionId,
@@ -323,7 +322,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
         bool _success = abi.decode(result, (bool));
         if (!_success) {
-            revert StrategyBuilderPlugin__ChangeActionInConditionFailed();
+            revert StrategyBuilderPlugin__changeAutomationInConditionFailed();
         }
     }
 
@@ -368,7 +367,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
                 revert StrategyBuilderPlugin__UpdateConditionFailed(_condition.conditionAddress, _condition.id);
             }
         } else {
-            _changeActionInCondition(_wallet, _condition.conditionAddress, _condition.id, _actionId, false);
+            _changeAutomationInCondition(_wallet, _condition.conditionAddress, _condition.id, _actionId, false);
         }
     }
 
