@@ -7,3 +7,4 @@ modular-account-libs/=lib/modular-account-libs/src/
 @uniswap/v2-core=lib/v2-core
 @uniswap/v2-periphery=lib/v2-periphery
 @aave/core-v3/contracts=lib/aave-v3-core/contracts
+@pythnetwork/pyth-sdk-solidity/=node_modules/@pythnetwork/pyth-sdk-solidity
