@@ -9,78 +9,78 @@ error BaseCondition__ConditionIsInUse();
 
 abstract contract BaseCondition is ICondition {
     // Storage for conditions, strategies, and automations
-    mapping(address => mapping(uint16 => uint16[])) private conditionStrategies; // (wallet => (id => strategies))
-    mapping(address => mapping(uint16 => uint16[])) private conditionAutomations; // (wallet => (id => automations))
-    mapping(address => mapping(uint16 => uint16)) private strategyConditionIndex;
-    mapping(address => mapping(uint16 => uint16)) private automationConditionIndex;
+    mapping(address => mapping(uint32 => uint32[])) private conditionStrategies; // (wallet => (id => strategies))
+    mapping(address => mapping(uint32 => uint32[])) private conditionAutomations; // (wallet => (id => automations))
+    mapping(address => mapping(uint32 => uint32)) private strategyConditionIndex;
+    mapping(address => mapping(uint32 => uint32)) private automationConditionIndex;
 
-    modifier conditionExist(uint16 id) {
+    modifier conditionExist(uint32 id) {
         if (!_isConditionActive(msg.sender, id)) {
             revert BaseCondition__ConditionDoesNotExist();
         }
         _;
     }
 
-    modifier conditionDoesNotExist(uint16 id) {
+    modifier conditionDoesNotExist(uint32 id) {
         if (_isConditionActive(msg.sender, id)) {
             revert BaseCondition__ConditionAlreadyExist();
         }
         _;
     }
 
-    function checkCondition(address, uint16) public view virtual returns (uint8) {
+    function checkCondition(address, uint32) public view virtual returns (uint8) {
         return 0;
     }
 
-    function isUpdateable(address, uint16) public view virtual returns (bool) {
+    function isUpdateable(address, uint32) public view virtual returns (bool) {
         return false;
     }
 
-    function updateCondition(uint16) public virtual returns (bool) {
+    function updateCondition(uint32) public virtual returns (bool) {
         // Default implementation for updateCondition (override in derived contracts)
         return false;
     }
 
-    function conditionActive(address _wallet, uint16 _id) external view returns (bool) {
+    function conditionActive(address _wallet, uint32 _id) external view returns (bool) {
         return _isConditionActive(_wallet, _id);
     }
 
-    function _isConditionActive(address, uint16) internal view virtual returns (bool) {
+    function _isConditionActive(address, uint32) internal view virtual returns (bool) {
         return false;
     }
 
-    function deleteCondition(uint16 _id) public virtual {
+    function deleteCondition(uint32 _id) public virtual {
         if (conditionAutomations[msg.sender][_id].length > 0 || conditionStrategies[msg.sender][_id].length > 0) {
             revert BaseCondition__ConditionIsInUse();
         }
     }
 
-    function actionValid(address wallet, uint16 id, uint16 action) public view returns (bool) {
+    function actionValid(address wallet, uint32 id, uint32 action) public view returns (bool) {
         // Validate the action (placeholder implementation)
         return automationConditionIndex[wallet][action] == id;
     }
 
-    function strategyValid(address wallet, uint16 id, uint16 strategy) public view returns (bool) {
+    function strategyValid(address wallet, uint32 id, uint32 strategy) public view returns (bool) {
         // Validate the strategy (placeholder implementation)
         return strategyConditionIndex[wallet][strategy] == id;
     }
 
-    function addAutomationToCondition(uint16 id, uint16 action) public returns (bool) {
+    function addAutomationToCondition(uint32 id, uint32 action) public returns (bool) {
         conditionAutomations[msg.sender][id].push(action);
-        automationConditionIndex[msg.sender][action] = uint16(conditionAutomations[msg.sender][id].length - 1);
+        automationConditionIndex[msg.sender][action] = uint32(conditionAutomations[msg.sender][id].length - 1);
         return true;
     }
 
-    function addStrategyToCondition(uint16 id, uint16 strategy) public returns (bool) {
+    function addStrategyToCondition(uint32 id, uint32 strategy) public returns (bool) {
         conditionStrategies[msg.sender][id].push(strategy);
-        strategyConditionIndex[msg.sender][strategy] = uint16(conditionStrategies[msg.sender][id].length - 1);
+        strategyConditionIndex[msg.sender][strategy] = uint32(conditionStrategies[msg.sender][id].length - 1);
         return true;
     }
 
-    function removeAutomationFromCondition(uint16 id, uint16 automation) public returns (bool) {
-        uint16[] storage _automations = conditionAutomations[msg.sender][id];
+    function removeAutomationFromCondition(uint32 id, uint32 automation) public returns (bool) {
+        uint32[] storage _automations = conditionAutomations[msg.sender][id];
 
-        uint16 _actualAutomationIndex = automationConditionIndex[msg.sender][automation];
+        uint32 _actualAutomationIndex = automationConditionIndex[msg.sender][automation];
 
         if (_automations[_actualAutomationIndex] != automation) {
             return false;
@@ -89,7 +89,7 @@ abstract contract BaseCondition is ICondition {
         uint256 _lastAutomationIndex = _automations.length - 1;
 
         if (_lastAutomationIndex != _actualAutomationIndex) {
-            uint16 _lastAutomationId = _automations[_lastAutomationIndex];
+            uint32 _lastAutomationId = _automations[_lastAutomationIndex];
             automationConditionIndex[msg.sender][_lastAutomationId] = _actualAutomationIndex;
             _automations[_actualAutomationIndex] = _lastAutomationId;
         }
@@ -99,10 +99,10 @@ abstract contract BaseCondition is ICondition {
         return true;
     }
 
-    function removeStrategyFromCondition(uint16 id, uint16 strategy) public returns (bool) {
-        uint16[] storage _strategies = conditionStrategies[msg.sender][id];
+    function removeStrategyFromCondition(uint32 id, uint32 strategy) public returns (bool) {
+        uint32[] storage _strategies = conditionStrategies[msg.sender][id];
 
-        uint16 _actualStrategyIndex = strategyConditionIndex[msg.sender][strategy];
+        uint32 _actualStrategyIndex = strategyConditionIndex[msg.sender][strategy];
 
         if (_strategies[_actualStrategyIndex] != strategy) {
             return false;
@@ -111,7 +111,7 @@ abstract contract BaseCondition is ICondition {
         uint256 _lastStrategyIndex = _strategies.length - 1;
 
         if (_lastStrategyIndex != _actualStrategyIndex) {
-            uint16 _lastStrategyId = _strategies[_lastStrategyIndex];
+            uint32 _lastStrategyId = _strategies[_lastStrategyIndex];
             strategyConditionIndex[msg.sender][_lastStrategyId] = _actualStrategyIndex;
             _strategies[_actualStrategyIndex] = _lastStrategyId;
         }
@@ -121,11 +121,11 @@ abstract contract BaseCondition is ICondition {
         return true;
     }
 
-    function strategies(address wallet, uint16 id) external view returns (uint16[] memory) {
+    function strategies(address wallet, uint32 id) external view returns (uint32[] memory) {
         return conditionStrategies[wallet][id];
     }
 
-    function automations(address wallet, uint16 id) external view returns (uint16[] memory) {
+    function automations(address wallet, uint32 id) external view returns (uint32[] memory) {
         return conditionAutomations[wallet][id];
     }
 }

@@ -15,6 +15,7 @@ interface IFeeHandler {
     event UpdatedVault(address vault);
     event UpdatedPercentages(uint256 beneficiary, uint256 creator, uint256 vault);
     event UpdatedPrimaryTokenDiscount(uint256 discount);
+    event UpdatedTokenAllowance(address token, bool allowed);
 
     function handleFee(address token, uint256 amount, address beneficiary, address creator) external;
     function handleFeeETH(address beneficiary, address creator) external payable;
@@ -22,4 +23,6 @@ interface IFeeHandler {
     function updateVault(address _vault) external;
     function updatePercentages(uint256 _beneficiary, uint256 _creator, uint256 _vault) external;
     function updatePrimaryTokenDiscount(uint256 _discount) external;
+    function updateTokenAllowance(address token, bool allowed) external;
+    function tokenAllowed(address token) external view returns (bool);
 }

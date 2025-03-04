@@ -14,19 +14,9 @@ import {
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IStrategyBuilderPlugin} from "./interfaces/IStrategyBuilderPlugin.sol";
 import {ICondition} from "./interfaces/ICondition.sol";
-import {IFeeManager} from "./interfaces/IFeeManager.sol";
+import {IFeeController} from "./interfaces/IFeeController.sol";
+import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IAction} from "./interfaces/IAction.sol";
-
-error StrategyBuilderPlugin__StrategyDoesNotExist();
-error StrategyBuilderPlugin__StrategyAlreadyExist();
-error StrategyBuilderPlugin__AutomationNotExecutable(address condition, uint16 id);
-error StrategyBuilderPlugin__FeeExceedMaxFee();
-error StrategyBuilderPlugin__AutomationNotExist();
-error StrategyBuilderPlugin__AutomationAlreadyExist();
-error StrategyBuilderPlugin__StrategyIsInUse();
-error StrategyBuilderPlugin__changeAutomationInConditionFailed();
-error StrategyBuilderPlugin__ChangeStrategyInConditionFailed();
-error StrategyBuilderPlugin__UpdateConditionFailed(address condition, uint16 id);
 
 contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // metadata used by the pluginMetadata() method down below
@@ -40,41 +30,42 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // in other words, we'll say "make sure the person calling increment is an owner of the account using our single plugin"
     uint256 internal constant _MANIFEST_DEPENDENCY_INDEX_OWNER_USER_OP_VALIDATION = 0;
 
-    IFeeManager public immutable feeManager;
+    IFeeController public immutable feeController;
+    IFeeHandler public immutable feeHandler;
 
-    mapping(address => mapping(uint16 => Strategy)) private strategies;
-    mapping(address => mapping(uint16 => uint16[])) private strategiesUsed; //All automations where the strategy is used
-    mapping(address => mapping(uint16 => uint16)) private automationsToIndex; //Maps each automation ID to its index in the owner's used strategy array.
-    mapping(address => mapping(uint16 => Automation)) private automations;
+    mapping(bytes32 => Strategy) private strategies;
+    mapping(bytes32 => uint32[]) private strategiesUsed; //All automations where the strategy is used
+    mapping(bytes32 => uint32) private automationsToIndex; //Maps each automation ID to its index in the owner's used strategy array.
+    mapping(bytes32 => Automation) private automations;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Modifier            ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    modifier strategyExist(uint16 _id) {
-        if (strategies[msg.sender][_id].steps.length == 0) {
-            revert StrategyBuilderPlugin__StrategyDoesNotExist();
+    modifier strategyExist(address wallet, uint32 id) {
+        if (strategies[getStorageId(wallet, id)].steps.length == 0) {
+            revert StrategyDoesNotExist();
         }
         _;
     }
 
-    modifier strategyDoesNotExist(uint16 _id) {
-        if (strategies[msg.sender][_id].steps.length > 0) {
-            revert StrategyBuilderPlugin__StrategyAlreadyExist();
+    modifier strategyDoesNotExist(address wallet, uint32 id) {
+        if (strategies[getStorageId(wallet, id)].steps.length > 0) {
+            revert StrategyAlreadyExist();
         }
         _;
     }
 
-    modifier automationExist(uint16 _id) {
-        if (automations[msg.sender][_id].condition.conditionAddress == address(0)) {
-            revert StrategyBuilderPlugin__AutomationNotExist();
+    modifier automationExist(address wallet, uint32 id) {
+        if (automations[getStorageId(wallet, id)].condition.conditionAddress == address(0)) {
+            revert AutomationNotExist();
         }
         _;
     }
 
-    modifier automationDoesNotExist(uint16 _id) {
-        if (automations[msg.sender][_id].condition.conditionAddress != address(0)) {
-            revert StrategyBuilderPlugin__AutomationAlreadyExist();
+    modifier automationDoesNotExist(address wallet, uint32 id) {
+        if (automations[getStorageId(wallet, id)].condition.conditionAddress != address(0)) {
+            revert AutomationAlreadyExist();
         }
         _;
     }
@@ -83,34 +74,35 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // ┃       Constructor         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    constructor(address _feeManager) {
-        feeManager = IFeeManager(_feeManager);
+    constructor(address _feeController, address _feeHandler) {
+        feeController = IFeeController(_feeController);
+        feeHandler = IFeeHandler(_feeHandler);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Execution functions    ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function addStrategy(uint16 _id, address _creator, StrategyStep[] calldata _steps)
+    function createStrategy(uint32 id, address creator, StrategyStep[] calldata steps)
         external
-        strategyDoesNotExist(_id)
+        strategyDoesNotExist(msg.sender, id)
     {
         //TODO: Validate steps
 
-        Strategy storage newStrategy = strategies[msg.sender][_id];
+        Strategy storage newStrategy = strategies[getStorageId(msg.sender, id)];
 
         //TODO: Dont allow zero address!
-        newStrategy.creator = _creator;
+        newStrategy.creator = creator;
 
-        for (uint256 i = 0; i < _steps.length; i++) {
-            StrategyStep memory step = _steps[i];
+        for (uint256 i = 0; i < steps.length; i++) {
+            StrategyStep memory step = steps[i];
 
             // Create a new step in storage
             StrategyStep storage newStep = newStrategy.steps.push();
             newStep.condition = step.condition;
 
             if (step.condition.conditionAddress != address(0)) {
-                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, _id, true);
+                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, id, true);
             }
 
             // Loop through the actions and add them to the step
@@ -120,158 +112,169 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
             }
         }
 
-        emit StrategyAdded(_id, _creator, newStrategy);
+        emit StrategyCreated(msg.sender, id, creator, newStrategy);
     }
 
-    function deleteStrategy(uint16 _id) external strategyExist(_id) {
-        if (strategiesUsed[msg.sender][_id].length > 0) {
-            revert StrategyBuilderPlugin__StrategyIsInUse();
+    function deleteStrategy(uint32 id) external strategyExist(msg.sender, id) {
+        bytes32 storageId = getStorageId(msg.sender, id);
+
+        if (strategiesUsed[storageId].length > 0) {
+            revert StrategyIsInUse();
         }
 
-        Strategy memory _strategy = strategies[msg.sender][_id];
+        Strategy memory _strategy = strategies[storageId];
 
         for (uint256 i = 0; i < _strategy.steps.length; i++) {
-            Condition memory _condition = _strategy.steps[i].condition;
-            if (_condition.conditionAddress != address(0)) {
-                _changeStrategyInCondition(msg.sender, _condition.conditionAddress, _condition.id, _id, false);
+            Condition memory condition = _strategy.steps[i].condition;
+            if (condition.conditionAddress != address(0)) {
+                _changeStrategyInCondition(msg.sender, condition.conditionAddress, condition.id, id, false);
             }
         }
 
-        delete strategies[msg.sender][_id];
+        delete strategies[storageId];
 
-        emit StrategyDeleted(_id);
+        emit StrategyDeleted(msg.sender, id);
     }
 
-    function executeStrategy(uint16 _id) external strategyExist(_id) {
-        _executeStrategy(msg.sender, _id);
+    function executeStrategy(uint32 id) external strategyExist(msg.sender, id) {
+        _executeStrategy(msg.sender, id);
     }
 
-    function activateAutomation(
-        uint16 _id,
-        uint16 _strategyId,
-        address _paymentToken,
-        uint256 _maxFeeAmount,
-        Condition calldata _condition
-    ) external automationDoesNotExist(_id) strategyExist(_strategyId) {
-        _changeAutomationInCondition(msg.sender, _condition.conditionAddress, _condition.id, _id, true);
+    function createAutomation(
+        uint32 id,
+        uint32 strategyId,
+        address paymentToken,
+        uint256 maxFeeInUSD,
+        Condition calldata condition
+    ) external automationDoesNotExist(msg.sender, id) strategyExist(msg.sender, strategyId) {
+        //Specific validations
+        _validatePaymentToken(paymentToken);
 
-        Automation storage _newAutomation = automations[msg.sender][_id];
+        _changeAutomationInCondition(msg.sender, condition.conditionAddress, condition.id, id, true);
 
-        _newAutomation.condition = _condition;
-        _newAutomation.strategyId = _strategyId;
+        bytes32 automationSID = getStorageId(msg.sender, id);
+        Automation storage _newAutomation = automations[getStorageId(msg.sender, id)];
+
+        _newAutomation.condition = condition;
+        _newAutomation.strategyId = strategyId;
         //TODO: Validate Payment token
-        _newAutomation.paymentToken = _paymentToken;
+        _newAutomation.paymentToken = paymentToken;
         //TODO: Validate maxFeeAmount
-        _newAutomation.maxFeeAmount = _maxFeeAmount;
+        _newAutomation.maxFeeAmount = maxFeeInUSD;
 
-        strategiesUsed[msg.sender][_strategyId].push(_id);
-        automationsToIndex[msg.sender][_id] = uint16(strategiesUsed[msg.sender][_strategyId].length - 1);
+        bytes32 strategySID = getStorageId(msg.sender, strategyId);
+        strategiesUsed[strategySID].push(id);
+        automationsToIndex[automationSID] = uint32(strategiesUsed[strategySID].length - 1);
 
-        emit AutomationActivated(_id, _strategyId, _condition, _paymentToken, _maxFeeAmount);
+        emit AutomationCreated(msg.sender, id, strategyId, condition, paymentToken, maxFeeInUSD);
     }
 
-    function deleteAutomation(uint16 _id) external automationExist(_id) {
-        Automation memory _automation = automations[msg.sender][_id];
+    function deleteAutomation(uint32 id) external automationExist(msg.sender, id) {
+        bytes32 automationSID = getStorageId(msg.sender, id);
+        Automation memory _automation = automations[automationSID];
 
-        uint16[] storage _usedInAutomations = strategiesUsed[msg.sender][_automation.strategyId];
+        uint32[] storage _usedInAutomations = strategiesUsed[getStorageId(msg.sender, _automation.strategyId)];
 
-        uint16 _actualAutomationIndex = automationsToIndex[msg.sender][_id];
+        uint32 _actualAutomationIndex = automationsToIndex[automationSID];
         uint256 _lastAutomationIndex = _usedInAutomations.length - 1;
         if (_actualAutomationIndex != _lastAutomationIndex) {
-            uint16 _lastAutomation = _usedInAutomations[_lastAutomationIndex];
+            uint32 _lastAutomation = _usedInAutomations[_lastAutomationIndex];
             _usedInAutomations[_actualAutomationIndex] = _lastAutomation;
-            automationsToIndex[msg.sender][_lastAutomation] = _actualAutomationIndex;
+            automationsToIndex[getStorageId(msg.sender, _lastAutomation)] = _actualAutomationIndex;
         }
         _usedInAutomations.pop();
 
         _changeAutomationInCondition(
-            msg.sender, _automation.condition.conditionAddress, _automation.condition.id, _id, false
+            msg.sender, _automation.condition.conditionAddress, _automation.condition.id, id, false
         );
 
-        delete automations[msg.sender][_id];
+        delete automations[automationSID];
 
-        emit AutomationDeleted(_id);
+        emit AutomationDeleted(msg.sender, id);
     }
 
-    function executeAutomation(uint16 _id, address _wallet, address _beneficary) external {
-        Automation memory _automation = automations[_wallet][_id];
+    function executeAutomation(uint32 id, address wallet, address beneficary) external automationExist(wallet, id) {
+        bytes32 automationSID = getStorageId(wallet, id);
+        Automation memory _automation = automations[automationSID];
 
         //Check the condition
-        (uint8 _conditionResult,) = _checkCondition(_wallet, _automation.condition);
+        (uint8 conditionResult,) = _checkCondition(wallet, _automation.condition);
 
-        if (_conditionResult == 0) {
-            revert StrategyBuilderPlugin__AutomationNotExecutable(
-                _automation.condition.conditionAddress, _automation.condition.id
-            );
+        if (conditionResult == 0) {
+            revert AutomationNotExecutable(_automation.condition.conditionAddress, _automation.condition.id);
         }
 
-        uint256 _feeNetto = _executeStrategy(_wallet, _automation.strategyId);
+        uint256 feeInUSD = _executeStrategy(wallet, _automation.strategyId);
 
-        //Calculate the resultant fee
-        uint256 _resultantFee = feeManager.prepareForPayment(_feeNetto, _automation.paymentToken);
-
-        if (_resultantFee > _automation.maxFeeAmount) {
-            revert StrategyBuilderPlugin__FeeExceedMaxFee();
+        if (feeInUSD > _automation.maxFeeAmount) {
+            revert FeeExceedMaxFee();
         }
 
-        address _strategyCreator = strategies[_wallet][_automation.strategyId].creator;
-        _payAutomation(_wallet, _automation.paymentToken, _resultantFee, _beneficary, _strategyCreator);
+        address _strategyCreator = strategies[getStorageId(wallet, _automation.strategyId)].creator;
+        uint256 feeInToken =
+            feeInUSD > 0 ? _payAutomation(wallet, _automation.paymentToken, feeInUSD, beneficary, _strategyCreator) : 0;
 
-        _updateCondition(_wallet, _automation.condition, _id);
+        _updateCondition(wallet, _automation.condition, id);
 
-        emit AutomationExecuted(_id, _automation.paymentToken, _resultantFee);
+        emit AutomationExecuted(wallet, id, _automation.paymentToken, feeInToken, feeInUSD);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Internal functions         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function _executeStrategy(address _wallet, uint16 _id) internal returns (uint256 fee) {
-        fee = _executeStep(_wallet, _id, 0);
+    function _executeStrategy(address wallet, uint32 id) internal returns (uint256 fee) {
+        fee = _executeStep(wallet, id, 0);
 
-        emit StrategyExecuted(_id);
+        emit StrategyExecuted(wallet, id);
     }
 
-    function _executeStep(address _wallet, uint16 _id, uint16 _index) internal returns (uint256 fee) {
-        StrategyStep memory _step = strategies[_wallet][_id].steps[_index];
+    function _executeStep(address wallet, uint32 id, uint16 index) internal returns (uint256 fee) {
+        StrategyStep memory _step = strategies[getStorageId(wallet, id)].steps[index];
 
         //Check Condition
-        (uint8 _conditionResult, uint16 _nextIndex) = _checkCondition(_wallet, _step.condition);
+        (uint8 conditionResult, uint16 nextIndex) = _checkCondition(wallet, _step.condition);
 
-        if (_conditionResult == 1) {
+        if (conditionResult == 1) {
             //Execute all actions from the step
             for (uint256 i = 0; i < _step.actions.length; i++) {
-                uint256 _actionFee = _executeAction(_wallet, _step.actions[i]);
+                uint256 _actionFee = _executeAction(wallet, _step.actions[i]);
                 fee += _actionFee;
             }
 
-            emit StrategyStepExecuted(_id, _index, _step.actions);
+            emit StrategyStepExecuted(wallet, id, index, _step.actions);
         }
 
-        if (_nextIndex != 0) {
+        if (nextIndex != 0) {
             //if there is a next step go to it
-            uint256 _feeNextStep = _executeStep(_wallet, _id, _nextIndex);
+            uint256 _feeNextStep = _executeStep(wallet, id, nextIndex);
             fee += _feeNextStep;
         }
     }
 
-    function _executeAction(address _wallet, Action memory _action) internal returns (uint256) {
-        IFeeManager.FeeType _feeType = feeManager.getFeeType(_action.selector);
+    function _executeAction(address _wallet, Action memory _action) internal returns (uint256 feeInUSD) {
+        (address tokenToTrack, bool exist) =
+            feeController.getTokenForAction(_action.target, _action.selector, _action.parameter);
+        // If the volume token exist track the volume before and after the execution, else get the min fee
 
-        if (_feeType == IFeeManager.FeeType.PostCallFee) {
-            address _basisFeeToken = feeManager.getBasisFeeToken(_action.selector, _action.parameter);
-            uint256 _tokenBalance = IERC20(_basisFeeToken).balanceOf(_wallet);
-            _execute(_wallet, _action);
-            return feeManager.calculateFeeForPostCallAction(
-                _action.selector, _basisFeeToken, IERC20(_basisFeeToken).balanceOf(_wallet) - _tokenBalance
-            );
-        } else if (_feeType == IFeeManager.FeeType.FixedFee) {
-            _execute(_wallet, _action);
-            return feeManager.getFixedFee(_action.selector);
+        uint256 preExecBalance = exist ? IERC20(tokenToTrack).balanceOf(_wallet) : 0;
+
+        _execute(_wallet, _action);
+
+        IFeeController.FeeType feeType = feeController.functionFeeConfig(_action.selector).feeType;
+
+        if (exist) {
+            uint256 postExecBalance = IERC20(tokenToTrack).balanceOf(_wallet);
+            uint256 volume = feeType == IFeeController.FeeType.Deposit
+                ? preExecBalance - postExecBalance
+                : postExecBalance - preExecBalance;
+
+            feeInUSD = feeController.calculateFee(tokenToTrack, _action.selector, volume);
         } else {
-            _execute(_wallet, _action);
-            return feeManager.calculateFeeForPreCallAction(_action.selector, _action.parameter);
+            feeInUSD = feeController.minFeeInUSD(feeType);
         }
+
+        emit ActionExecuted(_wallet, _action);
     }
 
     function _execute(address _wallet, Action memory _action) internal {
@@ -279,7 +282,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         if (_action.actionType == ActionType.EXTERNAL) {
             IPluginExecutor(_wallet).executeFromPluginExternal(_action.target, _action.value, data);
         } else {
-            (bool success, bytes memory _result) = _action.target.call(data);
+            (, bytes memory _result) = _action.target.call(data);
             IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
             for (uint256 i = 0; i < executions.length; i++) {
                 //TODO: Check target is unequal zero
@@ -311,26 +314,26 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     function _changeAutomationInCondition(
         address _wallet,
         address _condition,
-        uint16 _conditionId,
-        uint16 _action,
+        uint32 _conditionId,
+        uint32 automationId,
         bool _add
     ) internal {
         bytes memory data = _add
-            ? abi.encodeCall(ICondition.addAutomationToCondition, (_conditionId, _action))
-            : abi.encodeCall(ICondition.removeAutomationFromCondition, (_conditionId, _action));
+            ? abi.encodeCall(ICondition.addAutomationToCondition, (_conditionId, automationId))
+            : abi.encodeCall(ICondition.removeAutomationFromCondition, (_conditionId, automationId));
 
         bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
         bool _success = abi.decode(result, (bool));
         if (!_success) {
-            revert StrategyBuilderPlugin__changeAutomationInConditionFailed();
+            revert changeAutomationInConditionFailed();
         }
     }
 
     function _changeStrategyInCondition(
         address _wallet,
         address _condition,
-        uint16 _conditionId,
-        uint16 _strategy,
+        uint32 _conditionId,
+        uint32 _strategy,
         bool _add
     ) internal {
         bytes memory data = _add
@@ -340,34 +343,63 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
         bool _success = abi.decode(result, (bool));
         if (!_success) {
-            revert StrategyBuilderPlugin__ChangeStrategyInConditionFailed();
+            revert ChangeStrategyInConditionFailed();
         }
     }
 
-    function _payAutomation(address _wallet, address _paymentToken, uint256 _fee, address _beneficary, address _creator)
-        internal
-    {
-        bytes memory _approveData = abi.encodeCall(IERC20.approve, (address(feeManager), _fee));
-        IPluginExecutor(_wallet).executeFromPluginExternal(
-            _paymentToken == address(0) ? feeManager.octoInk() : _paymentToken, 0, _approveData
+    function _payAutomation(
+        address wallet,
+        address paymentToken,
+        uint256 feeInUSD,
+        address beneficiary,
+        address creator
+    ) internal returns (uint256) {
+        //calculate the token amount
+        uint256 feeInToken = feeController.calculateTokenAmount(paymentToken, feeInUSD);
+
+        //If payment with ERC20 token approve first
+        if (paymentToken != address(0)) {
+            bytes memory _approveData = abi.encodeCall(IERC20.approve, (address(feeHandler), feeInToken));
+            IPluginExecutor(wallet).executeFromPluginExternal(paymentToken, 0, _approveData);
+        }
+
+        bytes memory _handleFeeData = paymentToken != address(0)
+            ? abi.encodeCall(IFeeHandler.handleFee, (paymentToken, feeInToken, beneficiary, creator))
+            : abi.encodeCall(IFeeHandler.handleFeeETH, (beneficiary, creator));
+
+        IPluginExecutor(wallet).executeFromPluginExternal(
+            address(feeHandler), paymentToken == address(0) ? feeInToken : 0, _handleFeeData
         );
 
-        bytes memory _handleFeeData =
-            abi.encodeCall(IFeeManager.handleFee, (_fee, _beneficary, _creator, _paymentToken));
-        IPluginExecutor(_wallet).executeFromPluginExternal(address(feeManager), 0, _handleFeeData);
+        return feeInToken;
     }
 
-    function _updateCondition(address _wallet, Condition memory _condition, uint16 _actionId) internal {
+    function _updateCondition(address _wallet, Condition memory _condition, uint32 _actionId) internal {
         if (ICondition(_condition.conditionAddress).isUpdateable(_wallet, _condition.id)) {
             bytes memory _data = abi.encodeCall(ICondition.updateCondition, (_condition.id));
             bytes memory _result =
                 IPluginExecutor(_wallet).executeFromPluginExternal(_condition.conditionAddress, 0, _data);
             bool _success = abi.decode(_result, (bool));
             if (!_success) {
-                revert StrategyBuilderPlugin__UpdateConditionFailed(_condition.conditionAddress, _condition.id);
+                revert UpdateConditionFailed(_condition.conditionAddress, _condition.id);
             }
         } else {
             _changeAutomationInCondition(_wallet, _condition.conditionAddress, _condition.id, _actionId, false);
+        }
+    }
+
+    function _validatePaymentToken(address token) internal view {
+        bool valid = true;
+        if (!feeController.hasOracle(token)) {
+            valid = false;
+        }
+
+        if (!feeHandler.tokenAllowed(token)) {
+            valid = false;
+        }
+
+        if (!valid) {
+            revert PaymentTokenNotAllowed();
         }
     }
 
@@ -400,9 +432,9 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         manifest.dependencyInterfaceIds[0] = type(IPlugin).interfaceId;
 
         manifest.executionFunctions = new bytes4[](5);
-        manifest.executionFunctions[0] = this.addStrategy.selector;
+        manifest.executionFunctions[0] = this.createStrategy.selector;
         manifest.executionFunctions[1] = this.executeStrategy.selector;
-        manifest.executionFunctions[2] = this.activateAutomation.selector;
+        manifest.executionFunctions[2] = this.createAutomation.selector;
         manifest.executionFunctions[3] = this.deleteStrategy.selector;
         manifest.executionFunctions[4] = this.deleteAutomation.selector;
 
@@ -421,7 +453,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         // this will ensure that only an owner of the account can call increment
         manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](5);
         manifest.userOpValidationFunctions[0] = ManifestAssociatedFunction({
-            executionSelector: this.addStrategy.selector,
+            executionSelector: this.createStrategy.selector,
             associatedFunction: ownerUserOpValidationFunction
         });
 
@@ -431,7 +463,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         });
 
         manifest.userOpValidationFunctions[2] = ManifestAssociatedFunction({
-            executionSelector: this.activateAutomation.selector,
+            executionSelector: this.createAutomation.selector,
             associatedFunction: ownerUserOpValidationFunction
         });
 
@@ -450,7 +482,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         // a runtime validation function for it and unauthorized calls may occur due to that
         manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](5);
         manifest.preRuntimeValidationHooks[0] = ManifestAssociatedFunction({
-            executionSelector: this.addStrategy.selector,
+            executionSelector: this.createStrategy.selector,
             associatedFunction: ManifestFunction({
                 functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
                 functionId: 0,
@@ -468,7 +500,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         });
 
         manifest.preRuntimeValidationHooks[2] = ManifestAssociatedFunction({
-            executionSelector: this.activateAutomation.selector,
+            executionSelector: this.createAutomation.selector,
             associatedFunction: ManifestFunction({
                 functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
                 functionId: 0,
@@ -513,11 +545,15 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // ┃    External View Functions       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function strategy(address _wallet, uint16 _id) external view returns (Strategy memory) {
-        return strategies[_wallet][_id];
+    function strategy(address wallet, uint32 id) external view returns (Strategy memory) {
+        return strategies[getStorageId(wallet, id)];
     }
 
-    function automation(address _wallet, uint16 _id) external view returns (Automation memory) {
-        return automations[_wallet][_id];
+    function automation(address wallet, uint32 id) external view returns (Automation memory) {
+        return automations[getStorageId(wallet, id)];
+    }
+
+    function getStorageId(address wallet, uint32 id) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(wallet, id));
     }
 }

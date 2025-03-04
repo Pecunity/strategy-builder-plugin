@@ -85,6 +85,18 @@ contract FeeController is IFeeController {
         return _feeInUSD < _minFeeInUSD ? _minFeeInUSD : _feeInUSD;
     }
 
+    function calculateTokenAmount(address token, uint256 feeInUSD) external view returns (uint256) {
+        bytes32 oracleID = oracle.oracleID(token);
+
+        if (oracleID == bytes32(0)) {
+            revert NoOracleExist();
+        }
+
+        uint256 tokenPrice = oracle.getTokenPrice(token);
+
+        return feeInUSD * 10 ** 18 / tokenPrice;
+    }
+
     function getTokenForAction(address _target, bytes4 _selector, bytes memory _params)
         external
         view
@@ -125,5 +137,9 @@ contract FeeController is IFeeController {
 
     function priceOracle() external view returns (address) {
         return address(oracle);
+    }
+
+    function hasOracle(address token) external view returns (bool) {
+        return oracle.oracleID(token) != bytes32(0);
     }
 }
