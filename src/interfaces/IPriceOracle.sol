@@ -8,4 +8,6 @@ interface IPriceOracle {
     event OracleSet(address indexed token, bytes32 oracleID);
 
     function setOracleID(address _token, bytes32 _oracleID) external;
+    function oracleID(address _token) external view returns (bytes32);
+    function getTokenPrice(address _token) external view returns (uint256);
 }
