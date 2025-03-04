@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+interface IFeeHandler {
+    error InvalidAmount();
+    error ZeroAddressNotValid();
+    error InvalidBeneficiaryOrCreator();
+    error PrimaryTokenAlreadyActivated();
+    error InvalidPercentageDistribution();
+    error InvalidPrimaryTokenDiscount();
+
+    event FeeHandled(address indexed token, uint256 amount);
+    event FeeHandledETH(uint256 amount);
+    event PrimaryTokenActivated(address token, address treasury);
+    event UpdatedVault(address vault);
+    event UpdatedPercentages(uint256 beneficiary, uint256 creator, uint256 vault);
+    event UpdatedPrimaryTokenDiscount(uint256 discount);
+
+    function handleFee(address token, uint256 amount, address beneficiary, address creator) external;
+    function handleFeeETH(address beneficiary, address creator) external payable;
+    function activatePrimaryToken(address token, address _treasury) external;
+    function updateVault(address _vault) external;
+    function updatePercentages(uint256 _beneficiary, uint256 _creator, uint256 _vault) external;
+    function updatePrimaryTokenDiscount(uint256 _discount) external;
+}
