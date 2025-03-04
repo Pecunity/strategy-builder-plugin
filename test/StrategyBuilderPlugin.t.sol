@@ -15,13 +15,13 @@ import {IEntryPoint} from "@eth-infinitism/account-abstraction/interfaces/IEntry
 import {EntryPoint} from "@eth-infinitism/account-abstraction/core/EntryPoint.sol";
 import {UserOperation} from "@eth-infinitism/account-abstraction/interfaces/UserOperation.sol";
 
-import {StrategyBuilderPlugin, StrategyBuilderPlugin__AutomationNotExecutable} from "../src/StrategyBuilderPlugin.sol";
+import {StrategyBuilderPlugin} from "../src/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "../src/interfaces/IStrategyBuilderPlugin.sol";
-
+import {IFeeController} from "../src/interfaces/IFeeController.sol";
+import {IFeeHandler} from "../src/interfaces/IFeeHandler.sol";
 import {Token} from "../src/test/mocks/MockToken.sol";
 import {MockCondition} from "../src/test/mocks/MockCondition.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IFeeManager} from "../src/interfaces/IFeeManager.sol";
 
 contract StrategyBuilderTest is Test {
     using ECDSA for bytes32;
@@ -34,11 +34,13 @@ contract StrategyBuilderTest is Test {
     address payable beneficiary;
 
     address feeManager = makeAddr("fee-manager");
+    address feeHandler = makeAddr("fee-handler");
+    address feeController = makeAddr("fee-controller");
     address receiver = makeAddr("receiver");
     address executor = makeAddr("executor");
     address octoInk = makeAddr("octo-ink");
 
-    uint256 constant CALL_GAS_LIMIT = 800_000;
+    uint256 constant CALL_GAS_LIMIT = 1_000_000;
     uint256 constant VERIFICATION_GAS_LIMIT = 1000000;
 
     Token token;
@@ -69,7 +71,7 @@ contract StrategyBuilderTest is Test {
         account1 = UpgradeableModularAccount(payable(factory.createAccount(owner1, 0)));
         vm.deal(address(account1), 100 ether);
 
-        strategyBuilderPlugin = new StrategyBuilderPlugin(feeManager);
+        strategyBuilderPlugin = new StrategyBuilderPlugin(feeController,feeHandler);
         bytes32 manifestHash = keccak256(abi.encode(strategyBuilderPlugin.pluginManifest()));
 
         // we will have a single function dependency for our counter contract: the single owner user op validation
@@ -100,11 +102,11 @@ contract StrategyBuilderTest is Test {
         condition.addCondition(0, _condition);
     }
 
-    /////////////////////////////
-    ////// addStrategy //////////
-    /////////////////////////////
+    ////////////////////////////////
+    ////// createStrategy //////////
+    ////////////////////////////////
 
-    function test_addStrategy_Success() public {
+    function test_createStrategy_Success() public {
         IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](1);
 
         IStrategyBuilderPlugin.Condition memory emptyCondition;
@@ -123,13 +125,13 @@ contract StrategyBuilderTest is Test {
 
         steps[0] = step;
 
-        address _creator = makeAddr("creator");
-        uint16 _id = 16;
+        address creator = makeAddr("creator");
+        uint16 id = 16;
 
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)));
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.createStrategy, (id, creator, steps)));
 
-        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), _id);
-        assertEq(strategy.creator, _creator);
+        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), id);
+        assertEq(strategy.creator, creator);
 
         assertEq(strategy.steps[0].actions.length, 2);
     }
@@ -143,14 +145,20 @@ contract StrategyBuilderTest is Test {
 
         strategyWithConditionAdded(amount);
 
-        //Mock Fee Manager calls
+        //Mock Fee Controller calls
         vm.mockCall(
-            feeManager,
-            abi.encodeWithSelector(IFeeManager.getFeeType.selector),
-            abi.encode(IFeeManager.FeeType.FixedFee)
+            feeController,
+            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
+            abi.encode(address(0), false)
         );
 
-        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
+        IFeeController.FeeConfig memory config =
+            IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0});
+        vm.mockCall(
+            feeController, abi.encodeWithSelector(IFeeController.functionFeeConfig.selector), abi.encode(config)
+        );
+
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(1));
 
         sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)));
 
@@ -162,14 +170,20 @@ contract StrategyBuilderTest is Test {
 
         strategyWithTwoStepsAdd(amount);
 
-        //Mock Fee Manager calls
+        //Mock Fee Controller calls
         vm.mockCall(
-            feeManager,
-            abi.encodeWithSelector(IFeeManager.getFeeType.selector),
-            abi.encode(IFeeManager.FeeType.FixedFee)
+            feeController,
+            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
+            abi.encode(address(0), false)
         );
 
-        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
+        IFeeController.FeeConfig memory config =
+            IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0});
+        vm.mockCall(
+            feeController, abi.encodeWithSelector(IFeeController.functionFeeConfig.selector), abi.encode(config)
+        );
+
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(1));
 
         // create a user operation which has the calldata to specify we'd like to increment
         sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)));
@@ -195,10 +209,10 @@ contract StrategyBuilderTest is Test {
     }
 
     //////////////////////////////////
-    ////// activateAutomation ////////
+    ////// createAutomation   ////////
     //////////////////////////////////
 
-    function test_addAutomation_Success() external {
+    function test_createAutomation_Success() external {
         uint256 amount = 1 ether;
 
         strategyWithConditionAdded(amount);
@@ -206,8 +220,11 @@ contract StrategyBuilderTest is Test {
         IStrategyBuilderPlugin.Condition memory _automationCondition =
             IStrategyBuilderPlugin.Condition({conditionAddress: address(condition), id: 1, result1: 0, result0: 0});
 
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
+        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
+
         sendUserOperation(
-            abi.encodeCall(StrategyBuilderPlugin.activateAutomation, (1, 1, address(0), 1 ether, _automationCondition))
+            abi.encodeCall(StrategyBuilderPlugin.createAutomation, (1, 1, address(0), 1 ether, _automationCondition))
         );
 
         address conditionAddress = strategyBuilderPlugin.automation(address(account1), 1).condition.conditionAddress;
@@ -224,9 +241,9 @@ contract StrategyBuilderTest is Test {
 
         strategyWithConditionAdded(amount);
 
-        activateAutomation(0);
+        createAutomation(0);
 
-        mockFeeManager();
+        mockFeeController();
 
         address executor = makeAddr("executor");
 
@@ -242,15 +259,15 @@ contract StrategyBuilderTest is Test {
         MockCondition.Condition memory _condition = MockCondition.Condition({result: false, active: true});
         vm.prank(address(account1));
         condition.addCondition(1, _condition);
-        activateAutomation(1);
+        createAutomation(1);
 
-        mockFeeManager();
+        mockFeeController();
 
         address executor = makeAddr("executor");
 
         vm.prank(executor);
         vm.expectRevert(
-            abi.encodeWithSelector(StrategyBuilderPlugin__AutomationNotExecutable.selector, address(condition), 1)
+            abi.encodeWithSelector(IStrategyBuilderPlugin.AutomationNotExecutable.selector, address(condition), 1)
         );
         strategyBuilderPlugin.executeAutomation(1, address(account1), executor);
     }
@@ -264,7 +281,7 @@ contract StrategyBuilderTest is Test {
 
         strategyWithConditionAdded(amount);
 
-        activateAutomation(0);
+        createAutomation(0);
 
         sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.deleteAutomation, (1)));
 
@@ -299,7 +316,7 @@ contract StrategyBuilderTest is Test {
         address _creator = makeAddr("creator");
         uint16 _id = 1;
 
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)));
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.createStrategy, (_id, _creator, steps)));
     }
 
     function strategyWithTwoStepsAdd(uint256 transferAmount) internal {
@@ -337,10 +354,10 @@ contract StrategyBuilderTest is Test {
         uint16 _id = 1;
 
         // create a user operation which has the calldata to specify we'd like to increment
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.addStrategy, (_id, _creator, steps)));
+        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.createStrategy, (_id, _creator, steps)));
     }
 
-    function activateAutomation(uint16 conditionId) internal {
+    function createAutomation(uint16 conditionId) internal {
         IStrategyBuilderPlugin.Condition memory _automationCondition = IStrategyBuilderPlugin.Condition({
             conditionAddress: address(condition),
             id: conditionId,
@@ -348,27 +365,29 @@ contract StrategyBuilderTest is Test {
             result0: 0
         });
 
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
+        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
+
         sendUserOperation(
-            abi.encodeCall(StrategyBuilderPlugin.activateAutomation, (1, 1, address(0), 1 ether, _automationCondition))
+            abi.encodeCall(StrategyBuilderPlugin.createAutomation, (1, 1, address(0), 1 ether, _automationCondition))
         );
     }
 
-    function mockFeeManager() internal {
+    function mockFeeController() internal {
+        //Mock Fee Controller calls
         vm.mockCall(
-            feeManager,
-            abi.encodeWithSelector(IFeeManager.getFeeType.selector),
-            abi.encode(IFeeManager.FeeType.FixedFee)
+            feeController,
+            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
+            abi.encode(address(0), false)
         );
 
-        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.getFixedFee.selector), abi.encode(FIXED_FEE));
+        IFeeController.FeeConfig memory config =
+            IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0});
+        vm.mockCall(
+            feeController, abi.encodeWithSelector(IFeeController.functionFeeConfig.selector), abi.encode(config)
+        );
 
-        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.prepareForPayment.selector), abi.encode(FIXED_FEE));
-
-        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.octoInk.selector), abi.encode(octoInk));
-
-        vm.mockCall(octoInk, abi.encodeWithSelector(IERC20.approve.selector), abi.encode(true));
-
-        vm.mockCall(feeManager, abi.encodeWithSelector(IFeeManager.handleFee.selector), abi.encode(true));
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(0));
     }
 
     /* ====== HELPER FUNCTIONS ====== */

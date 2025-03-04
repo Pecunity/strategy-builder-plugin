@@ -21,9 +21,9 @@ interface IStrategyBuilderPlugin {
 
     struct Condition {
         address conditionAddress;
-        uint16 id;
-        uint16 result1; // If the condition returns 1 got to index result1. If index result1 is 0 then no next step
-        uint16 result0; // If the condtions returns 0 go to index result0. If index result0 is 0 then no next step
+        uint32 id;
+        uint8 result1; // If the condition returns 1 got to index result1. If index result1 is 0 then no next step
+        uint8 result0; // If the condtions returns 0 go to index result0. If index result0 is 0 then no next step
     }
 
     struct StrategyStep {
@@ -38,26 +38,53 @@ interface IStrategyBuilderPlugin {
 
     struct Automation {
         Condition condition; // If the condition returns 1, the automation can be executed
-        uint16 strategyId;
+        uint32 strategyId;
         address paymentToken;
         uint256 maxFeeAmount;
     }
 
+    error StrategyDoesNotExist();
+    error StrategyAlreadyExist();
+    error AutomationNotExecutable(address condition, uint32 id);
+    error FeeExceedMaxFee();
+    error AutomationNotExist();
+    error AutomationAlreadyExist();
+    error StrategyIsInUse();
+    error changeAutomationInConditionFailed();
+    error ChangeStrategyInConditionFailed();
+    error UpdateConditionFailed(address condition, uint32 id);
+    error PaymentTokenNotAllowed();
+
     /* ====== Events ====== */
 
-    event StrategyAdded(uint16 strategyId, address creator, Strategy strategy);
-    event StrategyExecuted(uint16 strategyId);
-    event StrategyDeleted(uint16 strategyId);
+    event StrategyCreated(address indexed wallet, uint32 strategyId, address creator, Strategy strategy);
+    event StrategyExecuted(address indexed wallet, uint32 strategyId);
+    event StrategyDeleted(address indexed wallet, uint32 strategyId);
 
-    event AutomationActivated(
-        uint16 automationId, uint16 strategyId, Condition condition, address paymentToken, uint256 maxFeeAmount
+    event AutomationCreated(
+        address indexed wallet,
+        uint32 automationId,
+        uint32 strategyId,
+        Condition condition,
+        address paymentToken,
+        uint256 maxFeeAmount
     );
-    event AutomationDeleted(uint16 automationId);
-    event AutomationExecuted(uint16 automationId, address paymentToken, uint256 feeAmount);
+    event AutomationDeleted(address indexed wallet, uint32 automationId);
+    event AutomationExecuted(
+        address indexed wallet, uint32 automationId, address paymentToken, uint256 feeInToken, uint256 feeInUSD
+    );
 
-    event StrategyStepExecuted(uint16 strategyId, uint16 stepId, Action[] actions);
+    event StrategyStepExecuted(address indexed wallet, uint32 strategyId, uint32 stepId, Action[] actions);
+    event ActionExecuted(address indexed wallet, Action action);
 
-    function addStrategy(uint16 id, address creator, StrategyStep[] calldata steps) external;
+    function createStrategy(uint32 id, address creator, StrategyStep[] calldata steps) external;
+    function createAutomation(
+        uint32 id,
+        uint32 strategyId,
+        address paymentToken,
+        uint256 maxFeeInUSD,
+        Condition calldata condition
+    ) external;
 
     // function executeStrategy(uint16 id) external;
 

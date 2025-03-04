@@ -21,6 +21,8 @@ contract FeeHandler is Ownable, IFeeHandler {
     uint256 public vaultPercentage;
     uint256 public primaryTokenDiscount = 2000; // 20% expressed as 2000 / 10000
 
+    mapping(address token => bool) private allowedTokens;
+
     constructor(address _vault, uint256 _beneficaryPercentage, uint256 _creatorPercentage, uint256 _vaultPercentage) {
         _updateVault(_vault);
         _updatePercentages(_beneficaryPercentage, _creatorPercentage, _vaultPercentage); // Default percentages: 30% beneficiary, 20% creator, 50% vault
@@ -94,6 +96,12 @@ contract FeeHandler is Ownable, IFeeHandler {
         emit UpdatedPrimaryTokenDiscount(_discount);
     }
 
+    function updateTokenAllowance(address token, bool allowed) external onlyOwner {
+        allowedTokens[token] = allowed;
+
+        emit UpdatedTokenAllowance(token, allowed);
+    }
+
     function _updateVault(address _vault) internal {
         _validateAddress(_vault);
         vault = _vault;
@@ -132,5 +140,9 @@ contract FeeHandler is Ownable, IFeeHandler {
 
     function primaryTokenActive() public view returns (bool) {
         return primaryToken != address(0);
+    }
+
+    function tokenAllowed(address token) external view returns (bool) {
+        return allowedTokens[token];
     }
 }

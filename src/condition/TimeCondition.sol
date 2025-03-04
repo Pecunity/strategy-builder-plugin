@@ -23,7 +23,7 @@ contract TimeCondition is BaseCondition {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃        State Variables           ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-    mapping(address wallet => mapping(uint16 id => Condition condition)) private conditions;
+    mapping(address wallet => mapping(uint32 id => Condition condition)) private conditions;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃           Modifiers              ┃
@@ -45,15 +45,15 @@ contract TimeCondition is BaseCondition {
     // ┃            Events                ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    event ConditionAdded(uint16 id, address wallet, Condition condition);
-    event ConditionDeleted(uint16 id, address wallet);
-    event ConditionUpdated(uint16 id, address wallet, uint256 newExecution);
+    event ConditionAdded(uint32 id, address wallet, Condition condition);
+    event ConditionDeleted(uint32 id, address wallet);
+    event ConditionUpdated(uint32 id, address wallet, uint256 newExecution);
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Public Functions           ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function addCondition(uint16 _id, Condition calldata _condition)
+    function addCondition(uint32 _id, Condition calldata _condition)
         external
         conditionDoesNotExist(_id)
         validCondition(_condition)
@@ -63,14 +63,14 @@ contract TimeCondition is BaseCondition {
         emit ConditionAdded(_id, msg.sender, _condition);
     }
 
-    function deleteCondition(uint16 _id) public override conditionExist(_id) {
+    function deleteCondition(uint32 _id) public override conditionExist(_id) {
         super.deleteCondition(_id);
         delete conditions[msg.sender][_id];
 
         emit ConditionDeleted(_id, msg.sender);
     }
 
-    function updateCondition(uint16 _id) public override conditionExist(_id) returns (bool) {
+    function updateCondition(uint32 _id) public override conditionExist(_id) returns (bool) {
         Condition memory _condition = conditions[msg.sender][_id];
 
         if (_condition.execution > block.timestamp) {
@@ -90,7 +90,7 @@ contract TimeCondition is BaseCondition {
     // ┃       Internal Functions         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function _isConditionActive(address _wallet, uint16 _id) internal view override returns (bool) {
+    function _isConditionActive(address _wallet, uint32 _id) internal view override returns (bool) {
         return conditions[_wallet][_id].execution != 0;
     }
 
@@ -98,7 +98,7 @@ contract TimeCondition is BaseCondition {
     // ┃         View Functions           ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function checkCondition(address _wallet, uint16 _id) public view override returns (uint8) {
+    function checkCondition(address _wallet, uint32 _id) public view override returns (uint8) {
         Condition memory _condition = conditions[_wallet][_id];
 
         if (_condition.execution == 0) {
@@ -112,11 +112,11 @@ contract TimeCondition is BaseCondition {
         }
     }
 
-    function isUpdateable(address _wallet, uint16 _id) public view override returns (bool) {
+    function isUpdateable(address _wallet, uint32 _id) public view override returns (bool) {
         return conditions[_wallet][_id].updateable;
     }
 
-    function walletCondition(address _wallet, uint16 _id) public view returns (Condition memory) {
+    function walletCondition(address _wallet, uint32 _id) public view returns (Condition memory) {
         return conditions[_wallet][_id];
     }
 }
