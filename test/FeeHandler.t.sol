@@ -135,6 +135,13 @@ contract FeeHandlerTest is Test {
         handler.updatePrimaryTokenDiscount(discount);
     }
 
+    function test_updateTokenAllowance_Success(address token) external {
+        vm.prank(OWNER);
+        handler.updateTokenAllowance(token, true);
+
+        assertEq(handler.tokenAllowed(token), true);
+    }
+
     function test_handleFee_Success(uint256 amount, address beneficiary, address creator) external {
         uint256 _maxTokenSupply = 1000 * 1e18;
         vm.prank(FEE_PAYER);
@@ -144,6 +151,9 @@ contract FeeHandlerTest is Test {
         vm.assume(beneficiary != address(0));
         vm.assume(creator != address(0));
 
+        vm.prank(OWNER);
+        handler.updateTokenAllowance(address(_token), true);
+
         vm.startPrank(FEE_PAYER);
         _token.approve(address(handler), _amount);
         handler.handleFee(address(_token), _amount, beneficiary, creator);
@@ -151,6 +161,18 @@ contract FeeHandlerTest is Test {
         assert(_token.balanceOf(beneficiary) > 0);
         assert(_token.balanceOf(creator) > 0);
         assert(_token.balanceOf(VAULT) > 0);
+    }
+
+    function test_handleFee_NoValidToken(address beneficiary, address creator, uint256 amount) external {
+        uint256 _maxTokenSupply = 1000 * 1e18;
+        uint256 _amount = bound(amount, 100, _maxTokenSupply);
+        vm.assume(beneficiary != address(0));
+        vm.assume(creator != address(0));
+
+        address token = makeAddr("token");
+
+        vm.expectRevert(IFeeHandler.TokenNotAllowed.selector);
+        handler.handleFee(token, _amount, beneficiary, creator);
     }
 
     function test_handleFee_InvalidAmount(address beneficiary, address creator) external {
@@ -182,12 +204,14 @@ contract FeeHandlerTest is Test {
         address primaryToken = makeAddr("primary-token");
         address treasury = makeAddr("treasury");
 
-        vm.prank(OWNER);
-        handler.activatePrimaryToken(primaryToken, treasury);
-
         uint256 _maxTokenSupply = 1000 * 1e18;
         vm.prank(FEE_PAYER);
         Token _token = new Token("test","MT",_maxTokenSupply);
+
+        vm.startPrank(OWNER);
+        handler.activatePrimaryToken(primaryToken, treasury);
+        handler.updateTokenAllowance(address(_token), true);
+        vm.stopPrank();
 
         uint256 _amount = bound(amount, 100, _maxTokenSupply);
         vm.assume(beneficiary != address(0));
@@ -210,8 +234,10 @@ contract FeeHandlerTest is Test {
         Token primaryToken = new Token("test","MT",_maxTokenSupply);
         address treasury = makeAddr("treasury");
 
-        vm.prank(OWNER);
+        vm.startPrank(OWNER);
         handler.activatePrimaryToken(address(primaryToken), treasury);
+        handler.updateTokenAllowance(address(primaryToken), true);
+        vm.stopPrank();
 
         uint256 _amount = bound(amount, 100, _maxTokenSupply);
         vm.assume(beneficiary != address(0));
@@ -231,7 +257,8 @@ contract FeeHandlerTest is Test {
         uint256 maxAmountETH = 1000 * 1e18;
         deal(FEE_PAYER, maxAmountETH);
 
-        console.log("test");
+        vm.prank(OWNER);
+        handler.updateTokenAllowance(address(0), true);
 
         uint256 _amount = bound(amount, 100, maxAmountETH);
         address beneficiary = makeAddr("beneficiary");
@@ -244,5 +271,13 @@ contract FeeHandlerTest is Test {
         assert(beneficiary.balance > 0);
         assert(creator.balance > 0);
         assert(VAULT.balance > 0);
+    }
+
+    function test_handleFeeETH_ETHNotValid() external {
+        address beneficiary = makeAddr("beneficiary");
+        address creator = makeAddr("creator");
+
+        vm.expectRevert(IFeeHandler.TokenNotAllowed.selector);
+        handler.handleFeeETH(beneficiary, creator);
     }
 }

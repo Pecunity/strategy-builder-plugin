@@ -178,6 +178,38 @@ contract FeeControllerTest is Test {
         assertEq(controller.calculateFee(_token, _selector, _volume), _expFee);
     }
 
+    function test_calculateTokenAmount_Success(address token, uint256 price) external {
+        vm.assume(price > 0);
+
+        uint256 feeInUSD = 200 * 1e18; //200 USD
+
+        bytes32 _oralceID = getRandomBytes32();
+        vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (token)), abi.encode(_oralceID));
+        vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.getTokenPrice, (token)), abi.encode(price));
+
+        uint256 expAmount = feeInUSD * 1e18 / price;
+
+        assertEq(expAmount, controller.calculateTokenAmount(token, feeInUSD));
+    }
+
+    function test_calculateTokenAmount_NoOracle(address token) external {
+        vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (token)), abi.encode(bytes32(0)));
+
+        vm.expectRevert(IFeeController.NoOracleExist.selector);
+        controller.calculateTokenAmount(token, 200);
+    }
+
+    function test_calculateTokenAmount_PriceZero(address token) external {
+        uint256 feeInUSD = 200 * 1e18; //200 USD
+
+        bytes32 _oralceID = getRandomBytes32();
+        vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (token)), abi.encode(_oralceID));
+        vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.getTokenPrice, (token)), abi.encode(0));
+
+        vm.expectRevert(IFeeController.InvalidTokenWithPriceOfZero.selector);
+        controller.calculateTokenAmount(token, feeInUSD);
+    }
+
     /* ====== HELPER FUNCTIONS ====== */
 
     function generateRandomBytes(uint256 length) internal view returns (bytes memory) {

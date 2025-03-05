@@ -32,6 +32,10 @@ contract FeeHandler is Ownable, IFeeHandler {
         _validateAmount(amount);
         _validateBeneficiaryAndCreator(beneficiary, creator);
 
+        if (!allowedTokens[token]) {
+            revert TokenNotAllowed();
+        }
+
         uint256 totalFee = amount;
         uint256 feeDiscount = 0;
         uint256 treasuryFee = 0;
@@ -57,6 +61,10 @@ contract FeeHandler is Ownable, IFeeHandler {
     }
 
     function handleFeeETH(address beneficiary, address creator) external payable {
+        if (!allowedTokens[address(0)]) {
+            revert TokenNotAllowed();
+        }
+
         _validateBeneficiaryAndCreator(beneficiary, creator);
 
         uint256 totalFee = msg.value;

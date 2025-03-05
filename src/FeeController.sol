@@ -94,6 +94,10 @@ contract FeeController is IFeeController {
 
         uint256 tokenPrice = oracle.getTokenPrice(token);
 
+        if (tokenPrice == 0) {
+            revert InvalidTokenWithPriceOfZero();
+        }
+
         return feeInUSD * 10 ** 18 / tokenPrice;
     }
 

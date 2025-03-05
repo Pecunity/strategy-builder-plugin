@@ -8,6 +8,7 @@ interface IFeeHandler {
     error PrimaryTokenAlreadyActivated();
     error InvalidPercentageDistribution();
     error InvalidPrimaryTokenDiscount();
+    error TokenNotAllowed();
 
     event FeeHandled(address indexed token, uint256 amount);
     event FeeHandledETH(uint256 amount);
