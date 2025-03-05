@@ -10,19 +10,148 @@ import type {
 
 const _abi = [
   {
+    inputs: [],
+    name: "AutomationAlreadyExist",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "condition",
+        type: "address",
+      },
+      {
+        internalType: "uint32",
+        name: "id",
+        type: "uint32",
+      },
+    ],
+    name: "AutomationNotExecutable",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AutomationNotExist",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "ChangeStrategyInConditionFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "FeeExceedMaxFee",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "PaymentTokenNotAllowed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "StrategyAlreadyExist",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "StrategyDoesNotExist",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "StrategyIsInUse",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "condition",
+        type: "address",
+      },
+      {
+        internalType: "uint32",
+        name: "id",
+        type: "uint32",
+      },
+    ],
+    name: "UpdateConditionFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "changeAutomationInConditionFailed",
+    type: "error",
+  },
+  {
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        components: [
+          {
+            internalType: "bytes4",
+            name: "selector",
+            type: "bytes4",
+          },
+          {
+            internalType: "bytes",
+            name: "parameter",
+            type: "bytes",
+          },
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "enum IStrategyBuilderPlugin.ActionType",
+            name: "actionType",
+            type: "uint8",
+          },
+        ],
         indexed: false,
-        internalType: "uint16",
-        name: "automationId",
-        type: "uint16",
+        internalType: "struct IStrategyBuilderPlugin.Action",
+        name: "action",
+        type: "tuple",
+      },
+    ],
+    name: "ActionExecuted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
       },
       {
         indexed: false,
-        internalType: "uint16",
+        internalType: "uint32",
+        name: "automationId",
+        type: "uint32",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
         name: "strategyId",
-        type: "uint16",
+        type: "uint32",
       },
       {
         components: [
@@ -32,19 +161,19 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "uint16",
+            internalType: "uint32",
             name: "id",
-            type: "uint16",
+            type: "uint32",
           },
           {
-            internalType: "uint16",
+            internalType: "uint8",
             name: "result1",
-            type: "uint16",
+            type: "uint8",
           },
           {
-            internalType: "uint16",
+            internalType: "uint8",
             name: "result0",
-            type: "uint16",
+            type: "uint8",
           },
         ],
         indexed: false,
@@ -65,17 +194,23 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "AutomationActivated",
+    name: "AutomationCreated",
     type: "event",
   },
   {
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "uint16",
+        internalType: "uint32",
         name: "automationId",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "AutomationDeleted",
@@ -85,10 +220,16 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "uint16",
+        internalType: "uint32",
         name: "automationId",
-        type: "uint16",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -99,7 +240,13 @@ const _abi = [
       {
         indexed: false,
         internalType: "uint256",
-        name: "feeAmount",
+        name: "feeInToken",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "feeInUSD",
         type: "uint256",
       },
     ],
@@ -110,10 +257,16 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "uint16",
+        internalType: "uint32",
         name: "strategyId",
-        type: "uint16",
+        type: "uint32",
       },
       {
         indexed: false,
@@ -138,19 +291,19 @@ const _abi = [
                     type: "address",
                   },
                   {
-                    internalType: "uint16",
+                    internalType: "uint32",
                     name: "id",
-                    type: "uint16",
+                    type: "uint32",
                   },
                   {
-                    internalType: "uint16",
+                    internalType: "uint8",
                     name: "result1",
-                    type: "uint16",
+                    type: "uint8",
                   },
                   {
-                    internalType: "uint16",
+                    internalType: "uint8",
                     name: "result0",
-                    type: "uint16",
+                    type: "uint8",
                   },
                 ],
                 internalType: "struct IStrategyBuilderPlugin.Condition",
@@ -201,17 +354,23 @@ const _abi = [
         type: "tuple",
       },
     ],
-    name: "StrategyAdded",
+    name: "StrategyCreated",
     type: "event",
   },
   {
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "uint16",
+        internalType: "uint32",
         name: "strategyId",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "StrategyDeleted",
@@ -221,10 +380,16 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "uint16",
+        internalType: "uint32",
         name: "strategyId",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "StrategyExecuted",
@@ -234,16 +399,22 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: "uint16",
-        name: "strategyId",
-        type: "uint16",
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
       },
       {
         indexed: false,
-        internalType: "uint16",
+        internalType: "uint32",
+        name: "strategyId",
+        type: "uint32",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
         name: "stepId",
-        type: "uint16",
+        type: "uint32",
       },
       {
         components: [
@@ -285,9 +456,64 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "strategyId",
+        type: "uint32",
+      },
+      {
+        internalType: "address",
+        name: "paymentToken",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "maxFeeInUSD",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "conditionAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint32",
+            name: "id",
+            type: "uint32",
+          },
+          {
+            internalType: "uint8",
+            name: "result1",
+            type: "uint8",
+          },
+          {
+            internalType: "uint8",
+            name: "result0",
+            type: "uint8",
+          },
+        ],
+        internalType: "struct IStrategyBuilderPlugin.Condition",
+        name: "condition",
+        type: "tuple",
+      },
+    ],
+    name: "createAutomation",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint32",
+        name: "id",
+        type: "uint32",
       },
       {
         internalType: "address",
@@ -304,19 +530,19 @@ const _abi = [
                 type: "address",
               },
               {
-                internalType: "uint16",
+                internalType: "uint32",
                 name: "id",
-                type: "uint16",
+                type: "uint32",
               },
               {
-                internalType: "uint16",
+                internalType: "uint8",
                 name: "result1",
-                type: "uint16",
+                type: "uint8",
               },
               {
-                internalType: "uint16",
+                internalType: "uint8",
                 name: "result0",
-                type: "uint16",
+                type: "uint8",
               },
             ],
             internalType: "struct IStrategyBuilderPlugin.Condition",
@@ -361,7 +587,7 @@ const _abi = [
         type: "tuple[]",
       },
     ],
-    name: "addStrategy",
+    name: "createStrategy",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

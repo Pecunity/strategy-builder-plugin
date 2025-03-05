@@ -21,22 +21,26 @@ contract FeeController is IFeeController {
     // Mapping: FeeType => Minimum fee in USD (18 decimals)
     mapping(FeeType => uint256) private minFeesInUSD;
 
-    constructor(address _oracle) {
+    constructor(address _oracle, uint256[] memory _maxFeeLimits, uint256[] memory _minFeesInUSD) {
         if (_oracle == address(0)) {
             revert ZeroAddressNotValid();
+        }
+
+        if (_maxFeeLimits.length != 3 || _minFeesInUSD.length != 3) {
+            revert InvalidArrayLength();
         }
 
         oracle = IPriceOracle(_oracle);
 
         // Default max fees (basis points)
-        maxFeeLimits[FeeType.Deposit] = 500; // Max 5%
-        maxFeeLimits[FeeType.Withdraw] = 1000; // Max 10%
-        maxFeeLimits[FeeType.Reward] = 200; // Max 2%
+        maxFeeLimits[FeeType.Deposit] = _maxFeeLimits[0];
+        maxFeeLimits[FeeType.Withdraw] = _maxFeeLimits[1];
+        maxFeeLimits[FeeType.Reward] = _maxFeeLimits[2];
 
         // Default min fees in USD (18 decimals, e.g., 1e18 = $1)
-        minFeesInUSD[FeeType.Deposit] = 1e18; // $1
-        minFeesInUSD[FeeType.Withdraw] = 2e18; // $2
-        minFeesInUSD[FeeType.Reward] = 0.5e18; // $0.50
+        minFeesInUSD[FeeType.Deposit] = _minFeesInUSD[0]; // $1
+        minFeesInUSD[FeeType.Withdraw] = _minFeesInUSD[1]; // $2
+        minFeesInUSD[FeeType.Reward] = _minFeesInUSD[2]; // $0.50
     }
 
     function setFunctionFeeConfig(bytes4 _selector, FeeType _feeType, uint256 _feePercentage) external {

@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export { ICondition__factory } from "./ICondition__factory";
-export { IFeeManager__factory } from "./IFeeManager__factory";
-export { IInkwell__factory } from "./IInkwell__factory";
-export { IParameterCalculation__factory } from "./IParameterCalculation__factory";
+export { IFeeController__factory } from "./IFeeController__factory";
+export { IFeeHandler__factory } from "./IFeeHandler__factory";
+export { IPriceOracle__factory } from "./IPriceOracle__factory";
 export { IStrategyBuilderPlugin__factory } from "./IStrategyBuilderPlugin__factory";
-export { IStrategyBuilderStorage__factory } from "./IStrategyBuilderStorage__factory";
+export { ITokenGetter__factory } from "./ITokenGetter__factory";

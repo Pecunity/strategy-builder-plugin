@@ -193,25 +193,6 @@ export type UserOperationStructOutput = [
 };
 
 export declare namespace IStrategyBuilderPlugin {
-  export type ConditionStruct = {
-    conditionAddress: AddressLike;
-    id: BigNumberish;
-    result1: BigNumberish;
-    result0: BigNumberish;
-  };
-
-  export type ConditionStructOutput = [
-    conditionAddress: string,
-    id: bigint,
-    result1: bigint,
-    result0: bigint
-  ] & {
-    conditionAddress: string;
-    id: bigint;
-    result1: bigint;
-    result0: bigint;
-  };
-
   export type ActionStruct = {
     selector: BytesLike;
     parameter: BytesLike;
@@ -232,6 +213,25 @@ export declare namespace IStrategyBuilderPlugin {
     target: string;
     value: bigint;
     actionType: bigint;
+  };
+
+  export type ConditionStruct = {
+    conditionAddress: AddressLike;
+    id: BigNumberish;
+    result1: BigNumberish;
+    result0: BigNumberish;
+  };
+
+  export type ConditionStructOutput = [
+    conditionAddress: string,
+    id: bigint,
+    result1: bigint,
+    result0: bigint
+  ] & {
+    conditionAddress: string;
+    id: bigint;
+    result1: bigint;
+    result0: bigint;
   };
 
   export type StrategyStepStruct = {
@@ -286,14 +286,16 @@ export interface StrategyBuilderPluginInterface extends Interface {
       | "AUTHOR"
       | "NAME"
       | "VERSION"
-      | "activateAutomation"
-      | "addStrategy"
       | "automation"
+      | "createAutomation"
+      | "createStrategy"
       | "deleteAutomation"
       | "deleteStrategy"
       | "executeAutomation"
       | "executeStrategy"
-      | "feeManager"
+      | "feeController"
+      | "feeHandler"
+      | "getStorageId"
       | "onInstall"
       | "onUninstall"
       | "pluginManifest"
@@ -310,10 +312,11 @@ export interface StrategyBuilderPluginInterface extends Interface {
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "AutomationActivated"
+      | "ActionExecuted"
+      | "AutomationCreated"
       | "AutomationDeleted"
       | "AutomationExecuted"
-      | "StrategyAdded"
+      | "StrategyCreated"
       | "StrategyDeleted"
       | "StrategyExecuted"
       | "StrategyStepExecuted"
@@ -323,7 +326,11 @@ export interface StrategyBuilderPluginInterface extends Interface {
   encodeFunctionData(functionFragment: "NAME", values?: undefined): string;
   encodeFunctionData(functionFragment: "VERSION", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "activateAutomation",
+    functionFragment: "automation",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "createAutomation",
     values: [
       BigNumberish,
       BigNumberish,
@@ -333,16 +340,12 @@ export interface StrategyBuilderPluginInterface extends Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "addStrategy",
+    functionFragment: "createStrategy",
     values: [
       BigNumberish,
       AddressLike,
       IStrategyBuilderPlugin.StrategyStepStruct[]
     ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "automation",
-    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "deleteAutomation",
@@ -361,8 +364,16 @@ export interface StrategyBuilderPluginInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "feeManager",
+    functionFragment: "feeController",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "feeHandler",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getStorageId",
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "onInstall",
@@ -416,15 +427,15 @@ export interface StrategyBuilderPluginInterface extends Interface {
   decodeFunctionResult(functionFragment: "AUTHOR", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "NAME", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "VERSION", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "activateAutomation",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addStrategy",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "automation", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "createAutomation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "createStrategy",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "deleteAutomation",
     data: BytesLike
@@ -441,7 +452,15 @@ export interface StrategyBuilderPluginInterface extends Interface {
     functionFragment: "executeStrategy",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "feeManager", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "feeController",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "feeHandler", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getStorageId",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "onInstall", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "onUninstall",
@@ -486,8 +505,28 @@ export interface StrategyBuilderPluginInterface extends Interface {
   ): Result;
 }
 
-export namespace AutomationActivatedEvent {
+export namespace ActionExecutedEvent {
   export type InputTuple = [
+    wallet: AddressLike,
+    action: IStrategyBuilderPlugin.ActionStruct
+  ];
+  export type OutputTuple = [
+    wallet: string,
+    action: IStrategyBuilderPlugin.ActionStructOutput
+  ];
+  export interface OutputObject {
+    wallet: string;
+    action: IStrategyBuilderPlugin.ActionStructOutput;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace AutomationCreatedEvent {
+  export type InputTuple = [
+    wallet: AddressLike,
     automationId: BigNumberish,
     strategyId: BigNumberish,
     condition: IStrategyBuilderPlugin.ConditionStruct,
@@ -495,6 +534,7 @@ export namespace AutomationActivatedEvent {
     maxFeeAmount: BigNumberish
   ];
   export type OutputTuple = [
+    wallet: string,
     automationId: bigint,
     strategyId: bigint,
     condition: IStrategyBuilderPlugin.ConditionStructOutput,
@@ -502,6 +542,7 @@ export namespace AutomationActivatedEvent {
     maxFeeAmount: bigint
   ];
   export interface OutputObject {
+    wallet: string;
     automationId: bigint;
     strategyId: bigint;
     condition: IStrategyBuilderPlugin.ConditionStructOutput;
@@ -515,9 +556,10 @@ export namespace AutomationActivatedEvent {
 }
 
 export namespace AutomationDeletedEvent {
-  export type InputTuple = [automationId: BigNumberish];
-  export type OutputTuple = [automationId: bigint];
+  export type InputTuple = [wallet: AddressLike, automationId: BigNumberish];
+  export type OutputTuple = [wallet: string, automationId: bigint];
   export interface OutputObject {
+    wallet: string;
     automationId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -528,19 +570,25 @@ export namespace AutomationDeletedEvent {
 
 export namespace AutomationExecutedEvent {
   export type InputTuple = [
+    wallet: AddressLike,
     automationId: BigNumberish,
     paymentToken: AddressLike,
-    feeAmount: BigNumberish
+    feeInToken: BigNumberish,
+    feeInUSD: BigNumberish
   ];
   export type OutputTuple = [
+    wallet: string,
     automationId: bigint,
     paymentToken: string,
-    feeAmount: bigint
+    feeInToken: bigint,
+    feeInUSD: bigint
   ];
   export interface OutputObject {
+    wallet: string;
     automationId: bigint;
     paymentToken: string;
-    feeAmount: bigint;
+    feeInToken: bigint;
+    feeInUSD: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -548,18 +596,21 @@ export namespace AutomationExecutedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace StrategyAddedEvent {
+export namespace StrategyCreatedEvent {
   export type InputTuple = [
+    wallet: AddressLike,
     strategyId: BigNumberish,
     creator: AddressLike,
     strategy: IStrategyBuilderPlugin.StrategyStruct
   ];
   export type OutputTuple = [
+    wallet: string,
     strategyId: bigint,
     creator: string,
     strategy: IStrategyBuilderPlugin.StrategyStructOutput
   ];
   export interface OutputObject {
+    wallet: string;
     strategyId: bigint;
     creator: string;
     strategy: IStrategyBuilderPlugin.StrategyStructOutput;
@@ -571,9 +622,10 @@ export namespace StrategyAddedEvent {
 }
 
 export namespace StrategyDeletedEvent {
-  export type InputTuple = [strategyId: BigNumberish];
-  export type OutputTuple = [strategyId: bigint];
+  export type InputTuple = [wallet: AddressLike, strategyId: BigNumberish];
+  export type OutputTuple = [wallet: string, strategyId: bigint];
   export interface OutputObject {
+    wallet: string;
     strategyId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -583,9 +635,10 @@ export namespace StrategyDeletedEvent {
 }
 
 export namespace StrategyExecutedEvent {
-  export type InputTuple = [strategyId: BigNumberish];
-  export type OutputTuple = [strategyId: bigint];
+  export type InputTuple = [wallet: AddressLike, strategyId: BigNumberish];
+  export type OutputTuple = [wallet: string, strategyId: bigint];
   export interface OutputObject {
+    wallet: string;
     strategyId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -596,16 +649,19 @@ export namespace StrategyExecutedEvent {
 
 export namespace StrategyStepExecutedEvent {
   export type InputTuple = [
+    wallet: AddressLike,
     strategyId: BigNumberish,
     stepId: BigNumberish,
     actions: IStrategyBuilderPlugin.ActionStruct[]
   ];
   export type OutputTuple = [
+    wallet: string,
     strategyId: bigint,
     stepId: bigint,
     actions: IStrategyBuilderPlugin.ActionStructOutput[]
   ];
   export interface OutputObject {
+    wallet: string;
     strategyId: bigint;
     stepId: bigint;
     actions: IStrategyBuilderPlugin.ActionStructOutput[];
@@ -665,59 +721,63 @@ export interface StrategyBuilderPlugin extends BaseContract {
 
   VERSION: TypedContractMethod<[], [string], "view">;
 
-  activateAutomation: TypedContractMethod<
-    [
-      _id: BigNumberish,
-      _strategyId: BigNumberish,
-      _paymentToken: AddressLike,
-      _maxFeeAmount: BigNumberish,
-      _condition: IStrategyBuilderPlugin.ConditionStruct
-    ],
-    [void],
-    "nonpayable"
-  >;
-
-  addStrategy: TypedContractMethod<
-    [
-      _id: BigNumberish,
-      _creator: AddressLike,
-      _steps: IStrategyBuilderPlugin.StrategyStepStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-
   automation: TypedContractMethod<
-    [_wallet: AddressLike, _id: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish],
     [IStrategyBuilderPlugin.AutomationStructOutput],
     "view"
   >;
 
-  deleteAutomation: TypedContractMethod<
-    [_id: BigNumberish],
+  createAutomation: TypedContractMethod<
+    [
+      id: BigNumberish,
+      strategyId: BigNumberish,
+      paymentToken: AddressLike,
+      maxFeeInUSD: BigNumberish,
+      condition: IStrategyBuilderPlugin.ConditionStruct
+    ],
     [void],
     "nonpayable"
   >;
 
-  deleteStrategy: TypedContractMethod<
-    [_id: BigNumberish],
+  createStrategy: TypedContractMethod<
+    [
+      id: BigNumberish,
+      creator: AddressLike,
+      steps: IStrategyBuilderPlugin.StrategyStepStruct[]
+    ],
     [void],
     "nonpayable"
   >;
+
+  deleteAutomation: TypedContractMethod<
+    [id: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  deleteStrategy: TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
 
   executeAutomation: TypedContractMethod<
-    [_id: BigNumberish, _wallet: AddressLike, _beneficary: AddressLike],
+    [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
     [void],
     "nonpayable"
   >;
 
   executeStrategy: TypedContractMethod<
-    [_id: BigNumberish],
+    [id: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  feeManager: TypedContractMethod<[], [string], "view">;
+  feeController: TypedContractMethod<[], [string], "view">;
+
+  feeHandler: TypedContractMethod<[], [string], "view">;
+
+  getStorageId: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [string],
+    "view"
+  >;
 
   onInstall: TypedContractMethod<[arg0: BytesLike], [void], "view">;
 
@@ -777,7 +837,7 @@ export interface StrategyBuilderPlugin extends BaseContract {
   >;
 
   strategy: TypedContractMethod<
-    [_wallet: AddressLike, _id: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish],
     [IStrategyBuilderPlugin.StrategyStructOutput],
     "view"
   >;
@@ -812,55 +872,65 @@ export interface StrategyBuilderPlugin extends BaseContract {
     nameOrSignature: "VERSION"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "activateAutomation"
-  ): TypedContractMethod<
-    [
-      _id: BigNumberish,
-      _strategyId: BigNumberish,
-      _paymentToken: AddressLike,
-      _maxFeeAmount: BigNumberish,
-      _condition: IStrategyBuilderPlugin.ConditionStruct
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "addStrategy"
-  ): TypedContractMethod<
-    [
-      _id: BigNumberish,
-      _creator: AddressLike,
-      _steps: IStrategyBuilderPlugin.StrategyStepStruct[]
-    ],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
     nameOrSignature: "automation"
   ): TypedContractMethod<
-    [_wallet: AddressLike, _id: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish],
     [IStrategyBuilderPlugin.AutomationStructOutput],
     "view"
   >;
   getFunction(
+    nameOrSignature: "createAutomation"
+  ): TypedContractMethod<
+    [
+      id: BigNumberish,
+      strategyId: BigNumberish,
+      paymentToken: AddressLike,
+      maxFeeInUSD: BigNumberish,
+      condition: IStrategyBuilderPlugin.ConditionStruct
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "createStrategy"
+  ): TypedContractMethod<
+    [
+      id: BigNumberish,
+      creator: AddressLike,
+      steps: IStrategyBuilderPlugin.StrategyStepStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "deleteAutomation"
-  ): TypedContractMethod<[_id: BigNumberish], [void], "nonpayable">;
+  ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "deleteStrategy"
-  ): TypedContractMethod<[_id: BigNumberish], [void], "nonpayable">;
+  ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "executeAutomation"
   ): TypedContractMethod<
-    [_id: BigNumberish, _wallet: AddressLike, _beneficary: AddressLike],
+    [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
     [void],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "executeStrategy"
-  ): TypedContractMethod<[_id: BigNumberish], [void], "nonpayable">;
+  ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "feeManager"
+    nameOrSignature: "feeController"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "feeHandler"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getStorageId"
+  ): TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [string],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "onInstall"
   ): TypedContractMethod<[arg0: BytesLike], [void], "view">;
@@ -930,7 +1000,7 @@ export interface StrategyBuilderPlugin extends BaseContract {
   getFunction(
     nameOrSignature: "strategy"
   ): TypedContractMethod<
-    [_wallet: AddressLike, _id: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish],
     [IStrategyBuilderPlugin.StrategyStructOutput],
     "view"
   >;
@@ -950,11 +1020,18 @@ export interface StrategyBuilderPlugin extends BaseContract {
   >;
 
   getEvent(
-    key: "AutomationActivated"
+    key: "ActionExecuted"
   ): TypedContractEvent<
-    AutomationActivatedEvent.InputTuple,
-    AutomationActivatedEvent.OutputTuple,
-    AutomationActivatedEvent.OutputObject
+    ActionExecutedEvent.InputTuple,
+    ActionExecutedEvent.OutputTuple,
+    ActionExecutedEvent.OutputObject
+  >;
+  getEvent(
+    key: "AutomationCreated"
+  ): TypedContractEvent<
+    AutomationCreatedEvent.InputTuple,
+    AutomationCreatedEvent.OutputTuple,
+    AutomationCreatedEvent.OutputObject
   >;
   getEvent(
     key: "AutomationDeleted"
@@ -971,11 +1048,11 @@ export interface StrategyBuilderPlugin extends BaseContract {
     AutomationExecutedEvent.OutputObject
   >;
   getEvent(
-    key: "StrategyAdded"
+    key: "StrategyCreated"
   ): TypedContractEvent<
-    StrategyAddedEvent.InputTuple,
-    StrategyAddedEvent.OutputTuple,
-    StrategyAddedEvent.OutputObject
+    StrategyCreatedEvent.InputTuple,
+    StrategyCreatedEvent.OutputTuple,
+    StrategyCreatedEvent.OutputObject
   >;
   getEvent(
     key: "StrategyDeleted"
@@ -1000,18 +1077,29 @@ export interface StrategyBuilderPlugin extends BaseContract {
   >;
 
   filters: {
-    "AutomationActivated(uint16,uint16,tuple,address,uint256)": TypedContractEvent<
-      AutomationActivatedEvent.InputTuple,
-      AutomationActivatedEvent.OutputTuple,
-      AutomationActivatedEvent.OutputObject
+    "ActionExecuted(address,tuple)": TypedContractEvent<
+      ActionExecutedEvent.InputTuple,
+      ActionExecutedEvent.OutputTuple,
+      ActionExecutedEvent.OutputObject
     >;
-    AutomationActivated: TypedContractEvent<
-      AutomationActivatedEvent.InputTuple,
-      AutomationActivatedEvent.OutputTuple,
-      AutomationActivatedEvent.OutputObject
+    ActionExecuted: TypedContractEvent<
+      ActionExecutedEvent.InputTuple,
+      ActionExecutedEvent.OutputTuple,
+      ActionExecutedEvent.OutputObject
     >;
 
-    "AutomationDeleted(uint16)": TypedContractEvent<
+    "AutomationCreated(address,uint32,uint32,tuple,address,uint256)": TypedContractEvent<
+      AutomationCreatedEvent.InputTuple,
+      AutomationCreatedEvent.OutputTuple,
+      AutomationCreatedEvent.OutputObject
+    >;
+    AutomationCreated: TypedContractEvent<
+      AutomationCreatedEvent.InputTuple,
+      AutomationCreatedEvent.OutputTuple,
+      AutomationCreatedEvent.OutputObject
+    >;
+
+    "AutomationDeleted(address,uint32)": TypedContractEvent<
       AutomationDeletedEvent.InputTuple,
       AutomationDeletedEvent.OutputTuple,
       AutomationDeletedEvent.OutputObject
@@ -1022,7 +1110,7 @@ export interface StrategyBuilderPlugin extends BaseContract {
       AutomationDeletedEvent.OutputObject
     >;
 
-    "AutomationExecuted(uint16,address,uint256)": TypedContractEvent<
+    "AutomationExecuted(address,uint32,address,uint256,uint256)": TypedContractEvent<
       AutomationExecutedEvent.InputTuple,
       AutomationExecutedEvent.OutputTuple,
       AutomationExecutedEvent.OutputObject
@@ -1033,18 +1121,18 @@ export interface StrategyBuilderPlugin extends BaseContract {
       AutomationExecutedEvent.OutputObject
     >;
 
-    "StrategyAdded(uint16,address,tuple)": TypedContractEvent<
-      StrategyAddedEvent.InputTuple,
-      StrategyAddedEvent.OutputTuple,
-      StrategyAddedEvent.OutputObject
+    "StrategyCreated(address,uint32,address,tuple)": TypedContractEvent<
+      StrategyCreatedEvent.InputTuple,
+      StrategyCreatedEvent.OutputTuple,
+      StrategyCreatedEvent.OutputObject
     >;
-    StrategyAdded: TypedContractEvent<
-      StrategyAddedEvent.InputTuple,
-      StrategyAddedEvent.OutputTuple,
-      StrategyAddedEvent.OutputObject
+    StrategyCreated: TypedContractEvent<
+      StrategyCreatedEvent.InputTuple,
+      StrategyCreatedEvent.OutputTuple,
+      StrategyCreatedEvent.OutputObject
     >;
 
-    "StrategyDeleted(uint16)": TypedContractEvent<
+    "StrategyDeleted(address,uint32)": TypedContractEvent<
       StrategyDeletedEvent.InputTuple,
       StrategyDeletedEvent.OutputTuple,
       StrategyDeletedEvent.OutputObject
@@ -1055,7 +1143,7 @@ export interface StrategyBuilderPlugin extends BaseContract {
       StrategyDeletedEvent.OutputObject
     >;
 
-    "StrategyExecuted(uint16)": TypedContractEvent<
+    "StrategyExecuted(address,uint32)": TypedContractEvent<
       StrategyExecutedEvent.InputTuple,
       StrategyExecutedEvent.OutputTuple,
       StrategyExecutedEvent.OutputObject
@@ -1066,7 +1154,7 @@ export interface StrategyBuilderPlugin extends BaseContract {
       StrategyExecutedEvent.OutputObject
     >;
 
-    "StrategyStepExecuted(uint16,uint16,tuple[])": TypedContractEvent<
+    "StrategyStepExecuted(address,uint32,uint32,tuple[])": TypedContractEvent<
       StrategyStepExecutedEvent.InputTuple,
       StrategyStepExecutedEvent.OutputTuple,
       StrategyStepExecutedEvent.OutputObject

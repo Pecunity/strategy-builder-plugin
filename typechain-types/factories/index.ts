@@ -3,6 +3,7 @@
 /* eslint-disable */
 export * as aave from "./@aave";
 export * as openzeppelin from "./@openzeppelin";
+export * as pythnetwork from "./@pythnetwork";
 export * as uniswap from "./@uniswap";
 export * as modularAccountLibs from "./modular-account-libs";
 export * as src from "./src";

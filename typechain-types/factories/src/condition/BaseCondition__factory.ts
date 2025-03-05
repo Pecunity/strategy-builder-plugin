@@ -22,14 +22,14 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "action",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "actionValid",
@@ -46,14 +46,14 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "action",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "addAutomationToCondition",
@@ -70,14 +70,14 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "strategy",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "addStrategyToCondition",
@@ -99,17 +99,17 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "automations",
     outputs: [
       {
-        internalType: "uint16[]",
+        internalType: "uint32[]",
         name: "",
-        type: "uint16[]",
+        type: "uint32[]",
       },
     ],
     stateMutability: "view",
@@ -123,9 +123,9 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "checkCondition",
@@ -147,9 +147,9 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "_id",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "conditionActive",
@@ -166,9 +166,9 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "_id",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "deleteCondition",
@@ -184,9 +184,9 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "isUpdateable",
@@ -203,14 +203,14 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "automation",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "removeAutomationFromCondition",
@@ -227,14 +227,14 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "strategy",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "removeStrategyFromCondition",
@@ -256,17 +256,17 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "strategies",
     outputs: [
       {
-        internalType: "uint16[]",
+        internalType: "uint32[]",
         name: "",
-        type: "uint16[]",
+        type: "uint32[]",
       },
     ],
     stateMutability: "view",
@@ -280,14 +280,14 @@ const _abi = [
         type: "address",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "id",
-        type: "uint16",
+        type: "uint32",
       },
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "strategy",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "strategyValid",
@@ -304,9 +304,9 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint16",
+        internalType: "uint32",
         name: "",
-        type: "uint16",
+        type: "uint32",
       },
     ],
     name: "updateCondition",

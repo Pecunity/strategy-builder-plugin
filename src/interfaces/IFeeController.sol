@@ -17,6 +17,7 @@ interface IFeeController {
     error ZeroAddressNotValid();
     error NoOracleExist();
     error InvalidTokenWithPriceOfZero();
+    error InvalidArrayLength();
 
     event FeeConfigSet(bytes4 indexed selector, FeeType feeType, uint256 feePercentage);
     event TokenGetterSet(address indexed target, bytes4 indexed selector, address tokenGetter);

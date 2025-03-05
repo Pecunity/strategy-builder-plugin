@@ -495,7 +495,7 @@ export interface TimeCondition extends BaseContract {
   >;
 
   filters: {
-    "ConditionAdded(uint16,address,tuple)": TypedContractEvent<
+    "ConditionAdded(uint32,address,tuple)": TypedContractEvent<
       ConditionAddedEvent.InputTuple,
       ConditionAddedEvent.OutputTuple,
       ConditionAddedEvent.OutputObject
@@ -506,7 +506,7 @@ export interface TimeCondition extends BaseContract {
       ConditionAddedEvent.OutputObject
     >;
 
-    "ConditionDeleted(uint16,address)": TypedContractEvent<
+    "ConditionDeleted(uint32,address)": TypedContractEvent<
       ConditionDeletedEvent.InputTuple,
       ConditionDeletedEvent.OutputTuple,
       ConditionDeletedEvent.OutputObject
@@ -517,7 +517,7 @@ export interface TimeCondition extends BaseContract {
       ConditionDeletedEvent.OutputObject
     >;
 
-    "ConditionUpdated(uint16,address,uint256)": TypedContractEvent<
+    "ConditionUpdated(uint32,address,uint256)": TypedContractEvent<
       ConditionUpdatedEvent.InputTuple,
       ConditionUpdatedEvent.OutputTuple,
       ConditionUpdatedEvent.OutputObject

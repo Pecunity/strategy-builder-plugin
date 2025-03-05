@@ -14,13 +14,16 @@ contract FeeControllerTest is Test {
     address public BAD_ACTOR = makeAddr("bad-actor");
     address public ORACLE = makeAddr("oracle");
 
+    uint256[] public maxFeeLimits = [500, 1000, 200];
+    uint256[] public minFeesInUSD = [1e18, 2e18, 0.5e18];
+
     function setUp() external {
         vm.prank(OWNER);
-        controller = new FeeController(ORACLE);
+        controller = new FeeController(ORACLE,maxFeeLimits,minFeesInUSD);
     }
 
     function test_deployment_Success() external {
-        FeeController _newController = new FeeController(ORACLE);
+        FeeController _newController = new FeeController(ORACLE,maxFeeLimits,minFeesInUSD);
 
         assertEq(_newController.priceOracle(), ORACLE);
 
@@ -31,7 +34,7 @@ contract FeeControllerTest is Test {
 
     function test_deployment_OracleZeroAddress() external {
         vm.expectRevert(IFeeController.ZeroAddressNotValid.selector);
-        new FeeController(address(0));
+        new FeeController(address(0),maxFeeLimits,minFeesInUSD);
     }
 
     function test_setFunctionFeeConfig_Success(bytes4 _selector) external {
