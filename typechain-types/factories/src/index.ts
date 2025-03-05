@@ -5,5 +5,7 @@ export * as actions from "./actions";
 export * as condition from "./condition";
 export * as interfaces from "./interfaces";
 export * as test from "./test";
+export { FeeController__factory } from "./FeeController__factory";
+export { FeeHandler__factory } from "./FeeHandler__factory";
+export { PriceOracle__factory } from "./PriceOracle__factory";
 export { StrategyBuilderPlugin__factory } from "./StrategyBuilderPlugin__factory";
-export { StrategyBuilderStorage__factory } from "./StrategyBuilderStorage__factory";

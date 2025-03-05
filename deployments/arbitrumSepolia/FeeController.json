@@ -1,0 +1,602 @@
+{
+  "address": "0x63D11999a31A5903D4025818534B5903c46CFB12",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_oracle",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_maxFeeLimits",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "_minFeesInUSD",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "FeePercentageExceedLimit",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidArrayLength",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidTokenWithPriceOfZero",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoOracleExist",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroAddressNotValid",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        },
+        {
+          "indexed": false,
+          "internalType": "enum IFeeController.FeeType",
+          "name": "feeType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "feePercentage",
+          "type": "uint256"
+        }
+      ],
+      "name": "FeeConfigSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tokenGetter",
+          "type": "address"
+        }
+      ],
+      "name": "GlobalTokenGetterSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "enum IFeeController.FeeType",
+          "name": "feeType",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "minFeeUSD",
+          "type": "uint256"
+        }
+      ],
+      "name": "MinFeeSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "target",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tokenGetter",
+          "type": "address"
+        }
+      ],
+      "name": "TokenGetterSet",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "PERCENTAGE_DIVISOR",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_volume",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "feeInUSD",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateTokenAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "functionFeeConfig",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "enum IFeeController.FeeType",
+              "name": "feeType",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "feePercentage",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct IFeeController.FeeConfig",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_params",
+          "type": "bytes"
+        }
+      ],
+      "name": "getTokenForAction",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "name": "hasOracle",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum IFeeController.FeeType",
+          "name": "_type",
+          "type": "uint8"
+        }
+      ],
+      "name": "maxFeeLimit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "enum IFeeController.FeeType",
+          "name": "_type",
+          "type": "uint8"
+        }
+      ],
+      "name": "minFeeInUSD",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "priceOracle",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "enum IFeeController.FeeType",
+          "name": "_feeType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_feePercentage",
+          "type": "uint256"
+        }
+      ],
+      "name": "setFunctionFeeConfig",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenGetter",
+          "type": "address"
+        }
+      ],
+      "name": "setGlobalTokenGetter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        },
+        {
+          "internalType": "address",
+          "name": "_tokenGetter",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_target",
+          "type": "address"
+        }
+      ],
+      "name": "setTokenGetter",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_target",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes4",
+          "name": "_selector",
+          "type": "bytes4"
+        }
+      ],
+      "name": "tokenGetter",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xda5c3e7ab9b28c86518d82167477995d3d405f6fc77db7ace8ac1da3ae0ea907",
+  "receipt": {
+    "to": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "from": "0x36375828fd821935cFf3E8AB6322cAb54BBfaDeC",
+    "contractAddress": null,
+    "transactionIndex": 1,
+    "gasUsed": "1841826",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xd089d47866dd2d97ab65859b4f6049f29c93d5920abefbba8d7b6d8b4e019450",
+    "transactionHash": "0xda5c3e7ab9b28c86518d82167477995d3d405f6fc77db7ace8ac1da3ae0ea907",
+    "logs": [],
+    "blockNumber": 129554267,
+    "cumulativeGasUsed": "1841826",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xa4F35769F25fde686124894920544515aab8de3A",
+    [
+      500,
+      1000,
+      200
+    ],
+    [
+      "1000000000000000000",
+      "2000000000000000000",
+      "500000000000000000"
+    ]
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "4b77b1615366c5fedbc67911183a0195",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_oracle\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"_maxFeeLimits\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"_minFeesInUSD\",\"type\":\"uint256[]\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"FeePercentageExceedLimit\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidArrayLength\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidTokenWithPriceOfZero\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NoOracleExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddressNotValid\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"enum IFeeController.FeeType\",\"name\":\"feeType\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"feePercentage\",\"type\":\"uint256\"}],\"name\":\"FeeConfigSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenGetter\",\"type\":\"address\"}],\"name\":\"GlobalTokenGetterSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"enum IFeeController.FeeType\",\"name\":\"feeType\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"minFeeUSD\",\"type\":\"uint256\"}],\"name\":\"MinFeeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes4\",\"name\":\"selector\",\"type\":\"bytes4\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenGetter\",\"type\":\"address\"}],\"name\":\"TokenGetterSet\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"PERCENTAGE_DIVISOR\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"},{\"internalType\":\"uint256\",\"name\":\"_volume\",\"type\":\"uint256\"}],\"name\":\"calculateFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"feeInUSD\",\"type\":\"uint256\"}],\"name\":\"calculateTokenAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"functionFeeConfig\",\"outputs\":[{\"components\":[{\"internalType\":\"enum IFeeController.FeeType\",\"name\":\"feeType\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"feePercentage\",\"type\":\"uint256\"}],\"internalType\":\"struct IFeeController.FeeConfig\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_target\",\"type\":\"address\"},{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"},{\"internalType\":\"bytes\",\"name\":\"_params\",\"type\":\"bytes\"}],\"name\":\"getTokenForAction\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"hasOracle\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum IFeeController.FeeType\",\"name\":\"_type\",\"type\":\"uint8\"}],\"name\":\"maxFeeLimit\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"enum IFeeController.FeeType\",\"name\":\"_type\",\"type\":\"uint8\"}],\"name\":\"minFeeInUSD\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"priceOracle\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"},{\"internalType\":\"enum IFeeController.FeeType\",\"name\":\"_feeType\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"_feePercentage\",\"type\":\"uint256\"}],\"name\":\"setFunctionFeeConfig\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"},{\"internalType\":\"address\",\"name\":\"_tokenGetter\",\"type\":\"address\"}],\"name\":\"setGlobalTokenGetter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"},{\"internalType\":\"address\",\"name\":\"_tokenGetter\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_target\",\"type\":\"address\"}],\"name\":\"setTokenGetter\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_target\",\"type\":\"address\"},{\"internalType\":\"bytes4\",\"name\":\"_selector\",\"type\":\"bytes4\"}],\"name\":\"tokenGetter\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/FeeController.sol\":\"FeeController\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"src/FeeController.sol\":{\"content\":\"// SPDX-License-Identifier:MIT\\npragma solidity ^0.8.19;\\n\\nimport {IFeeController} from \\\"./interfaces/IFeeController.sol\\\";\\nimport {ITokenGetter} from \\\"./interfaces/ITokenGetter.sol\\\";\\nimport {IPriceOracle} from \\\"./interfaces/IPriceOracle.sol\\\";\\n\\ncontract FeeController is IFeeController {\\n    uint256 public constant PERCENTAGE_DIVISOR = 10000;\\n\\n    IPriceOracle private oracle;\\n\\n    // Mapping: function selector => FeeConfig\\n    mapping(bytes4 => FeeConfig) private functionFeeConfigs;\\n    // Mapping: target contract => function selector => token getter contract (specific)\\n    mapping(address => mapping(bytes4 => address)) private tokenGetters;\\n    // Mapping: function selector => token getter contract (global fallback)\\n    mapping(bytes4 => address) private globalTokenGetters;\\n    // Mapping: FeeType => Maximum allowed fee percentage\\n    mapping(FeeType => uint256) private maxFeeLimits;\\n    // Mapping: FeeType => Minimum fee in USD (18 decimals)\\n    mapping(FeeType => uint256) private minFeesInUSD;\\n\\n    constructor(address _oracle, uint256[] memory _maxFeeLimits, uint256[] memory _minFeesInUSD) {\\n        if (_oracle == address(0)) {\\n            revert ZeroAddressNotValid();\\n        }\\n\\n        if (_maxFeeLimits.length != 3 || _minFeesInUSD.length != 3) {\\n            revert InvalidArrayLength();\\n        }\\n\\n        oracle = IPriceOracle(_oracle);\\n\\n        // Default max fees (basis points)\\n        maxFeeLimits[FeeType.Deposit] = _maxFeeLimits[0];\\n        maxFeeLimits[FeeType.Withdraw] = _maxFeeLimits[1];\\n        maxFeeLimits[FeeType.Reward] = _maxFeeLimits[2];\\n\\n        // Default min fees in USD (18 decimals, e.g., 1e18 = $1)\\n        minFeesInUSD[FeeType.Deposit] = _minFeesInUSD[0]; // $1\\n        minFeesInUSD[FeeType.Withdraw] = _minFeesInUSD[1]; // $2\\n        minFeesInUSD[FeeType.Reward] = _minFeesInUSD[2]; // $0.50\\n    }\\n\\n    function setFunctionFeeConfig(bytes4 _selector, FeeType _feeType, uint256 _feePercentage) external {\\n        if (_feePercentage > maxFeeLimits[_feeType]) {\\n            revert FeePercentageExceedLimit();\\n        }\\n\\n        functionFeeConfigs[_selector] = FeeConfig(_feeType, _feePercentage);\\n\\n        emit FeeConfigSet(_selector, _feeType, _feePercentage);\\n    }\\n\\n    function setTokenGetter(bytes4 _selector, address _tokenGetter, address _target) external {\\n        if (_target == address(0) || _tokenGetter == address(0)) {\\n            revert ZeroAddressNotValid();\\n        }\\n\\n        tokenGetters[_target][_selector] = _tokenGetter;\\n        emit TokenGetterSet(_target, _selector, _tokenGetter);\\n    }\\n\\n    function setGlobalTokenGetter(bytes4 _selector, address _tokenGetter) external {\\n        if (_tokenGetter == address(0)) {\\n            revert ZeroAddressNotValid();\\n        }\\n\\n        globalTokenGetters[_selector] = _tokenGetter;\\n        emit GlobalTokenGetterSet(_selector, _tokenGetter);\\n    }\\n\\n    function calculateFee(address _token, bytes4 _selector, uint256 _volume) external view returns (uint256) {\\n        bytes32 _oracleID = oracle.oracleID(_token);\\n        FeeConfig memory _config = functionFeeConfigs[_selector];\\n\\n        uint256 _minFeeInUSD = minFeesInUSD[_config.feeType];\\n\\n        if (_oracleID == bytes32(0) || _config.feePercentage == 0) {\\n            return _minFeeInUSD;\\n        }\\n\\n        uint256 _tokenPrice = oracle.getTokenPrice(_token);\\n\\n        uint256 _feeAmount = _volume * _config.feePercentage / PERCENTAGE_DIVISOR;\\n        uint256 _feeInUSD = _feeAmount * _tokenPrice / 10 ** 18;\\n\\n        return _feeInUSD < _minFeeInUSD ? _minFeeInUSD : _feeInUSD;\\n    }\\n\\n    function calculateTokenAmount(address token, uint256 feeInUSD) external view returns (uint256) {\\n        bytes32 oracleID = oracle.oracleID(token);\\n\\n        if (oracleID == bytes32(0)) {\\n            revert NoOracleExist();\\n        }\\n\\n        uint256 tokenPrice = oracle.getTokenPrice(token);\\n\\n        if (tokenPrice == 0) {\\n            revert InvalidTokenWithPriceOfZero();\\n        }\\n\\n        return feeInUSD * 10 ** 18 / tokenPrice;\\n    }\\n\\n    function getTokenForAction(address _target, bytes4 _selector, bytes memory _params)\\n        external\\n        view\\n        returns (address, bool)\\n    {\\n        address _tokenGetter = tokenGetter(_target, _selector);\\n\\n        if (_tokenGetter == address(0)) {\\n            return (address(0), false);\\n        }\\n\\n        address _token = ITokenGetter(_tokenGetter).getTokenForSelector(_selector, _params);\\n\\n        return (_token, true);\\n    }\\n\\n    function tokenGetter(address _target, bytes4 _selector) public view returns (address) {\\n        address _tokenGetter = tokenGetters[_target][_selector];\\n\\n        if (_tokenGetter == address(0)) {\\n            _tokenGetter = globalTokenGetters[_selector];\\n        }\\n\\n        return _tokenGetter;\\n    }\\n\\n    function functionFeeConfig(bytes4 _selector) external view returns (FeeConfig memory) {\\n        return functionFeeConfigs[_selector];\\n    }\\n\\n    function maxFeeLimit(FeeType _type) external view returns (uint256) {\\n        return maxFeeLimits[_type];\\n    }\\n\\n    function minFeeInUSD(FeeType _type) external view returns (uint256) {\\n        return minFeesInUSD[_type];\\n    }\\n\\n    function priceOracle() external view returns (address) {\\n        return address(oracle);\\n    }\\n\\n    function hasOracle(address token) external view returns (bool) {\\n        return oracle.oracleID(token) != bytes32(0);\\n    }\\n}\\n\",\"keccak256\":\"0x8dca1cfedb2ed68fc2278da1c1126168204552b95df7ae2ba0c0b227d0e092be\",\"license\":\"MIT\"},\"src/interfaces/IFeeController.sol\":{\"content\":\"// SPDX-License-Identifier:MIT\\npragma solidity ^0.8.19;\\n\\ninterface IFeeController {\\n    enum FeeType {\\n        Deposit,\\n        Withdraw,\\n        Reward\\n    }\\n\\n    struct FeeConfig {\\n        FeeType feeType;\\n        uint256 feePercentage; // e.g., 100 = 1% (basis points)\\n    }\\n\\n    error FeePercentageExceedLimit();\\n    error ZeroAddressNotValid();\\n    error NoOracleExist();\\n    error InvalidTokenWithPriceOfZero();\\n    error InvalidArrayLength();\\n\\n    event FeeConfigSet(bytes4 indexed selector, FeeType feeType, uint256 feePercentage);\\n    event TokenGetterSet(address indexed target, bytes4 indexed selector, address tokenGetter);\\n    event GlobalTokenGetterSet(bytes4 indexed selector, address tokenGetter);\\n    event MinFeeSet(FeeType feeType, uint256 minFeeUSD);\\n\\n    function setFunctionFeeConfig(bytes4 _selector, FeeType _feeType, uint256 _feePercentage) external;\\n\\n    function getTokenForAction(address _target, bytes4 _selector, bytes memory _params)\\n        external\\n        view\\n        returns (address, bool);\\n    function calculateFee(address _token, bytes4 _selector, uint256 _volume) external view returns (uint256);\\n    function calculateTokenAmount(address token, uint256 feeInUSD) external view returns (uint256);\\n    function functionFeeConfig(bytes4 _selector) external view returns (FeeConfig memory);\\n    function maxFeeLimit(FeeType _type) external view returns (uint256);\\n    function minFeeInUSD(FeeType _type) external view returns (uint256);\\n    function hasOracle(address token) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x6c531a60fb5e40fc5eb34e51f048d723aa1d8cc5ec36e3ea545f9927c604e86b\",\"license\":\"MIT\"},\"src/interfaces/IPriceOracle.sol\":{\"content\":\"// SPDX-License-Identifier:MIT\\npragma solidity ^0.8.19;\\n\\ninterface IPriceOracle {\\n    error OracleNotExist(address token);\\n    error NegativePriceNotAllowed();\\n\\n    event OracleSet(address indexed token, bytes32 oracleID);\\n\\n    function setOracleID(address _token, bytes32 _oracleID) external;\\n    function oracleID(address _token) external view returns (bytes32);\\n    function getTokenPrice(address _token) external view returns (uint256);\\n}\\n\",\"keccak256\":\"0x509aeb14324ce759ad4a41be87a306200d53ba05b23afb111dec31ebe1109420\",\"license\":\"MIT\"},\"src/interfaces/ITokenGetter.sol\":{\"content\":\"// SPDX-License-Identifier:MIT\\npragma solidity ^0.8.19;\\n\\ninterface ITokenGetter {\\n    function getTokenForSelector(bytes4 selector, bytes memory params) external view returns (address);\\n}\\n\",\"keccak256\":\"0x2b6a642f4ad7113336ff3009d7ad8c6e850ad3acfb7d72c3b26b1438fa39d8be\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60806040523480156200001157600080fd5b50604051620012d6380380620012d683398101604081905262000034916200039e565b6001600160a01b0383166200005c57604051633bf95ba760e01b815260040160405180910390fd5b815160031415806200007057508051600314155b156200008f57604051634ec4810560e11b815260040160405180910390fd5b600080546001600160a01b0319166001600160a01b0385161781558251839190620000be57620000be62000428565b602002602001015160046000806002811115620000df57620000df6200043e565b6002811115620000f357620000f36200043e565b815260200190815260200160002081905550816001815181106200011b576200011b62000428565b602002602001015160046000600160028111156200013d576200013d6200043e565b60028111156200015157620001516200043e565b8152602001908152602001600020819055508160028151811062000179576200017962000428565b6020026020010151600460006002808111156200019a576200019a6200043e565b6002811115620001ae57620001ae6200043e565b81526020019081526020016000208190555080600081518110620001d657620001d662000428565b602002602001015160056000806002811115620001f757620001f76200043e565b60028111156200020b576200020b6200043e565b8152602001908152602001600020819055508060018151811062000233576200023362000428565b602002602001015160056000600160028111156200025557620002556200043e565b60028111156200026957620002696200043e565b8152602001908152602001600020819055508060028151811062000291576200029162000428565b602002602001015160056000600280811115620002b257620002b26200043e565b6002811115620002c657620002c66200043e565b81526020019081526020016000208190555050505062000454565b634e487b7160e01b600052604160045260246000fd5b600082601f8301126200030957600080fd5b815160206001600160401b0380831115620003285762000328620002e1565b8260051b604051601f19603f83011681018181108482111715620003505762000350620002e1565b60405293845260208187018101949081019250878511156200037157600080fd5b6020870191505b84821015620003935781518352918301919083019062000378565b979650505050505050565b600080600060608486031215620003b457600080fd5b83516001600160a01b0381168114620003cc57600080fd5b60208501519093506001600160401b0380821115620003ea57600080fd5b620003f887838801620002f7565b935060408601519150808211156200040f57600080fd5b506200041e86828701620002f7565b9150509250925092565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052602160045260246000fd5b610e7280620004646000396000f3fe608060405234801561001057600080fd5b50600436106100ce5760003560e01c806334dcc7971161008c578063caf2976511610066578063caf29765146101d4578063d659e5d1146101dd578063f25be753146101fd578063f6d0e6401461021057600080fd5b806334dcc7971461017c5780638b33fc99146101ae578063aac61a1f146101c157600080fd5b806278b21d146100d35780630ebcbf27146100e857806315d4ba4f146100fb578063180c93091461010e5780632630c12f1461013657806326bf18f71461015b575b600080fd5b6100e66100e1366004610a54565b610223565b005b6100e66100f6366004610aac565b6102d9565b6100e6610109366004610ae8565b6103ee565b61012161011c366004610b1f565b610482565b60405190151581526020015b60405180910390f35b6000546001600160a01b03165b6040516001600160a01b03909116815260200161012d565b61016e610169366004610b3c565b6104f9565b60405190815260200161012d565b61018f61018a366004610b6d565b610538565b604080516001600160a01b03909316835290151560208301520161012d565b61016e6101bc366004610b3c565b6105e7565b61016e6101cf366004610c41565b6105ff565b61016e61271081565b6101f06101eb366004610c6d565b610748565b60405161012d9190610cc0565b61016e61020b366004610ce1565b6107bd565b61014361021e366004610d0f565b6109bf565b6001600160a01b038116158061024057506001600160a01b038216155b1561025e57604051633bf95ba760e01b815260040160405180910390fd5b6001600160a01b0381811660008181526002602090815260408083206001600160e01b031989168085529083529281902080546001600160a01b03191695881695861790555193845290927f3663e8364574850f7532d60f4cf1e49cdd0cef2fba915d7fc69105065077ac27910160405180910390a3505050565b600460008360028111156102ef576102ef610c88565b600281111561030057610300610c88565b81526020019081526020016000205481111561032f576040516333791c4b60e01b815260040160405180910390fd5b604051806040016040528083600281111561034c5761034c610c88565b815260209081018390526001600160e01b031985166000908152600191829052604090208251815491929091839160ff199091169083600281111561039357610393610c88565b021790555060208201518160010155905050826001600160e01b0319167f2581c9349512cebfda9236be97ce4458f7d8bd3a3542e9f446171386da6eccb683836040516103e1929190610d44565b60405180910390a2505050565b6001600160a01b03811661041557604051633bf95ba760e01b815260040160405180910390fd5b6001600160e01b0319821660008181526003602090815260409182902080546001600160a01b0319166001600160a01b03861690811790915591519182527f87210db1bc43a1a253ff34bda9b3c3a0de6546212bc35b7ba69e64bbd34e5caa910160405180910390a25050565b6000805460405163831cf43d60e01b81526001600160a01b0384811660048301528392169063831cf43d90602401602060405180830381865afa1580156104cd573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104f19190610d5f565b141592915050565b60006004600083600281111561051157610511610c88565b600281111561052257610522610c88565b8152602001908152602001600020549050919050565b600080600061054786866109bf565b90506001600160a01b0381166105645760008092509250506105df565b604051635581161b60e01b81526000906001600160a01b03831690635581161b906105959089908990600401610d78565b602060405180830381865afa1580156105b2573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105d69190610dd8565b93506001925050505b935093915050565b60006005600083600281111561051157610511610c88565b6000805460405163831cf43d60e01b81526001600160a01b0385811660048301528392169063831cf43d90602401602060405180830381865afa15801561064a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061066e9190610d5f565b90508061068e57604051635164ad9b60e11b815260040160405180910390fd5b60008054604051630681320d60e51b81526001600160a01b0387811660048301529091169063d02641a090602401602060405180830381865afa1580156106d9573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106fd9190610d5f565b905080600003610720576040516332c89c1360e21b815260040160405180910390fd5b8061073385670de0b6b3a7640000610df5565b61073d9190610e1a565b925050505b92915050565b60408051808201909152600080825260208201526001600160e01b031982166000908152600160205260409081902081518083019092528054829060ff16600281111561079757610797610c88565b60028111156107a8576107a8610c88565b81526020016001820154815250509050919050565b6000805460405163831cf43d60e01b81526001600160a01b0386811660048301528392169063831cf43d90602401602060405180830381865afa158015610808573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061082c9190610d5f565b6001600160e01b03198516600090815260016020526040808220815180830190925280549394509192909190829060ff16600281111561086e5761086e610c88565b600281111561087f5761087f610c88565b81526020016001820154815250509050600060056000836000015160028111156108ab576108ab610c88565b60028111156108bc576108bc610c88565b815260208101919091526040016000205490508215806108de57506020820151155b156108ed5792506109b8915050565b60008054604051630681320d60e51b81526001600160a01b038a811660048301529091169063d02641a090602401602060405180830381865afa158015610938573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061095c9190610d5f565b905060006127108460200151886109739190610df5565b61097d9190610e1a565b90506000670de0b6b3a76400006109948484610df5565b61099e9190610e1a565b90508381106109ad57806109af565b835b96505050505050505b9392505050565b6001600160a01b0380831660009081526002602090815260408083206001600160e01b031986168452909152812054909116806109b85750506001600160e01b0319166000908152600360205260409020546001600160a01b0316919050565b80356001600160e01b031981168114610a3757600080fd5b919050565b6001600160a01b0381168114610a5157600080fd5b50565b600080600060608486031215610a6957600080fd5b610a7284610a1f565b92506020840135610a8281610a3c565b91506040840135610a9281610a3c565b809150509250925092565b803560038110610a3757600080fd5b600080600060608486031215610ac157600080fd5b610aca84610a1f565b9250610ad860208501610a9d565b9150604084013590509250925092565b60008060408385031215610afb57600080fd5b610b0483610a1f565b91506020830135610b1481610a3c565b809150509250929050565b600060208284031215610b3157600080fd5b81356109b881610a3c565b600060208284031215610b4e57600080fd5b6109b882610a9d565b634e487b7160e01b600052604160045260246000fd5b600080600060608486031215610b8257600080fd5b8335610b8d81610a3c565b9250610b9b60208501610a1f565b9150604084013567ffffffffffffffff80821115610bb857600080fd5b818601915086601f830112610bcc57600080fd5b813581811115610bde57610bde610b57565b604051601f8201601f19908116603f01168101908382118183101715610c0657610c06610b57565b81604052828152896020848701011115610c1f57600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b60008060408385031215610c5457600080fd5b8235610c5f81610a3c565b946020939093013593505050565b600060208284031215610c7f57600080fd5b6109b882610a1f565b634e487b7160e01b600052602160045260246000fd5b60038110610cbc57634e487b7160e01b600052602160045260246000fd5b9052565b6000604082019050610cd3828451610c9e565b602092830151919092015290565b600080600060608486031215610cf657600080fd5b8335610d0181610a3c565b9250610ad860208501610a1f565b60008060408385031215610d2257600080fd5b8235610d2d81610a3c565b9150610d3b60208401610a1f565b90509250929050565b60408101610d528285610c9e565b8260208301529392505050565b600060208284031215610d7157600080fd5b5051919050565b63ffffffff60e01b831681526000602060406020840152835180604085015260005b81811015610db657858101830151858201606001528201610d9a565b506000606082860101526060601f19601f830116850101925050509392505050565b600060208284031215610dea57600080fd5b81516109b881610a3c565b808202811582820484141761074257634e487b7160e01b600052601160045260246000fd5b600082610e3757634e487b7160e01b600052601260045260246000fd5b50049056fea2646970667358221220443e8e545676c417e276debef3ea76893a62c31cbb38c226948e1b9271b5a3e864736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100ce5760003560e01c806334dcc7971161008c578063caf2976511610066578063caf29765146101d4578063d659e5d1146101dd578063f25be753146101fd578063f6d0e6401461021057600080fd5b806334dcc7971461017c5780638b33fc99146101ae578063aac61a1f146101c157600080fd5b806278b21d146100d35780630ebcbf27146100e857806315d4ba4f146100fb578063180c93091461010e5780632630c12f1461013657806326bf18f71461015b575b600080fd5b6100e66100e1366004610a54565b610223565b005b6100e66100f6366004610aac565b6102d9565b6100e6610109366004610ae8565b6103ee565b61012161011c366004610b1f565b610482565b60405190151581526020015b60405180910390f35b6000546001600160a01b03165b6040516001600160a01b03909116815260200161012d565b61016e610169366004610b3c565b6104f9565b60405190815260200161012d565b61018f61018a366004610b6d565b610538565b604080516001600160a01b03909316835290151560208301520161012d565b61016e6101bc366004610b3c565b6105e7565b61016e6101cf366004610c41565b6105ff565b61016e61271081565b6101f06101eb366004610c6d565b610748565b60405161012d9190610cc0565b61016e61020b366004610ce1565b6107bd565b61014361021e366004610d0f565b6109bf565b6001600160a01b038116158061024057506001600160a01b038216155b1561025e57604051633bf95ba760e01b815260040160405180910390fd5b6001600160a01b0381811660008181526002602090815260408083206001600160e01b031989168085529083529281902080546001600160a01b03191695881695861790555193845290927f3663e8364574850f7532d60f4cf1e49cdd0cef2fba915d7fc69105065077ac27910160405180910390a3505050565b600460008360028111156102ef576102ef610c88565b600281111561030057610300610c88565b81526020019081526020016000205481111561032f576040516333791c4b60e01b815260040160405180910390fd5b604051806040016040528083600281111561034c5761034c610c88565b815260209081018390526001600160e01b031985166000908152600191829052604090208251815491929091839160ff199091169083600281111561039357610393610c88565b021790555060208201518160010155905050826001600160e01b0319167f2581c9349512cebfda9236be97ce4458f7d8bd3a3542e9f446171386da6eccb683836040516103e1929190610d44565b60405180910390a2505050565b6001600160a01b03811661041557604051633bf95ba760e01b815260040160405180910390fd5b6001600160e01b0319821660008181526003602090815260409182902080546001600160a01b0319166001600160a01b03861690811790915591519182527f87210db1bc43a1a253ff34bda9b3c3a0de6546212bc35b7ba69e64bbd34e5caa910160405180910390a25050565b6000805460405163831cf43d60e01b81526001600160a01b0384811660048301528392169063831cf43d90602401602060405180830381865afa1580156104cd573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906104f19190610d5f565b141592915050565b60006004600083600281111561051157610511610c88565b600281111561052257610522610c88565b8152602001908152602001600020549050919050565b600080600061054786866109bf565b90506001600160a01b0381166105645760008092509250506105df565b604051635581161b60e01b81526000906001600160a01b03831690635581161b906105959089908990600401610d78565b602060405180830381865afa1580156105b2573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906105d69190610dd8565b93506001925050505b935093915050565b60006005600083600281111561051157610511610c88565b6000805460405163831cf43d60e01b81526001600160a01b0385811660048301528392169063831cf43d90602401602060405180830381865afa15801561064a573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061066e9190610d5f565b90508061068e57604051635164ad9b60e11b815260040160405180910390fd5b60008054604051630681320d60e51b81526001600160a01b0387811660048301529091169063d02641a090602401602060405180830381865afa1580156106d9573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906106fd9190610d5f565b905080600003610720576040516332c89c1360e21b815260040160405180910390fd5b8061073385670de0b6b3a7640000610df5565b61073d9190610e1a565b925050505b92915050565b60408051808201909152600080825260208201526001600160e01b031982166000908152600160205260409081902081518083019092528054829060ff16600281111561079757610797610c88565b60028111156107a8576107a8610c88565b81526020016001820154815250509050919050565b6000805460405163831cf43d60e01b81526001600160a01b0386811660048301528392169063831cf43d90602401602060405180830381865afa158015610808573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061082c9190610d5f565b6001600160e01b03198516600090815260016020526040808220815180830190925280549394509192909190829060ff16600281111561086e5761086e610c88565b600281111561087f5761087f610c88565b81526020016001820154815250509050600060056000836000015160028111156108ab576108ab610c88565b60028111156108bc576108bc610c88565b815260208101919091526040016000205490508215806108de57506020820151155b156108ed5792506109b8915050565b60008054604051630681320d60e51b81526001600160a01b038a811660048301529091169063d02641a090602401602060405180830381865afa158015610938573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061095c9190610d5f565b905060006127108460200151886109739190610df5565b61097d9190610e1a565b90506000670de0b6b3a76400006109948484610df5565b61099e9190610e1a565b90508381106109ad57806109af565b835b96505050505050505b9392505050565b6001600160a01b0380831660009081526002602090815260408083206001600160e01b031986168452909152812054909116806109b85750506001600160e01b0319166000908152600360205260409020546001600160a01b0316919050565b80356001600160e01b031981168114610a3757600080fd5b919050565b6001600160a01b0381168114610a5157600080fd5b50565b600080600060608486031215610a6957600080fd5b610a7284610a1f565b92506020840135610a8281610a3c565b91506040840135610a9281610a3c565b809150509250925092565b803560038110610a3757600080fd5b600080600060608486031215610ac157600080fd5b610aca84610a1f565b9250610ad860208501610a9d565b9150604084013590509250925092565b60008060408385031215610afb57600080fd5b610b0483610a1f565b91506020830135610b1481610a3c565b809150509250929050565b600060208284031215610b3157600080fd5b81356109b881610a3c565b600060208284031215610b4e57600080fd5b6109b882610a9d565b634e487b7160e01b600052604160045260246000fd5b600080600060608486031215610b8257600080fd5b8335610b8d81610a3c565b9250610b9b60208501610a1f565b9150604084013567ffffffffffffffff80821115610bb857600080fd5b818601915086601f830112610bcc57600080fd5b813581811115610bde57610bde610b57565b604051601f8201601f19908116603f01168101908382118183101715610c0657610c06610b57565b81604052828152896020848701011115610c1f57600080fd5b8260208601602083013760006020848301015280955050505050509250925092565b60008060408385031215610c5457600080fd5b8235610c5f81610a3c565b946020939093013593505050565b600060208284031215610c7f57600080fd5b6109b882610a1f565b634e487b7160e01b600052602160045260246000fd5b60038110610cbc57634e487b7160e01b600052602160045260246000fd5b9052565b6000604082019050610cd3828451610c9e565b602092830151919092015290565b600080600060608486031215610cf657600080fd5b8335610d0181610a3c565b9250610ad860208501610a1f565b60008060408385031215610d2257600080fd5b8235610d2d81610a3c565b9150610d3b60208401610a1f565b90509250929050565b60408101610d528285610c9e565b8260208301529392505050565b600060208284031215610d7157600080fd5b5051919050565b63ffffffff60e01b831681526000602060406020840152835180604085015260005b81811015610db657858101830151858201606001528201610d9a565b506000606082860101526060601f19601f830116850101925050509392505050565b600060208284031215610dea57600080fd5b81516109b881610a3c565b808202811582820484141761074257634e487b7160e01b600052601160045260246000fd5b600082610e3757634e487b7160e01b600052601260045260246000fd5b50049056fea2646970667358221220443e8e545676c417e276debef3ea76893a62c31cbb38c226948e1b9271b5a3e864736f6c63430008180033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 4232,
+        "contract": "src/FeeController.sol:FeeController",
+        "label": "oracle",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(IPriceOracle)11550"
+      },
+      {
+        "astId": 4237,
+        "contract": "src/FeeController.sol:FeeController",
+        "label": "functionFeeConfigs",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes4,t_struct(FeeConfig)11286_storage)"
+      },
+      {
+        "astId": 4243,
+        "contract": "src/FeeController.sol:FeeController",
+        "label": "tokenGetters",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_address,t_mapping(t_bytes4,t_address))"
+      },
+      {
+        "astId": 4247,
+        "contract": "src/FeeController.sol:FeeController",
+        "label": "globalTokenGetters",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_bytes4,t_address)"
+      },
+      {
+        "astId": 4252,
+        "contract": "src/FeeController.sol:FeeController",
+        "label": "maxFeeLimits",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_enum(FeeType)11280,t_uint256)"
+      },
+      {
+        "astId": 4257,
+        "contract": "src/FeeController.sol:FeeController",
+        "label": "minFeesInUSD",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_enum(FeeType)11280,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bytes4": {
+        "encoding": "inplace",
+        "label": "bytes4",
+        "numberOfBytes": "4"
+      },
+      "t_contract(IPriceOracle)11550": {
+        "encoding": "inplace",
+        "label": "contract IPriceOracle",
+        "numberOfBytes": "20"
+      },
+      "t_enum(FeeType)11280": {
+        "encoding": "inplace",
+        "label": "enum IFeeController.FeeType",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_mapping(t_bytes4,t_address))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(bytes4 => address))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_bytes4,t_address)"
+      },
+      "t_mapping(t_bytes4,t_address)": {
+        "encoding": "mapping",
+        "key": "t_bytes4",
+        "label": "mapping(bytes4 => address)",
+        "numberOfBytes": "32",
+        "value": "t_address"
+      },
+      "t_mapping(t_bytes4,t_struct(FeeConfig)11286_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes4",
+        "label": "mapping(bytes4 => struct IFeeController.FeeConfig)",
+        "numberOfBytes": "32",
+        "value": "t_struct(FeeConfig)11286_storage"
+      },
+      "t_mapping(t_enum(FeeType)11280,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_enum(FeeType)11280",
+        "label": "mapping(enum IFeeController.FeeType => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_struct(FeeConfig)11286_storage": {
+        "encoding": "inplace",
+        "label": "struct IFeeController.FeeConfig",
+        "members": [
+          {
+            "astId": 11283,
+            "contract": "src/FeeController.sol:FeeController",
+            "label": "feeType",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_enum(FeeType)11280"
+          },
+          {
+            "astId": 11285,
+            "contract": "src/FeeController.sol:FeeController",
+            "label": "feePercentage",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

@@ -2,8 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ICondition } from "./ICondition";
-export type { IFeeManager } from "./IFeeManager";
-export type { IInkwell } from "./IInkwell";
-export type { IParameterCalculation } from "./IParameterCalculation";
+export type { IFeeController } from "./IFeeController";
+export type { IFeeHandler } from "./IFeeHandler";
+export type { IPriceOracle } from "./IPriceOracle";
 export type { IStrategyBuilderPlugin } from "./IStrategyBuilderPlugin";
-export type { IStrategyBuilderStorage } from "./IStrategyBuilderStorage";
+export type { ITokenGetter } from "./ITokenGetter";

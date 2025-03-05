@@ -30,6 +30,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IWETH__factory>;
     getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20__factory>;
@@ -38,9 +42,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20Metadata__factory>;
     getContractFactory(
+      name: "IERC20Permit",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Permit__factory>;
+    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
+      name: "IPyth",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPyth__factory>;
+    getContractFactory(
+      name: "IPythEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPythEvents__factory>;
     getContractFactory(
       name: "IUniswapV2Factory",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -82,9 +98,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniswapV2Base__factory>;
     getContractFactory(
-      name: "UniswapV2Plugin",
+      name: "UniswapV2LPActions",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.UniswapV2Plugin__factory>;
+    ): Promise<Contracts.UniswapV2LPActions__factory>;
+    getContractFactory(
+      name: "UniswapV2SwapActions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UniswapV2SwapActions__factory>;
     getContractFactory(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -94,37 +114,45 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TimeCondition__factory>;
     getContractFactory(
+      name: "FeeController",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FeeController__factory>;
+    getContractFactory(
+      name: "FeeHandler",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FeeHandler__factory>;
+    getContractFactory(
       name: "ICondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ICondition__factory>;
     getContractFactory(
-      name: "IFeeManager",
+      name: "IFeeController",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IFeeManager__factory>;
+    ): Promise<Contracts.IFeeController__factory>;
     getContractFactory(
-      name: "IInkwell",
+      name: "IFeeHandler",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IInkwell__factory>;
+    ): Promise<Contracts.IFeeHandler__factory>;
     getContractFactory(
-      name: "IParameterCalculation",
+      name: "IPriceOracle",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IParameterCalculation__factory>;
+    ): Promise<Contracts.IPriceOracle__factory>;
     getContractFactory(
       name: "IStrategyBuilderPlugin",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IStrategyBuilderPlugin__factory>;
     getContractFactory(
-      name: "IStrategyBuilderStorage",
+      name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IStrategyBuilderStorage__factory>;
+    ): Promise<Contracts.ITokenGetter__factory>;
+    getContractFactory(
+      name: "PriceOracle",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PriceOracle__factory>;
     getContractFactory(
       name: "StrategyBuilderPlugin",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.StrategyBuilderPlugin__factory>;
-    getContractFactory(
-      name: "StrategyBuilderStorage",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.StrategyBuilderStorage__factory>;
     getContractFactory(
       name: "MockCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -155,6 +183,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IWETH>;
     getContractAt(
+      name: "Ownable",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
+    getContractAt(
       name: "ERC20",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -165,10 +198,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20Metadata>;
     getContractAt(
+      name: "IERC20Permit",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Permit>;
+    getContractAt(
       name: "IERC20",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "IPyth",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPyth>;
+    getContractAt(
+      name: "IPythEvents",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPythEvents>;
     getContractAt(
       name: "IUniswapV2Factory",
       address: string | ethers.Addressable,
@@ -220,10 +268,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.UniswapV2Base>;
     getContractAt(
-      name: "UniswapV2Plugin",
+      name: "UniswapV2LPActions",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.UniswapV2Plugin>;
+    ): Promise<Contracts.UniswapV2LPActions>;
+    getContractAt(
+      name: "UniswapV2SwapActions",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UniswapV2SwapActions>;
     getContractAt(
       name: "BaseCondition",
       address: string | ethers.Addressable,
@@ -235,45 +288,55 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.TimeCondition>;
     getContractAt(
+      name: "FeeController",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FeeController>;
+    getContractAt(
+      name: "FeeHandler",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FeeHandler>;
+    getContractAt(
       name: "ICondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.ICondition>;
     getContractAt(
-      name: "IFeeManager",
+      name: "IFeeController",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.IFeeManager>;
+    ): Promise<Contracts.IFeeController>;
     getContractAt(
-      name: "IInkwell",
+      name: "IFeeHandler",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.IInkwell>;
+    ): Promise<Contracts.IFeeHandler>;
     getContractAt(
-      name: "IParameterCalculation",
+      name: "IPriceOracle",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.IParameterCalculation>;
+    ): Promise<Contracts.IPriceOracle>;
     getContractAt(
       name: "IStrategyBuilderPlugin",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IStrategyBuilderPlugin>;
     getContractAt(
-      name: "IStrategyBuilderStorage",
+      name: "ITokenGetter",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.IStrategyBuilderStorage>;
+    ): Promise<Contracts.ITokenGetter>;
+    getContractAt(
+      name: "PriceOracle",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PriceOracle>;
     getContractAt(
       name: "StrategyBuilderPlugin",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.StrategyBuilderPlugin>;
-    getContractAt(
-      name: "StrategyBuilderStorage",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.StrategyBuilderStorage>;
     getContractAt(
       name: "MockCondition",
       address: string | ethers.Addressable,
@@ -302,6 +365,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IWETH>;
     deployContract(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Ownable>;
+    deployContract(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ERC20>;
@@ -310,9 +377,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20Metadata>;
     deployContract(
+      name: "IERC20Permit",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Permit>;
+    deployContract(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20>;
+    deployContract(
+      name: "IPyth",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPyth>;
+    deployContract(
+      name: "IPythEvents",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPythEvents>;
     deployContract(
       name: "IUniswapV2Factory",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -354,9 +433,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2Base>;
     deployContract(
-      name: "UniswapV2Plugin",
+      name: "UniswapV2LPActions",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2Plugin>;
+    ): Promise<Contracts.UniswapV2LPActions>;
+    deployContract(
+      name: "UniswapV2SwapActions",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.UniswapV2SwapActions>;
     deployContract(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -366,37 +449,45 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TimeCondition>;
     deployContract(
+      name: "FeeController",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FeeController>;
+    deployContract(
+      name: "FeeHandler",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FeeHandler>;
+    deployContract(
       name: "ICondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICondition>;
     deployContract(
-      name: "IFeeManager",
+      name: "IFeeController",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IFeeManager>;
+    ): Promise<Contracts.IFeeController>;
     deployContract(
-      name: "IInkwell",
+      name: "IFeeHandler",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IInkwell>;
+    ): Promise<Contracts.IFeeHandler>;
     deployContract(
-      name: "IParameterCalculation",
+      name: "IPriceOracle",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IParameterCalculation>;
+    ): Promise<Contracts.IPriceOracle>;
     deployContract(
       name: "IStrategyBuilderPlugin",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyBuilderPlugin>;
     deployContract(
-      name: "IStrategyBuilderStorage",
+      name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IStrategyBuilderStorage>;
+    ): Promise<Contracts.ITokenGetter>;
+    deployContract(
+      name: "PriceOracle",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.PriceOracle>;
     deployContract(
       name: "StrategyBuilderPlugin",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderPlugin>;
-    deployContract(
-      name: "StrategyBuilderStorage",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StrategyBuilderStorage>;
     deployContract(
       name: "MockCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -427,6 +518,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IWETH>;
     deployContract(
+      name: "Ownable",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.Ownable>;
+    deployContract(
       name: "ERC20",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -437,10 +533,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20Metadata>;
     deployContract(
+      name: "IERC20Permit",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Permit>;
+    deployContract(
       name: "IERC20",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20>;
+    deployContract(
+      name: "IPyth",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPyth>;
+    deployContract(
+      name: "IPythEvents",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPythEvents>;
     deployContract(
       name: "IUniswapV2Factory",
       args: any[],
@@ -492,10 +603,15 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2Base>;
     deployContract(
-      name: "UniswapV2Plugin",
+      name: "UniswapV2LPActions",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2Plugin>;
+    ): Promise<Contracts.UniswapV2LPActions>;
+    deployContract(
+      name: "UniswapV2SwapActions",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.UniswapV2SwapActions>;
     deployContract(
       name: "BaseCondition",
       args: any[],
@@ -507,45 +623,55 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TimeCondition>;
     deployContract(
+      name: "FeeController",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FeeController>;
+    deployContract(
+      name: "FeeHandler",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FeeHandler>;
+    deployContract(
       name: "ICondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICondition>;
     deployContract(
-      name: "IFeeManager",
+      name: "IFeeController",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IFeeManager>;
+    ): Promise<Contracts.IFeeController>;
     deployContract(
-      name: "IInkwell",
+      name: "IFeeHandler",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IInkwell>;
+    ): Promise<Contracts.IFeeHandler>;
     deployContract(
-      name: "IParameterCalculation",
+      name: "IPriceOracle",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IParameterCalculation>;
+    ): Promise<Contracts.IPriceOracle>;
     deployContract(
       name: "IStrategyBuilderPlugin",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyBuilderPlugin>;
     deployContract(
-      name: "IStrategyBuilderStorage",
+      name: "ITokenGetter",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IStrategyBuilderStorage>;
+    ): Promise<Contracts.ITokenGetter>;
+    deployContract(
+      name: "PriceOracle",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.PriceOracle>;
     deployContract(
       name: "StrategyBuilderPlugin",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderPlugin>;
-    deployContract(
-      name: "StrategyBuilderStorage",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StrategyBuilderStorage>;
     deployContract(
       name: "MockCondition",
       args: any[],

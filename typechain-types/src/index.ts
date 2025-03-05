@@ -9,5 +9,7 @@ import type * as interfaces from "./interfaces";
 export type { interfaces };
 import type * as test from "./test";
 export type { test };
+export type { FeeController } from "./FeeController";
+export type { FeeHandler } from "./FeeHandler";
+export type { PriceOracle } from "./PriceOracle";
 export type { StrategyBuilderPlugin } from "./StrategyBuilderPlugin";
-export type { StrategyBuilderStorage } from "./StrategyBuilderStorage";

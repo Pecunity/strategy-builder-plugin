@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { UniswapV2Base } from "./UniswapV2Base";
-export type { UniswapV2Plugin } from "./UniswapV2Plugin";
+export type { UniswapV2LPActions } from "./UniswapV2LPActions";
+export type { UniswapV2SwapActions } from "./UniswapV2SwapActions";
