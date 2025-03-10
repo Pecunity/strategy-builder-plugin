@@ -94,6 +94,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.AaveV3Base__factory>;
     getContractFactory(
+      name: "IUniswapV2Base",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV2Base__factory>;
+    getContractFactory(
+      name: "IUniswapV2SwapActions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV2SwapActions__factory>;
+    getContractFactory(
       name: "UniswapV2Base",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniswapV2Base__factory>;
@@ -263,6 +271,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.AaveV3Base>;
     getContractAt(
+      name: "IUniswapV2Base",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV2Base>;
+    getContractAt(
+      name: "IUniswapV2SwapActions",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV2SwapActions>;
+    getContractAt(
       name: "UniswapV2Base",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -429,6 +447,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.AaveV3Base>;
     deployContract(
+      name: "IUniswapV2Base",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IUniswapV2Base>;
+    deployContract(
+      name: "IUniswapV2SwapActions",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IUniswapV2SwapActions>;
+    deployContract(
       name: "UniswapV2Base",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2Base>;
@@ -597,6 +623,16 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.AaveV3Base>;
+    deployContract(
+      name: "IUniswapV2Base",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IUniswapV2Base>;
+    deployContract(
+      name: "IUniswapV2SwapActions",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IUniswapV2SwapActions>;
     deployContract(
       name: "UniswapV2Base",
       args: any[],

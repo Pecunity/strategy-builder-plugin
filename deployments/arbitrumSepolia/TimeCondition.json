@@ -1,0 +1,680 @@
+{
+  "address": "0x63A4eab3C549132B86693DB7aD43C75646e9A1cC",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "BaseCondition__ConditionAlreadyExist",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "BaseCondition__ConditionDoesNotExist",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "BaseCondition__ConditionIsInUse",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TimeCondition__ConditionsIsNotUpdateable",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TimeCondition__DeltaNotValid",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "TimeCondition__ExecutionTimeNotValid",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "execution",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "delta",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "updateable",
+              "type": "bool"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct TimeCondition.Condition",
+          "name": "condition",
+          "type": "tuple"
+        }
+      ],
+      "name": "ConditionAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "name": "ConditionDeleted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "newExecution",
+          "type": "uint256"
+        }
+      ],
+      "name": "ConditionUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "action",
+          "type": "uint32"
+        }
+      ],
+      "name": "actionValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "action",
+          "type": "uint32"
+        }
+      ],
+      "name": "addAutomationToCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "execution",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "delta",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "updateable",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct TimeCondition.Condition",
+          "name": "_condition",
+          "type": "tuple"
+        }
+      ],
+      "name": "addCondition",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "strategy",
+          "type": "uint32"
+        }
+      ],
+      "name": "addStrategyToCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        }
+      ],
+      "name": "automations",
+      "outputs": [
+        {
+          "internalType": "uint32[]",
+          "name": "",
+          "type": "uint32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "checkCondition",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "conditionActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "deleteCondition",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "isUpdateable",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "automation",
+          "type": "uint32"
+        }
+      ],
+      "name": "removeAutomationFromCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "strategy",
+          "type": "uint32"
+        }
+      ],
+      "name": "removeStrategyFromCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        }
+      ],
+      "name": "strategies",
+      "outputs": [
+        {
+          "internalType": "uint32[]",
+          "name": "",
+          "type": "uint32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "strategy",
+          "type": "uint32"
+        }
+      ],
+      "name": "strategyValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "updateCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "walletCondition",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "execution",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "delta",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "updateable",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct TimeCondition.Condition",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x48711e7308b081a87618bb883f5ed8f646a32f731d89f53c4d9d5f58a29d9c22",
+  "receipt": {
+    "to": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+    "from": "0x36375828fd821935cFf3E8AB6322cAb54BBfaDeC",
+    "contractAddress": null,
+    "transactionIndex": 1,
+    "gasUsed": "3026038",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xb604ac79e474f8ac0f2b5ba3c78845dd51727b07b125b9e75f4880bdb0f662f7",
+    "transactionHash": "0x48711e7308b081a87618bb883f5ed8f646a32f731d89f53c4d9d5f58a29d9c22",
+    "logs": [],
+    "blockNumber": 131068486,
+    "cumulativeGasUsed": "3026038",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "4b77b1615366c5fedbc67911183a0195",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"BaseCondition__ConditionAlreadyExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"BaseCondition__ConditionDoesNotExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"BaseCondition__ConditionIsInUse\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TimeCondition__ConditionsIsNotUpdateable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TimeCondition__DeltaNotValid\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"TimeCondition__ExecutionTimeNotValid\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"execution\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"delta\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"updateable\",\"type\":\"bool\"}],\"indexed\":false,\"internalType\":\"struct TimeCondition.Condition\",\"name\":\"condition\",\"type\":\"tuple\"}],\"name\":\"ConditionAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"}],\"name\":\"ConditionDeleted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newExecution\",\"type\":\"uint256\"}],\"name\":\"ConditionUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"action\",\"type\":\"uint32\"}],\"name\":\"actionValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"action\",\"type\":\"uint32\"}],\"name\":\"addAutomationToCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"execution\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"delta\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"updateable\",\"type\":\"bool\"}],\"internalType\":\"struct TimeCondition.Condition\",\"name\":\"_condition\",\"type\":\"tuple\"}],\"name\":\"addCondition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"strategy\",\"type\":\"uint32\"}],\"name\":\"addStrategyToCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"}],\"name\":\"automations\",\"outputs\":[{\"internalType\":\"uint32[]\",\"name\":\"\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"checkCondition\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"conditionActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"deleteCondition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"isUpdateable\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"automation\",\"type\":\"uint32\"}],\"name\":\"removeAutomationFromCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"strategy\",\"type\":\"uint32\"}],\"name\":\"removeStrategyFromCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"}],\"name\":\"strategies\",\"outputs\":[{\"internalType\":\"uint32[]\",\"name\":\"\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"strategy\",\"type\":\"uint32\"}],\"name\":\"strategyValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"updateCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"walletCondition\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"execution\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"delta\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"updateable\",\"type\":\"bool\"}],\"internalType\":\"struct TimeCondition.Condition\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/condition/TimeCondition.sol\":\"TimeCondition\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"src/condition/BaseCondition.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.19;\\n\\nimport {ICondition} from \\\"../interfaces/ICondition.sol\\\";\\n\\nerror BaseCondition__ConditionDoesNotExist();\\nerror BaseCondition__ConditionAlreadyExist();\\nerror BaseCondition__ConditionIsInUse();\\n\\nabstract contract BaseCondition is ICondition {\\n    // Storage for conditions, strategies, and automations\\n    mapping(address => mapping(uint32 => uint32[])) private conditionStrategies; // (wallet => (id => strategies))\\n    mapping(address => mapping(uint32 => uint32[])) private conditionAutomations; // (wallet => (id => automations))\\n    mapping(address => mapping(uint32 => uint32)) private strategyConditionIndex;\\n    mapping(address => mapping(uint32 => uint32)) private automationConditionIndex;\\n\\n    modifier conditionExist(uint32 id) {\\n        if (!_isConditionActive(msg.sender, id)) {\\n            revert BaseCondition__ConditionDoesNotExist();\\n        }\\n        _;\\n    }\\n\\n    modifier conditionDoesNotExist(uint32 id) {\\n        if (_isConditionActive(msg.sender, id)) {\\n            revert BaseCondition__ConditionAlreadyExist();\\n        }\\n        _;\\n    }\\n\\n    function checkCondition(address, uint32) public view virtual returns (uint8) {\\n        return 0;\\n    }\\n\\n    function isUpdateable(address, uint32) public view virtual returns (bool) {\\n        return false;\\n    }\\n\\n    function updateCondition(uint32) public virtual returns (bool) {\\n        // Default implementation for updateCondition (override in derived contracts)\\n        return false;\\n    }\\n\\n    function conditionActive(address _wallet, uint32 _id) external view returns (bool) {\\n        return _isConditionActive(_wallet, _id);\\n    }\\n\\n    function _isConditionActive(address, uint32) internal view virtual returns (bool) {\\n        return false;\\n    }\\n\\n    function deleteCondition(uint32 _id) public virtual {\\n        if (conditionAutomations[msg.sender][_id].length > 0 || conditionStrategies[msg.sender][_id].length > 0) {\\n            revert BaseCondition__ConditionIsInUse();\\n        }\\n    }\\n\\n    function actionValid(address wallet, uint32 id, uint32 action) public view returns (bool) {\\n        // Validate the action (placeholder implementation)\\n        return automationConditionIndex[wallet][action] == id;\\n    }\\n\\n    function strategyValid(address wallet, uint32 id, uint32 strategy) public view returns (bool) {\\n        // Validate the strategy (placeholder implementation)\\n        return strategyConditionIndex[wallet][strategy] == id;\\n    }\\n\\n    function addAutomationToCondition(uint32 id, uint32 action) public returns (bool) {\\n        conditionAutomations[msg.sender][id].push(action);\\n        automationConditionIndex[msg.sender][action] = uint32(conditionAutomations[msg.sender][id].length - 1);\\n        return true;\\n    }\\n\\n    function addStrategyToCondition(uint32 id, uint32 strategy) public returns (bool) {\\n        conditionStrategies[msg.sender][id].push(strategy);\\n        strategyConditionIndex[msg.sender][strategy] = uint32(conditionStrategies[msg.sender][id].length - 1);\\n        return true;\\n    }\\n\\n    function removeAutomationFromCondition(uint32 id, uint32 automation) public returns (bool) {\\n        uint32[] storage _automations = conditionAutomations[msg.sender][id];\\n\\n        uint32 _actualAutomationIndex = automationConditionIndex[msg.sender][automation];\\n\\n        if (_automations[_actualAutomationIndex] != automation) {\\n            return false;\\n        }\\n\\n        uint256 _lastAutomationIndex = _automations.length - 1;\\n\\n        if (_lastAutomationIndex != _actualAutomationIndex) {\\n            uint32 _lastAutomationId = _automations[_lastAutomationIndex];\\n            automationConditionIndex[msg.sender][_lastAutomationId] = _actualAutomationIndex;\\n            _automations[_actualAutomationIndex] = _lastAutomationId;\\n        }\\n\\n        _automations.pop();\\n\\n        return true;\\n    }\\n\\n    function removeStrategyFromCondition(uint32 id, uint32 strategy) public returns (bool) {\\n        uint32[] storage _strategies = conditionStrategies[msg.sender][id];\\n\\n        uint32 _actualStrategyIndex = strategyConditionIndex[msg.sender][strategy];\\n\\n        if (_strategies[_actualStrategyIndex] != strategy) {\\n            return false;\\n        }\\n\\n        uint256 _lastStrategyIndex = _strategies.length - 1;\\n\\n        if (_lastStrategyIndex != _actualStrategyIndex) {\\n            uint32 _lastStrategyId = _strategies[_lastStrategyIndex];\\n            strategyConditionIndex[msg.sender][_lastStrategyId] = _actualStrategyIndex;\\n            _strategies[_actualStrategyIndex] = _lastStrategyId;\\n        }\\n\\n        _strategies.pop();\\n\\n        return true;\\n    }\\n\\n    function strategies(address wallet, uint32 id) external view returns (uint32[] memory) {\\n        return conditionStrategies[wallet][id];\\n    }\\n\\n    function automations(address wallet, uint32 id) external view returns (uint32[] memory) {\\n        return conditionAutomations[wallet][id];\\n    }\\n}\\n\",\"keccak256\":\"0xe608645c26b26f4bd152e2ac4ea7636f521dce71075c4210b60e5cc48f92412f\",\"license\":\"MIT\"},\"src/condition/TimeCondition.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.19;\\n\\nimport {BaseCondition} from \\\"./BaseCondition.sol\\\";\\n\\nerror TimeCondition__ExecutionTimeNotValid();\\nerror TimeCondition__DeltaNotValid();\\nerror TimeCondition__ConditionsIsNotUpdateable();\\n\\ncontract TimeCondition is BaseCondition {\\n    uint256 constant MINIMUM_DELTA = 3600;\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503           Structs                \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n\\n    struct Condition {\\n        uint256 execution;\\n        uint256 delta;\\n        bool updateable;\\n    }\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503        State Variables           \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n    mapping(address wallet => mapping(uint32 id => Condition condition)) private conditions;\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503           Modifiers              \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n\\n    modifier validCondition(Condition calldata _condition) {\\n        if (_condition.execution < block.timestamp) {\\n            revert TimeCondition__ExecutionTimeNotValid();\\n        }\\n\\n        if (_condition.delta < MINIMUM_DELTA) {\\n            revert TimeCondition__DeltaNotValid();\\n        }\\n\\n        _;\\n    }\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503            Events                \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n\\n    event ConditionAdded(uint32 id, address wallet, Condition condition);\\n    event ConditionDeleted(uint32 id, address wallet);\\n    event ConditionUpdated(uint32 id, address wallet, uint256 newExecution);\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503       Public Functions           \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n\\n    function addCondition(uint32 _id, Condition calldata _condition)\\n        external\\n        conditionDoesNotExist(_id)\\n        validCondition(_condition)\\n    {\\n        conditions[msg.sender][_id] = _condition;\\n\\n        emit ConditionAdded(_id, msg.sender, _condition);\\n    }\\n\\n    function deleteCondition(uint32 _id) public override conditionExist(_id) {\\n        super.deleteCondition(_id);\\n        delete conditions[msg.sender][_id];\\n\\n        emit ConditionDeleted(_id, msg.sender);\\n    }\\n\\n    function updateCondition(uint32 _id) public override conditionExist(_id) returns (bool) {\\n        Condition memory _condition = conditions[msg.sender][_id];\\n\\n        if (_condition.execution > block.timestamp) {\\n            revert TimeCondition__ConditionsIsNotUpdateable();\\n        }\\n\\n        _condition.execution += _condition.delta;\\n\\n        conditions[msg.sender][_id] = _condition;\\n\\n        emit ConditionUpdated(_id, msg.sender, _condition.execution);\\n\\n        return true;\\n    }\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503       Internal Functions         \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n\\n    function _isConditionActive(address _wallet, uint32 _id) internal view override returns (bool) {\\n        return conditions[_wallet][_id].execution != 0;\\n    }\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503         View Functions           \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n\\n    function checkCondition(address _wallet, uint32 _id) public view override returns (uint8) {\\n        Condition memory _condition = conditions[_wallet][_id];\\n\\n        if (_condition.execution == 0) {\\n            return 0;\\n        }\\n\\n        if (_condition.execution <= block.timestamp) {\\n            return 1;\\n        } else {\\n            return 0;\\n        }\\n    }\\n\\n    function isUpdateable(address _wallet, uint32 _id) public view override returns (bool) {\\n        return conditions[_wallet][_id].updateable;\\n    }\\n\\n    function walletCondition(address _wallet, uint32 _id) public view returns (Condition memory) {\\n        return conditions[_wallet][_id];\\n    }\\n}\\n\",\"keccak256\":\"0xc038395886f6610fe960f890aeafcd01c08407338617fa9e2ae8860cfa14ef2c\",\"license\":\"MIT\"},\"src/interfaces/ICondition.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.19;\\n\\ninterface ICondition {\\n    function checkCondition(address wallet, uint32 id) external view returns (uint8);\\n\\n    function isUpdateable(address wallet, uint32 id) external view returns (bool);\\n\\n    function actionValid(address wallet, uint32 id, uint32 action) external view returns (bool);\\n\\n    function strategyValid(address wallet, uint32 id, uint32 strategy) external view returns (bool);\\n\\n    function updateCondition(uint32 id) external returns (bool);\\n\\n    function deleteCondition(uint32 id) external;\\n\\n    function addAutomationToCondition(uint32 id, uint32 action) external returns (bool);\\n\\n    function addStrategyToCondition(uint32 id, uint32 action) external returns (bool);\\n\\n    function removeAutomationFromCondition(uint32 id, uint32 automation) external returns (bool);\\n\\n    function removeStrategyFromCondition(uint32 id, uint32 strategy) external returns (bool);\\n\\n    function conditionActive(address wallet, uint32 id) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xf7d8ef822f58236f414226e77743a9dc1c4997d939caf454b0047662a52978f0\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50610f36806100206000396000f3fe608060405234801561001057600080fd5b50600436106100f55760003560e01c806357182cae11610097578063cff8364011610066578063cff8364014610286578063e5012fb414610299578063eec93dd0146102ac578063fff5cf19146102bf57600080fd5b806357182cae146101d35780636f2b9aff1461021757806389a78a031461024e5780638a4914c21461027357600080fd5b80631245f298116100d35780631245f2981461014a57806314b0af701461015d578063384c879d146101705780633dc9bd441461019057600080fd5b8063023ef5a9146100fa57806303d049bb1461012257806310bdddc814610135575b600080fd5b61010d610108366004610cb8565b610302565b60405190151581526020015b60405180910390f35b61010d610130366004610ceb565b6103a6565b610148610143366004610d06565b6104e4565b005b610148610158366004610ceb565b6105c7565b61010d61016b366004610cb8565b61066d565b61018361017e366004610d5c565b61080b565b6040516101199190610d78565b61010d61019e366004610dc2565b6001600160a01b0392909216600090815260036020908152604080832063ffffffff9586168452909152902054821691161490565b61010d6101e1366004610d5c565b6001600160a01b038216600090815260046020908152604080832063ffffffff8516845290915290206002015460ff1692915050565b61022a610225366004610d5c565b6108b2565b60408051825181526020808401519082015291810151151590820152606001610119565b61026161025c366004610d5c565b610931565b60405160ff9091168152602001610119565b61010d610281366004610cb8565b6109b2565b61010d610294366004610d5c565b610ad2565b61010d6102a7366004610cb8565b610ae5565b6101836102ba366004610d5c565b610b84565b61010d6102cd366004610dc2565b6001600160a01b0392909216600090815260026020908152604080832063ffffffff9586168452909152902054821691161490565b33600090815260016020818152604080842063ffffffff878116808752918452918520805480860182558187529386206008850401805460079095166004026101000a808502199095169388169490940292909217909255908352546103689190610e1b565b33600090815260036020908152604080832063ffffffff87811685529252909120805463ffffffff1916929091169190911790555060015b92915050565b6000816103b33382610c01565b6103d057604051630453eefd60e11b815260040160405180910390fd5b33600090815260046020908152604080832063ffffffff871684528252918290208251606081018452815480825260018301549382019390935260029091015460ff1615159281019290925242101561043c57604051635b2c6ddd60e01b815260040160405180910390fd5b602081015181518290610450908390610e2e565b90525033600081815260046020908152604080832063ffffffff8916808552908352928190208551808255868401516001830155868301516002909201805460ff1916921515929092179091558151938452918301939093528183015290517f4512841be653bcd6562897298746e2d671f964036bf8fc1342f86ecabe30d331916060908290030190a15060019392505050565b816104ef3382610c01565b1561050d5760405163217deb7360e21b815260040160405180910390fd5b81428135101561053057604051633cb342e560e21b815260040160405180910390fd5b610e10816020013510156105575760405163039872d160e21b815260040160405180910390fd5b33600090815260046020908152604080832063ffffffff88168452909152902083906105838282610e4f565b9050507fb426363a4b10243595274732519e5a718e5fd0cfbfc6d4adac581cff27b3c2d78433856040516105b993929190610e85565b60405180910390a150505050565b806105d23382610c01565b6105ef57604051630453eefd60e11b815260040160405180910390fd5b6105f882610c33565b33600081815260046020908152604080832063ffffffff871680855290835281842084815560018101949094556002909301805460ff191690558051928352908201929092527f9c33cb453d76063bb338c509094bd32900fe4a7e3ccbb52ef947618994a4a6c3910160405180910390a15050565b3360008181526020818152604080832063ffffffff8088168552908352818420948452600283528184208682168086529352908320548454939493911691908390839081106106be576106be610ed4565b6000918252602090912060088204015460079091166004026101000a900463ffffffff16146106f2576000925050506103a0565b815460009061070390600190610e1b565b90508163ffffffff1681146107c057600083828154811061072657610726610ed4565b6000918252602080832060088304015433845260028252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff19169286169283179055855490925082918691811061078b5761078b610ed4565b90600052602060002090600891828204019190066004026101000a81548163ffffffff021916908363ffffffff160217905550505b828054806107d0576107d0610eea565b600082815260209020600860001990920191820401805463ffffffff600460078516026101000a021916905590555060019250505092915050565b6001600160a01b038216600090815260016020908152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156108a557602002820191906000526020600020906000905b82829054906101000a900463ffffffff1663ffffffff16815260200190600401906020826003010492830192600103820291508084116108685790505b5050505050905092915050565b6108d8604051806060016040528060008152602001600081526020016000151581525090565b506001600160a01b038216600090815260046020908152604080832063ffffffff851684528252918290208251606081018452815481526001820154928101929092526002015460ff1615159181019190915292915050565b6001600160a01b038216600090815260046020908152604080832063ffffffff8516845282528083208151606081018352815480825260018301549482019490945260029091015460ff161515918101919091529082036109965760009150506103a0565b805142106109a85760019150506103a0565b60009150506103a0565b33600081815260016020908152604080832063ffffffff808816855290835281842094845260038352818420868216808652935290832054845493949391169190839083908110610a0557610a05610ed4565b6000918252602090912060088204015460079091166004026101000a900463ffffffff1614610a39576000925050506103a0565b8154600090610a4a90600190610e1b565b90508163ffffffff1681146107c0576000838281548110610a6d57610a6d610ed4565b6000918252602080832060088304015433845260038252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff19169286169283179055855490925082918691811061078b5761078b610ed4565b6000610ade8383610c01565b9392505050565b3360009081526020818152604080832063ffffffff8681168086529184529184208054600180820183558287529486206008820401805460079092166004026101000a808602199092169488169190910293909317909255835254610b4a9190610e1b565b33600090815260026020908152604080832063ffffffff96871684529091529020805463ffffffff19169190931617909155506001919050565b6001600160a01b03821660009081526020818152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156108a5576000918252602091829020805463ffffffff16845290820283019290916004910180841161086857509498975050505050505050565b6001600160a01b038216600090815260046020908152604080832063ffffffff85168452909152902054151592915050565b33600090815260016020908152604080832063ffffffff85168452909152902054151580610c7e57503360009081526020818152604080832063ffffffff8516845290915290205415155b15610c9c5760405163846e233f60e01b815260040160405180910390fd5b50565b803563ffffffff81168114610cb357600080fd5b919050565b60008060408385031215610ccb57600080fd5b610cd483610c9f565b9150610ce260208401610c9f565b90509250929050565b600060208284031215610cfd57600080fd5b610ade82610c9f565b6000808284036080811215610d1a57600080fd5b610d2384610c9f565b92506060601f1982011215610d3757600080fd5b506020830190509250929050565b80356001600160a01b0381168114610cb357600080fd5b60008060408385031215610d6f57600080fd5b610cd483610d45565b6020808252825182820181905260009190848201906040850190845b81811015610db657835163ffffffff1683529284019291840191600101610d94565b50909695505050505050565b600080600060608486031215610dd757600080fd5b610de084610d45565b9250610dee60208501610c9f565b9150610dfc60408501610c9f565b90509250925092565b634e487b7160e01b600052601160045260246000fd5b818103818111156103a0576103a0610e05565b808201808211156103a0576103a0610e05565b8015158114610c9c57600080fd5b8135815560208201356001820155600281016040830135610e6f81610e41565b815490151560ff1660ff19919091161790555050565b600060a08201905063ffffffff8516825260018060a01b038416602083015282356040830152602083013560608301526040830135610ec381610e41565b801515608084015250949350505050565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fdfea2646970667358221220e8365478e2ebc5665713156d77d25b200b7bded0957ce1844465aa749d5de55164736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100f55760003560e01c806357182cae11610097578063cff8364011610066578063cff8364014610286578063e5012fb414610299578063eec93dd0146102ac578063fff5cf19146102bf57600080fd5b806357182cae146101d35780636f2b9aff1461021757806389a78a031461024e5780638a4914c21461027357600080fd5b80631245f298116100d35780631245f2981461014a57806314b0af701461015d578063384c879d146101705780633dc9bd441461019057600080fd5b8063023ef5a9146100fa57806303d049bb1461012257806310bdddc814610135575b600080fd5b61010d610108366004610cb8565b610302565b60405190151581526020015b60405180910390f35b61010d610130366004610ceb565b6103a6565b610148610143366004610d06565b6104e4565b005b610148610158366004610ceb565b6105c7565b61010d61016b366004610cb8565b61066d565b61018361017e366004610d5c565b61080b565b6040516101199190610d78565b61010d61019e366004610dc2565b6001600160a01b0392909216600090815260036020908152604080832063ffffffff9586168452909152902054821691161490565b61010d6101e1366004610d5c565b6001600160a01b038216600090815260046020908152604080832063ffffffff8516845290915290206002015460ff1692915050565b61022a610225366004610d5c565b6108b2565b60408051825181526020808401519082015291810151151590820152606001610119565b61026161025c366004610d5c565b610931565b60405160ff9091168152602001610119565b61010d610281366004610cb8565b6109b2565b61010d610294366004610d5c565b610ad2565b61010d6102a7366004610cb8565b610ae5565b6101836102ba366004610d5c565b610b84565b61010d6102cd366004610dc2565b6001600160a01b0392909216600090815260026020908152604080832063ffffffff9586168452909152902054821691161490565b33600090815260016020818152604080842063ffffffff878116808752918452918520805480860182558187529386206008850401805460079095166004026101000a808502199095169388169490940292909217909255908352546103689190610e1b565b33600090815260036020908152604080832063ffffffff87811685529252909120805463ffffffff1916929091169190911790555060015b92915050565b6000816103b33382610c01565b6103d057604051630453eefd60e11b815260040160405180910390fd5b33600090815260046020908152604080832063ffffffff871684528252918290208251606081018452815480825260018301549382019390935260029091015460ff1615159281019290925242101561043c57604051635b2c6ddd60e01b815260040160405180910390fd5b602081015181518290610450908390610e2e565b90525033600081815260046020908152604080832063ffffffff8916808552908352928190208551808255868401516001830155868301516002909201805460ff1916921515929092179091558151938452918301939093528183015290517f4512841be653bcd6562897298746e2d671f964036bf8fc1342f86ecabe30d331916060908290030190a15060019392505050565b816104ef3382610c01565b1561050d5760405163217deb7360e21b815260040160405180910390fd5b81428135101561053057604051633cb342e560e21b815260040160405180910390fd5b610e10816020013510156105575760405163039872d160e21b815260040160405180910390fd5b33600090815260046020908152604080832063ffffffff88168452909152902083906105838282610e4f565b9050507fb426363a4b10243595274732519e5a718e5fd0cfbfc6d4adac581cff27b3c2d78433856040516105b993929190610e85565b60405180910390a150505050565b806105d23382610c01565b6105ef57604051630453eefd60e11b815260040160405180910390fd5b6105f882610c33565b33600081815260046020908152604080832063ffffffff871680855290835281842084815560018101949094556002909301805460ff191690558051928352908201929092527f9c33cb453d76063bb338c509094bd32900fe4a7e3ccbb52ef947618994a4a6c3910160405180910390a15050565b3360008181526020818152604080832063ffffffff8088168552908352818420948452600283528184208682168086529352908320548454939493911691908390839081106106be576106be610ed4565b6000918252602090912060088204015460079091166004026101000a900463ffffffff16146106f2576000925050506103a0565b815460009061070390600190610e1b565b90508163ffffffff1681146107c057600083828154811061072657610726610ed4565b6000918252602080832060088304015433845260028252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff19169286169283179055855490925082918691811061078b5761078b610ed4565b90600052602060002090600891828204019190066004026101000a81548163ffffffff021916908363ffffffff160217905550505b828054806107d0576107d0610eea565b600082815260209020600860001990920191820401805463ffffffff600460078516026101000a021916905590555060019250505092915050565b6001600160a01b038216600090815260016020908152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156108a557602002820191906000526020600020906000905b82829054906101000a900463ffffffff1663ffffffff16815260200190600401906020826003010492830192600103820291508084116108685790505b5050505050905092915050565b6108d8604051806060016040528060008152602001600081526020016000151581525090565b506001600160a01b038216600090815260046020908152604080832063ffffffff851684528252918290208251606081018452815481526001820154928101929092526002015460ff1615159181019190915292915050565b6001600160a01b038216600090815260046020908152604080832063ffffffff8516845282528083208151606081018352815480825260018301549482019490945260029091015460ff161515918101919091529082036109965760009150506103a0565b805142106109a85760019150506103a0565b60009150506103a0565b33600081815260016020908152604080832063ffffffff808816855290835281842094845260038352818420868216808652935290832054845493949391169190839083908110610a0557610a05610ed4565b6000918252602090912060088204015460079091166004026101000a900463ffffffff1614610a39576000925050506103a0565b8154600090610a4a90600190610e1b565b90508163ffffffff1681146107c0576000838281548110610a6d57610a6d610ed4565b6000918252602080832060088304015433845260038252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff19169286169283179055855490925082918691811061078b5761078b610ed4565b6000610ade8383610c01565b9392505050565b3360009081526020818152604080832063ffffffff8681168086529184529184208054600180820183558287529486206008820401805460079092166004026101000a808602199092169488169190910293909317909255835254610b4a9190610e1b565b33600090815260026020908152604080832063ffffffff96871684529091529020805463ffffffff19169190931617909155506001919050565b6001600160a01b03821660009081526020818152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156108a5576000918252602091829020805463ffffffff16845290820283019290916004910180841161086857509498975050505050505050565b6001600160a01b038216600090815260046020908152604080832063ffffffff85168452909152902054151592915050565b33600090815260016020908152604080832063ffffffff85168452909152902054151580610c7e57503360009081526020818152604080832063ffffffff8516845290915290205415155b15610c9c5760405163846e233f60e01b815260040160405180910390fd5b50565b803563ffffffff81168114610cb357600080fd5b919050565b60008060408385031215610ccb57600080fd5b610cd483610c9f565b9150610ce260208401610c9f565b90509250929050565b600060208284031215610cfd57600080fd5b610ade82610c9f565b6000808284036080811215610d1a57600080fd5b610d2384610c9f565b92506060601f1982011215610d3757600080fd5b506020830190509250929050565b80356001600160a01b0381168114610cb357600080fd5b60008060408385031215610d6f57600080fd5b610cd483610d45565b6020808252825182820181905260009190848201906040850190845b81811015610db657835163ffffffff1683529284019291840191600101610d94565b50909695505050505050565b600080600060608486031215610dd757600080fd5b610de084610d45565b9250610dee60208501610c9f565b9150610dfc60408501610c9f565b90509250925092565b634e487b7160e01b600052601160045260246000fd5b818103818111156103a0576103a0610e05565b808201808211156103a0576103a0610e05565b8015158114610c9c57600080fd5b8135815560208201356001820155600281016040830135610e6f81610e41565b815490151560ff1660ff19919091161790555050565b600060a08201905063ffffffff8516825260018060a01b038416602083015282356040830152602083013560608301526040830135610ec381610e41565b801515608084015250949350505050565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fdfea2646970667358221220e8365478e2ebc5665713156d77d25b200b7bded0957ce1844465aa749d5de55164736f6c63430008180033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 10409,
+        "contract": "src/condition/TimeCondition.sol:TimeCondition",
+        "label": "conditionStrategies",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_array(t_uint32)dyn_storage))"
+      },
+      {
+        "astId": 10416,
+        "contract": "src/condition/TimeCondition.sol:TimeCondition",
+        "label": "conditionAutomations",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_array(t_uint32)dyn_storage))"
+      },
+      {
+        "astId": 10422,
+        "contract": "src/condition/TimeCondition.sol:TimeCondition",
+        "label": "strategyConditionIndex",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_uint32))"
+      },
+      {
+        "astId": 10428,
+        "contract": "src/condition/TimeCondition.sol:TimeCondition",
+        "label": "automationConditionIndex",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_uint32))"
+      },
+      {
+        "astId": 10900,
+        "contract": "src/condition/TimeCondition.sol:TimeCondition",
+        "label": "conditions",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_struct(Condition)10893_storage))"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint32)dyn_storage": {
+        "base": "t_uint32",
+        "encoding": "dynamic_array",
+        "label": "uint32[]",
+        "numberOfBytes": "32"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_mapping(t_uint32,t_array(t_uint32)dyn_storage))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint32 => uint32[]))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_array(t_uint32)dyn_storage)"
+      },
+      "t_mapping(t_address,t_mapping(t_uint32,t_struct(Condition)10893_storage))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint32 => struct TimeCondition.Condition))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_struct(Condition)10893_storage)"
+      },
+      "t_mapping(t_address,t_mapping(t_uint32,t_uint32))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint32 => uint32))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_uint32)"
+      },
+      "t_mapping(t_uint32,t_array(t_uint32)dyn_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => uint32[])",
+        "numberOfBytes": "32",
+        "value": "t_array(t_uint32)dyn_storage"
+      },
+      "t_mapping(t_uint32,t_struct(Condition)10893_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => struct TimeCondition.Condition)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Condition)10893_storage"
+      },
+      "t_mapping(t_uint32,t_uint32)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => uint32)",
+        "numberOfBytes": "32",
+        "value": "t_uint32"
+      },
+      "t_struct(Condition)10893_storage": {
+        "encoding": "inplace",
+        "label": "struct TimeCondition.Condition",
+        "members": [
+          {
+            "astId": 10888,
+            "contract": "src/condition/TimeCondition.sol:TimeCondition",
+            "label": "execution",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 10890,
+            "contract": "src/condition/TimeCondition.sol:TimeCondition",
+            "label": "delta",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 10892,
+            "contract": "src/condition/TimeCondition.sol:TimeCondition",
+            "label": "updateable",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      }
+    }
+  }
+}
