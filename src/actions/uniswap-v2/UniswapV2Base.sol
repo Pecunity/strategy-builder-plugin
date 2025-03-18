@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import {IUniswapV2Factory} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
@@ -63,28 +63,6 @@ contract UniswapV2Base is IUniswapV2Base {
     function _percentageShareETH(uint256 percentage, address account) internal view returns (uint256) {
         uint256 totalBalanceETH = account.balance;
         return (totalBalanceETH * percentage) / PERCENTAGE_FACTOR;
-    }
-
-    function _calculateMaxAmounts(address tokenA, address tokenB, address pair, address account)
-        internal
-        view
-        returns (uint256 maxAmountA, uint256 maxAmountB)
-    {
-        (uint112 reserveA, uint112 reserveB,) = IUniswapV2Pair(pair).getReserves();
-
-        uint256 balanceTokenA = IERC20(tokenA).balanceOf(account);
-        uint256 balanceTokenB = IERC20(tokenB).balanceOf(account);
-
-        maxAmountA = balanceTokenA;
-        maxAmountB = balanceTokenB;
-
-        uint256 requiredB = (balanceTokenA * reserveB) / reserveA;
-
-        if (requiredB > balanceTokenB) {
-            maxAmountA = (balanceTokenB * reserveA) / reserveB;
-        } else {
-            maxAmountB = requiredB;
-        }
     }
 
     function _approveToken(address token, uint256 amount) internal view returns (PluginExecution memory) {

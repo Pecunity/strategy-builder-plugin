@@ -245,8 +245,6 @@ contract StrategyBuilderTest is Test {
 
         mockFeeController();
 
-        address executor = makeAddr("executor");
-
         vm.prank(executor);
         strategyBuilderPlugin.executeAutomation(1, address(account1), executor);
     }

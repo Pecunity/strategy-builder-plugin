@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 
@@ -12,7 +12,7 @@ import {Token} from "../../src/test/mocks/MockToken.sol";
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract UniswapV2PluginTest is Test {
+contract UniswapV2SwapActionsTest is Test {
     error ExecutionFailed(IAction.PluginExecution execution);
 
     UniswapV2SwapActions swapActions;

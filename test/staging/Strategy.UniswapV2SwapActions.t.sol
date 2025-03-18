@@ -148,8 +148,6 @@ contract StrategyUniswapV2SwapActionTest is Test {
         strategyBuilderPlugin = new StrategyBuilderPlugin(address(feeController),address(feeHandler));
         vm.stopPrank();
 
-        //TODO:Setup the contracts
-
         vm.startPrank(OWNER);
 
         feeController.setTokenGetter(
@@ -172,6 +170,7 @@ contract StrategyUniswapV2SwapActionTest is Test {
 
         //adding strategy builder plugin to the account
         bytes32 manifestHash = keccak256(abi.encode(strategyBuilderPlugin.pluginManifest()));
+        console.logBytes32(manifestHash);
 
         // we will have a single function dependency for our counter contract: the single owner user op validation
         // we'll use this to ensure that only an owner can sign a user operation that can successfully increment
@@ -179,6 +178,11 @@ contract StrategyUniswapV2SwapActionTest is Test {
         dependencies[0] = FunctionReferenceLib.pack(
             address(singleOwnerPlugin), uint8(ISingleOwnerPlugin.FunctionId.USER_OP_VALIDATION_OWNER)
         );
+
+        bytes21 _output = bytes21(FunctionReference.unwrap(dependencies[0]));
+
+        console.logBytes21(_output);
+        console.logAddress(address(singleOwnerPlugin));
 
         // install this plugin on the account as the owner
         vm.prank(owner1);

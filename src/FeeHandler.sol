@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -39,6 +39,8 @@ contract FeeHandler is Ownable, IFeeHandler {
         uint256 totalFee = amount;
         uint256 feeDiscount = 0;
         uint256 treasuryFee = 0;
+
+        //TODO: Implement Fee Reduction
 
         if (primaryTokenActive() && token == primaryToken) {
             feeDiscount = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {IFeeController} from "./interfaces/IFeeController.sol";
 import {ITokenGetter} from "./interfaces/ITokenGetter.sol";
