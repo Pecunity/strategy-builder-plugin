@@ -6,6 +6,8 @@ import * as dotenv from "dotenv";
 import { NetworkUserConfig } from "hardhat/types";
 dotenv.config();
 
+import "./tasks";
+
 /** @type import('hardhat/config').HardhatUserConfig */
 const deployerPrivateKey =
   process.env.PRIVATE_KEY ??

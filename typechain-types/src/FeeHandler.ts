@@ -37,12 +37,14 @@ export interface FeeHandlerInterface extends Interface {
       | "primaryToken"
       | "primaryTokenActive"
       | "primaryTokenDiscount"
+      | "reduction"
       | "renounceOwnership"
       | "tokenAllowed"
       | "transferOwnership"
       | "treasury"
       | "updatePercentages"
       | "updatePrimaryTokenDiscount"
+      | "updateReduction"
       | "updateTokenAllowance"
       | "updateVault"
       | "vault"
@@ -57,6 +59,7 @@ export interface FeeHandlerInterface extends Interface {
       | "PrimaryTokenActivated"
       | "UpdatedPercentages"
       | "UpdatedPrimaryTokenDiscount"
+      | "UpdatedReduction"
       | "UpdatedTokenAllowance"
       | "UpdatedVault"
   ): EventFragment;
@@ -102,6 +105,7 @@ export interface FeeHandlerInterface extends Interface {
     functionFragment: "primaryTokenDiscount",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "reduction", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -122,6 +126,10 @@ export interface FeeHandlerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "updatePrimaryTokenDiscount",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateReduction",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "updateTokenAllowance",
@@ -175,6 +183,7 @@ export interface FeeHandlerInterface extends Interface {
     functionFragment: "primaryTokenDiscount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "reduction", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -194,6 +203,10 @@ export interface FeeHandlerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "updatePrimaryTokenDiscount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateReduction",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -289,6 +302,18 @@ export namespace UpdatedPrimaryTokenDiscountEvent {
   export type OutputTuple = [discount: bigint];
   export interface OutputObject {
     discount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UpdatedReductionEvent {
+  export type InputTuple = [reduction: AddressLike];
+  export type OutputTuple = [reduction: string];
+  export interface OutputObject {
+    reduction: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -403,6 +428,8 @@ export interface FeeHandler extends BaseContract {
 
   primaryTokenDiscount: TypedContractMethod<[], [bigint], "view">;
 
+  reduction: TypedContractMethod<[], [string], "view">;
+
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   tokenAllowed: TypedContractMethod<[token: AddressLike], [boolean], "view">;
@@ -423,6 +450,12 @@ export interface FeeHandler extends BaseContract {
 
   updatePrimaryTokenDiscount: TypedContractMethod<
     [_discount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  updateReduction: TypedContractMethod<
+    [_reduction: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -494,6 +527,9 @@ export interface FeeHandler extends BaseContract {
     nameOrSignature: "primaryTokenDiscount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "reduction"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
@@ -515,6 +551,9 @@ export interface FeeHandler extends BaseContract {
   getFunction(
     nameOrSignature: "updatePrimaryTokenDiscount"
   ): TypedContractMethod<[_discount: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "updateReduction"
+  ): TypedContractMethod<[_reduction: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "updateTokenAllowance"
   ): TypedContractMethod<
@@ -573,6 +612,13 @@ export interface FeeHandler extends BaseContract {
     UpdatedPrimaryTokenDiscountEvent.InputTuple,
     UpdatedPrimaryTokenDiscountEvent.OutputTuple,
     UpdatedPrimaryTokenDiscountEvent.OutputObject
+  >;
+  getEvent(
+    key: "UpdatedReduction"
+  ): TypedContractEvent<
+    UpdatedReductionEvent.InputTuple,
+    UpdatedReductionEvent.OutputTuple,
+    UpdatedReductionEvent.OutputObject
   >;
   getEvent(
     key: "UpdatedTokenAllowance"
@@ -654,6 +700,17 @@ export interface FeeHandler extends BaseContract {
       UpdatedPrimaryTokenDiscountEvent.InputTuple,
       UpdatedPrimaryTokenDiscountEvent.OutputTuple,
       UpdatedPrimaryTokenDiscountEvent.OutputObject
+    >;
+
+    "UpdatedReduction(address)": TypedContractEvent<
+      UpdatedReductionEvent.InputTuple,
+      UpdatedReductionEvent.OutputTuple,
+      UpdatedReductionEvent.OutputObject
+    >;
+    UpdatedReduction: TypedContractEvent<
+      UpdatedReductionEvent.InputTuple,
+      UpdatedReductionEvent.OutputTuple,
+      UpdatedReductionEvent.OutputObject
     >;
 
     "UpdatedTokenAllowance(address,bool)": TypedContractEvent<

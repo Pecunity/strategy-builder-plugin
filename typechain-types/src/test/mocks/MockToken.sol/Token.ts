@@ -32,6 +32,7 @@ export interface TokenInterface extends Interface {
       | "decimals"
       | "decreaseAllowance"
       | "increaseAllowance"
+      | "mint"
       | "name"
       | "setDecimals"
       | "symbol"
@@ -61,6 +62,10 @@ export interface TokenInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "increaseAllowance",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "mint",
     values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
@@ -94,6 +99,7 @@ export interface TokenInterface extends Interface {
     functionFragment: "increaseAllowance",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setDecimals",
@@ -218,6 +224,12 @@ export interface Token extends BaseContract {
     "nonpayable"
   >;
 
+  mint: TypedContractMethod<
+    [account: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   name: TypedContractMethod<[], [string], "view">;
 
   setDecimals: TypedContractMethod<
@@ -278,6 +290,13 @@ export interface Token extends BaseContract {
   ): TypedContractMethod<
     [spender: AddressLike, addedValue: BigNumberish],
     [boolean],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "mint"
+  ): TypedContractMethod<
+    [account: AddressLike, amount: BigNumberish],
+    [void],
     "nonpayable"
   >;
   getFunction(

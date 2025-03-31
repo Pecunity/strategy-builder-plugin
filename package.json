@@ -10,7 +10,7 @@
   "scripts": {
     "test": "forge test",
     "compile": "hardhat compile && forge build",
-    "coverage": "forge coverage --report lcov && genhtml lcov.info --branch-coverage --output-dir coverage",
+    "coverage": "forge coverage --report lcov && genhtml lcov.info  --output-dir coverage",
     "deploy": "hardhat deploy --network"
   },
   "keywords": [],

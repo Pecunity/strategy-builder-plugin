@@ -1,8 +1,10 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 interface IStrategyBuilderPlugin {
-    enum FunctionId {USER_OP_VALIDATION_SESSION_KEY}
+    enum FunctionId {
+        USER_OP_VALIDATION_SESSION_KEY
+    }
 
     enum ActionType {
         EXTERNAL,
@@ -85,7 +87,7 @@ interface IStrategyBuilderPlugin {
         uint256 maxFeeInUSD,
         Condition calldata condition
     ) external;
-
+    function executeAutomation(uint32 id, address wallet, address beneficary) external;
     // function executeStrategy(uint16 id) external;
 
     // function deleteStrategy(uint16 id) external;

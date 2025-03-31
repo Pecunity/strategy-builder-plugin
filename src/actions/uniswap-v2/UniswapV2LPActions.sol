@@ -1,21 +1,33 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {UniswapV2Base} from "./UniswapV2Base.sol";
 import {IUniswapV2Router01} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import {IUniswapV2Factory} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import {IUniswapV2Pair} from "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IUniswapV2LPActions} from "./interfaces/IUniswapV2LPActions.sol";
 
-error UniswapV2LPActions__PoolPairDoesNotExist();
-error UniswapV2LPActions__NotZeroAmountForBothTokensAllowed();
-
-contract UniswapV2LPActions is UniswapV2Base {
+contract UniswapV2LPActions is UniswapV2Base, IUniswapV2LPActions {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Constructor         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    constructor(address _router) UniswapV2Base(_router) {}
+    constructor(address _router) UniswapV2Base(_router) {
+        tokenGetterIDs[IUniswapV2LPActions.addLiquidityETH.selector] = 1;
+        tokenGetterIDs[IUniswapV2LPActions.addLiqudityPercentageETH.selector] = 1;
+        tokenGetterIDs[IUniswapV2LPActions.removeLiquidityETH.selector] = 1;
+        tokenGetterIDs[IUniswapV2LPActions.removeLiquidityETHPercentage.selector] = 1;
+        tokenGetterIDs[IUniswapV2LPActions.zapETH.selector] = 1;
+
+        tokenGetterIDs[IUniswapV2LPActions.addLiquidity.selector] = 2;
+
+        tokenGetterIDs[IUniswapV2LPActions.removeLiquidity.selector] = 3;
+
+        tokenGetterIDs[IUniswapV2LPActions.zap.selector] = 4;
+        tokenGetterIDs[IUniswapV2LPActions.removeLiquidityPercentage.selector] = 4;
+        tokenGetterIDs[IUniswapV2LPActions.addLiqudityPercentage.selector] = 4;
+    }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Base LP PluginExecution Functions    ┃
@@ -31,7 +43,7 @@ contract UniswapV2LPActions is UniswapV2Base {
         address to
     ) public view returns (PluginExecution[] memory) {
         if (amountADesired == 0 && amountBDesired == 0) {
-            revert UniswapV2LPActions__NotZeroAmountForBothTokensAllowed();
+            revert NotZeroAmountForBothTokensAllowed();
         }
 
         if (amountADesired == 0) {
@@ -62,7 +74,7 @@ contract UniswapV2LPActions is UniswapV2Base {
         address to
     ) public view returns (PluginExecution[] memory) {
         if (amountTokenDesired == 0 && amountETHDesired == 0) {
-            revert UniswapV2LPActions__NotZeroAmountForBothTokensAllowed();
+            revert NotZeroAmountForBothTokensAllowed();
         }
 
         if (amountTokenDesired == 0) {
@@ -118,44 +130,7 @@ contract UniswapV2LPActions is UniswapV2Base {
     // ┃   Percentage LP PluginExecution Functions    ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function addLiquidityETHPercentage(address token, uint256 percentageETHDesired, address to)
-        public
-        view
-        validPercentage(percentageETHDesired)
-        returns (PluginExecution[] memory)
-    {
-        uint256 amountETHDesired = _percentageShareETH(percentageETHDesired, to);
-
-        uint256 amountTokenDesired = _calculateAmountForLP(WETH, amountETHDesired, _getPoolPair(token, WETH));
-
-        return addLiquidityETH(token, amountTokenDesired, 0, amountETHDesired, 0, to);
-    }
-
-    function addLiquidityETHPercentageToken(address token, uint256 percentageTokenDesired, address to)
-        external
-        view
-        validPercentage(percentageTokenDesired)
-        returns (PluginExecution[] memory)
-    {
-        uint256 amountTokenDesired = _percentageShare(token, percentageTokenDesired, to);
-        uint256 amountETHDesired = _calculateAmountForLP(token, amountTokenDesired, _getPoolPair(token, WETH));
-
-        return addLiquidityETH(token, amountTokenDesired, 0, amountETHDesired, 0, to);
-    }
-
-    function addLiquidityPercentage(uint256 percentageADesired, address tokenA, address tokenB, address to)
-        external
-        view
-        validPercentage(percentageADesired)
-        returns (PluginExecution[] memory)
-    {
-        uint256 amountADesired = _percentageShare(tokenA, percentageADesired, to);
-        uint256 amountBDesired = _calculateAmountForLP(tokenA, amountADesired, _getPoolPair(tokenA, tokenB));
-
-        return addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, 0, 0, to);
-    }
-
-    function addLiqudityPercentageOfMaxPossible(address tokenA, address tokenB, uint256 percentage, address to)
+    function addLiqudityPercentage(address tokenA, address tokenB, uint256 percentage, address wallet)
         external
         view
         validPercentage(percentage)
@@ -163,23 +138,36 @@ contract UniswapV2LPActions is UniswapV2Base {
     {
         address pair = _getPoolPair(tokenA, tokenB);
 
-        address _tokenA = tokenA;
-        address _tokenB = tokenB;
-        if (IUniswapV2Pair(pair).token0() != tokenA) {
-            _tokenA = tokenB;
-            _tokenB = tokenA;
-        }
-
-        (uint256 maxAmountA, uint256 maxAmountB) = _calculateMaxAmounts(_tokenA, _tokenB, pair, to);
+        (uint256 maxAmountA, uint256 maxAmountB) = _getMaxAmounts(tokenA, tokenB, pair, wallet);
 
         return addLiquidity(
-            _tokenA,
-            _tokenB,
+            tokenA,
+            tokenB,
             (maxAmountA * percentage) / PERCENTAGE_FACTOR,
             (maxAmountB * percentage) / PERCENTAGE_FACTOR,
             0,
             0,
-            to
+            wallet
+        );
+    }
+
+    function addLiqudityPercentageETH(address token, uint256 percentage, address wallet)
+        external
+        view
+        validPercentage(percentage)
+        returns (PluginExecution[] memory)
+    {
+        address pair = _getPoolPair(token, WETH);
+
+        (uint256 maxAmountToken, uint256 maxAmountETH) = _getMaxAmountsETH(token, pair, wallet);
+
+        return addLiquidityETH(
+            token,
+            maxAmountToken * percentage / PERCENTAGE_FACTOR,
+            0,
+            maxAmountETH * percentage / PERCENTAGE_FACTOR,
+            0,
+            wallet
         );
     }
 
@@ -208,7 +196,7 @@ contract UniswapV2LPActions is UniswapV2Base {
         view
         returns (PluginExecution[] memory)
     {
-        PluginExecution[] memory executions = new PluginExecution[](4);
+        PluginExecution[] memory executions = new PluginExecution[](5);
 
         address pair = _getPoolPair(tokenA, tokenB);
 
@@ -222,37 +210,35 @@ contract UniswapV2LPActions is UniswapV2Base {
         executions[1] = swapExecutions[1];
         executions[2] = lpExecutions[0];
         executions[3] = lpExecutions[1];
+        executions[4] = lpExecutions[2];
 
         return executions;
     }
 
     function zapETH(address token, uint256 amountIn, bool inputETH, address to)
         external
+        view
         returns (PluginExecution[] memory)
     {
-        address pair = _getPoolPair(WETH, token);
+        (uint256 amountToken, uint256 amountETH, PluginExecution[] memory swapExecutions) =
+            _swapToETHorETH(token, amountIn, inputETH, to);
 
-        address tokenA = inputETH ? WETH : token;
+        PluginExecution[] memory executions = new PluginExecution[](swapExecutions.length + 2);
 
-        uint256 swapAmount = _calculateSwapAmountForProvidingLiquidity(pair, tokenA, amountIn);
+        PluginExecution[] memory lpExecutions = addLiquidityETH(token, amountToken, 0, amountETH, 0, to);
 
-        uint256 amountToken;
-        uint256 amountETH;
-        uint8 executionAmount;
-        PluginExecution[] memory swapExecutions;
-        if (inputETH) {
-            (amountToken, swapExecutions) = _swapETH(token, swapAmount, to);
-            amountETH = amountIn - swapAmount;
-            executionAmount = 1;
+        executions[0] = swapExecutions[0];
+
+        if (swapExecutions.length == 1) {
+            executions[1] = lpExecutions[0];
+            executions[2] = lpExecutions[1];
         } else {
-            (amountETH, swapExecutions) = _swapToETH(token, swapAmount, to);
-            amountToken = amountIn - swapAmount;
-            executionAmount = 2;
+            executions[1] = swapExecutions[1];
+            executions[2] = lpExecutions[0];
+            executions[3] = lpExecutions[1];
         }
 
-        PluginExecution[] memory executions = new PluginExecution[](executionAmount+2);
-
-        // addLiquidityETH(token, amountToken, 0, amountETH, 0);
+        return executions;
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -263,7 +249,7 @@ contract UniswapV2LPActions is UniswapV2Base {
         address _poolPair = IUniswapV2Factory(factory).getPair(tokenA, tokenB);
 
         if (_poolPair == address(0)) {
-            revert UniswapV2LPActions__PoolPairDoesNotExist();
+            revert PoolPairDoesNotExist();
         }
 
         return _poolPair;
@@ -281,6 +267,69 @@ contract UniswapV2LPActions is UniswapV2Base {
             amountForLp = (amount * reserve1) / reserve0;
         } else {
             amountForLp = (amount * reserve0) / reserve1;
+        }
+    }
+
+    function _getMaxAmounts(address tokenA, address tokenB, address pair, address account)
+        internal
+        view
+        returns (uint256 maxAmountA, uint256 maxAmountB)
+    {
+        (uint112 _reserveA, uint112 _reserveB,) = IUniswapV2Pair(pair).getReserves();
+
+        uint112 reserveA;
+        uint112 reserveB;
+        if (IUniswapV2Pair(pair).token0() == tokenA) {
+            reserveA = _reserveA;
+            reserveB = _reserveB;
+        } else {
+            reserveA = _reserveB;
+            reserveB = _reserveA;
+        }
+
+        uint256 balanceA = IERC20(tokenA).balanceOf(account);
+        uint256 balanceB = IERC20(tokenB).balanceOf(account);
+
+        (maxAmountA, maxAmountB) = _calculateMaxAmounts(reserveA, reserveB, balanceA, balanceB);
+    }
+
+    function _getMaxAmountsETH(address token, address pair, address account)
+        internal
+        view
+        returns (uint256 maxAmountToken, uint256 maxAmountETH)
+    {
+        (uint112 reserveA, uint112 reserveB,) = IUniswapV2Pair(pair).getReserves();
+
+        uint112 reserveToken;
+        uint112 reserveETH;
+        if (IUniswapV2Pair(pair).token0() == token) {
+            reserveToken = reserveA;
+            reserveETH = reserveB;
+        } else {
+            reserveToken = reserveB;
+            reserveETH = reserveA;
+        }
+
+        uint256 balanceToken = IERC20(token).balanceOf(account);
+        uint256 balanceETH = account.balance;
+
+        (maxAmountToken, maxAmountETH) = _calculateMaxAmounts(reserveToken, reserveETH, balanceToken, balanceETH);
+    }
+
+    function _calculateMaxAmounts(uint112 reserveA, uint112 reserveB, uint256 balanceA, uint256 balanceB)
+        internal
+        view
+        returns (uint256 maxAmountA, uint256 maxAmountB)
+    {
+        maxAmountA = balanceA;
+        maxAmountB = balanceB;
+
+        uint256 requiredB = (balanceA * reserveB) / reserveA;
+
+        if (requiredB > balanceB) {
+            maxAmountA = (balanceB * reserveA) / reserveB;
+        } else {
+            maxAmountB = requiredB;
         }
     }
 
@@ -347,5 +396,50 @@ contract UniswapV2LPActions is UniswapV2Base {
         );
 
         return PluginExecution({target: router, value: 0, data: _data});
+    }
+
+    function _swapToETHorETH(address token, uint256 amountIn, bool inputETH, address to)
+        internal
+        view
+        returns (uint256 amountToken, uint256 amountETH, PluginExecution[] memory swapExecutions)
+    {
+        address pair = _getPoolPair(WETH, token);
+
+        address tokenA = inputETH ? WETH : token;
+
+        uint256 swapAmount = _calculateSwapAmountForProvidingLiquidity(pair, tokenA, amountIn);
+
+        if (inputETH) {
+            (amountToken, swapExecutions) = _swapETH(token, swapAmount, to);
+            amountETH = amountIn - swapAmount;
+        } else {
+            (amountETH, swapExecutions) = _swapToETH(token, swapAmount, to);
+            amountToken = amountIn - swapAmount;
+        }
+    }
+
+    function getTokenForSelector(bytes4 selector, bytes memory params) external view override returns (address) {
+        uint8 tokenGetterID = tokenGetterIDs[selector];
+
+        if (tokenGetterID == 0 || tokenGetterID > 4) {
+            revert InvalidTokenGetterID();
+        }
+
+        if (tokenGetterID == 1) {
+            return address(0);
+        }
+
+        if (tokenGetterID == 2) {
+            (address token,,,,,,) = abi.decode(params, (address, address, uint256, uint256, uint256, uint256, address));
+            return token;
+        }
+
+        if (tokenGetterID == 3) {
+            (address token,,,,,) = abi.decode(params, (address, address, uint256, uint256, uint256, address));
+            return token;
+        } else {
+            (address token,,,) = abi.decode(params, (address, address, uint256, address));
+            return token;
+        }
     }
 }

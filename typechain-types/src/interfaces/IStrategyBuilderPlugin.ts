@@ -94,7 +94,7 @@ export declare namespace IStrategyBuilderPlugin {
 
 export interface IStrategyBuilderPluginInterface extends Interface {
   getFunction(
-    nameOrSignature: "createAutomation" | "createStrategy"
+    nameOrSignature: "createAutomation" | "createStrategy" | "executeAutomation"
   ): FunctionFragment;
 
   getEvent(
@@ -127,6 +127,10 @@ export interface IStrategyBuilderPluginInterface extends Interface {
       IStrategyBuilderPlugin.StrategyStepStruct[]
     ]
   ): string;
+  encodeFunctionData(
+    functionFragment: "executeAutomation",
+    values: [BigNumberish, AddressLike, AddressLike]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "createAutomation",
@@ -134,6 +138,10 @@ export interface IStrategyBuilderPluginInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createStrategy",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "executeAutomation",
     data: BytesLike
   ): Result;
 }
@@ -370,6 +378,12 @@ export interface IStrategyBuilderPlugin extends BaseContract {
     "nonpayable"
   >;
 
+  executeAutomation: TypedContractMethod<
+    [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -395,6 +409,13 @@ export interface IStrategyBuilderPlugin extends BaseContract {
       creator: AddressLike,
       steps: IStrategyBuilderPlugin.StrategyStepStruct[]
     ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "executeAutomation"
+  ): TypedContractMethod<
+    [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
     [void],
     "nonpayable"
   >;

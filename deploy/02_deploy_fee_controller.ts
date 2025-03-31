@@ -24,12 +24,15 @@ const deployFeeController: DeployFunction = async (
 
     const priceOracle = (await get("PriceOracle")).address;
 
+    const owner = config.owner
+
     console.log("Deployment Parameter FeeControler:");
     console.log(`priceOracle (contract): ${priceOracle}`);
     console.log(`maxFeeLimits: ${maxFeeLimits}`);
     console.log(`minFeesInUSD: ${minFeesInUSD}`);
+    console.log(`owner: ${owner}`);
 
-    const args = [priceOracle, maxFeeLimits, minFeesInUSD];
+    const args = [priceOracle, maxFeeLimits, minFeesInUSD, owner];
 
     const feeControllerDeployment = await deploy("FeeController", {
       from: deployer,

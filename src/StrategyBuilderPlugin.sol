@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {BasePlugin} from "modular-account-libs/plugins/BasePlugin.sol";
 import {IPluginExecutor} from "modular-account-libs/interfaces/IPluginExecutor.sol";
@@ -19,6 +19,10 @@ import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IAction} from "./interfaces/IAction.sol";
 
 contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃       StateVariable       ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
     // metadata used by the pluginMetadata() method down below
     string public constant NAME = "Strategy Builder Plugin";
     string public constant VERSION = "0.0.1";

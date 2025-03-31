@@ -46,11 +46,14 @@ export interface FeeControllerInterface extends Interface {
       | "hasOracle"
       | "maxFeeLimit"
       | "minFeeInUSD"
+      | "owner"
       | "priceOracle"
+      | "renounceOwnership"
       | "setFunctionFeeConfig"
       | "setGlobalTokenGetter"
       | "setTokenGetter"
       | "tokenGetter"
+      | "transferOwnership"
   ): FunctionFragment;
 
   getEvent(
@@ -58,6 +61,7 @@ export interface FeeControllerInterface extends Interface {
       | "FeeConfigSet"
       | "GlobalTokenGetterSet"
       | "MinFeeSet"
+      | "OwnershipTransferred"
       | "TokenGetterSet"
   ): EventFragment;
 
@@ -93,8 +97,13 @@ export interface FeeControllerInterface extends Interface {
     functionFragment: "minFeeInUSD",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "priceOracle",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -112,6 +121,10 @@ export interface FeeControllerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "tokenGetter",
     values: [AddressLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [AddressLike]
   ): string;
 
   decodeFunctionResult(
@@ -143,8 +156,13 @@ export interface FeeControllerInterface extends Interface {
     functionFragment: "minFeeInUSD",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "priceOracle",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -161,6 +179,10 @@ export interface FeeControllerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "tokenGetter",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
 }
@@ -206,6 +228,19 @@ export namespace MinFeeSetEvent {
   export interface OutputObject {
     feeType: bigint;
     minFeeUSD: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -310,7 +345,11 @@ export interface FeeController extends BaseContract {
 
   minFeeInUSD: TypedContractMethod<[_type: BigNumberish], [bigint], "view">;
 
+  owner: TypedContractMethod<[], [string], "view">;
+
   priceOracle: TypedContractMethod<[], [string], "view">;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   setFunctionFeeConfig: TypedContractMethod<
     [
@@ -338,6 +377,12 @@ export interface FeeController extends BaseContract {
     [_target: AddressLike, _selector: BytesLike],
     [string],
     "view"
+  >;
+
+  transferOwnership: TypedContractMethod<
+    [newOwner: AddressLike],
+    [void],
+    "nonpayable"
   >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
@@ -385,8 +430,14 @@ export interface FeeController extends BaseContract {
     nameOrSignature: "minFeeInUSD"
   ): TypedContractMethod<[_type: BigNumberish], [bigint], "view">;
   getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "priceOracle"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "renounceOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "setFunctionFeeConfig"
   ): TypedContractMethod<
@@ -419,6 +470,9 @@ export interface FeeController extends BaseContract {
     [string],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "transferOwnership"
+  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
 
   getEvent(
     key: "FeeConfigSet"
@@ -440,6 +494,13 @@ export interface FeeController extends BaseContract {
     MinFeeSetEvent.InputTuple,
     MinFeeSetEvent.OutputTuple,
     MinFeeSetEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferred"
+  ): TypedContractEvent<
+    OwnershipTransferredEvent.InputTuple,
+    OwnershipTransferredEvent.OutputTuple,
+    OwnershipTransferredEvent.OutputObject
   >;
   getEvent(
     key: "TokenGetterSet"
@@ -481,6 +542,17 @@ export interface FeeController extends BaseContract {
       MinFeeSetEvent.InputTuple,
       MinFeeSetEvent.OutputTuple,
       MinFeeSetEvent.OutputObject
+    >;
+
+    "OwnershipTransferred(address,address)": TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+    OwnershipTransferred: TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
     >;
 
     "TokenGetterSet(address,bytes4,address)": TypedContractEvent<

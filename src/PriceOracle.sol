@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {IPyth} from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import {PythStructs} from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
@@ -11,8 +11,10 @@ contract PriceOracle is Ownable, IPriceOracle {
 
     mapping(address token => bytes32 oracleID) private oracleIDs;
 
-    constructor(address _pythOracle) {
+    constructor(address _pythOracle, address _owner) {
         pythOracle = IPyth(_pythOracle);
+
+        _transferOwnership(_owner);
     }
 
     function setOracleID(address _token, bytes32 _oracleID) external onlyOwner {

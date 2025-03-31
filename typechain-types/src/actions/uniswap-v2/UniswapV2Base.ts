@@ -23,32 +23,68 @@ import type {
 export interface UniswapV2BaseInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "DELTA_DEADLINE"
+      | "PERCENTAGE_FACTOR"
       | "WETH"
       | "_getSwapAmount"
       | "factory"
+      | "getTokenForSelector"
       | "router"
+      | "tokenGetterIDs"
       | "uniswapV2RouterAddress"
   ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "DELTA_DEADLINE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "PERCENTAGE_FACTOR",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "WETH", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "_getSwapAmount",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getTokenForSelector",
+    values: [BytesLike, BytesLike]
+  ): string;
   encodeFunctionData(functionFragment: "router", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "tokenGetterIDs",
+    values: [BytesLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "uniswapV2RouterAddress",
     values?: undefined
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "DELTA_DEADLINE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "PERCENTAGE_FACTOR",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "WETH", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "_getSwapAmount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenForSelector",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "router", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "tokenGetterIDs",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "uniswapV2RouterAddress",
     data: BytesLike
@@ -98,6 +134,10 @@ export interface UniswapV2Base extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  DELTA_DEADLINE: TypedContractMethod<[], [bigint], "view">;
+
+  PERCENTAGE_FACTOR: TypedContractMethod<[], [bigint], "view">;
+
   WETH: TypedContractMethod<[], [string], "view">;
 
   _getSwapAmount: TypedContractMethod<
@@ -108,7 +148,15 @@ export interface UniswapV2Base extends BaseContract {
 
   factory: TypedContractMethod<[], [string], "view">;
 
+  getTokenForSelector: TypedContractMethod<
+    [arg0: BytesLike, arg1: BytesLike],
+    [string],
+    "view"
+  >;
+
   router: TypedContractMethod<[], [string], "view">;
+
+  tokenGetterIDs: TypedContractMethod<[arg0: BytesLike], [bigint], "view">;
 
   uniswapV2RouterAddress: TypedContractMethod<[], [string], "view">;
 
@@ -116,6 +164,12 @@ export interface UniswapV2Base extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "DELTA_DEADLINE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "PERCENTAGE_FACTOR"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "WETH"
   ): TypedContractMethod<[], [string], "view">;
@@ -126,8 +180,14 @@ export interface UniswapV2Base extends BaseContract {
     nameOrSignature: "factory"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "getTokenForSelector"
+  ): TypedContractMethod<[arg0: BytesLike, arg1: BytesLike], [string], "view">;
+  getFunction(
     nameOrSignature: "router"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "tokenGetterIDs"
+  ): TypedContractMethod<[arg0: BytesLike], [bigint], "view">;
   getFunction(
     nameOrSignature: "uniswapV2RouterAddress"
   ): TypedContractMethod<[], [string], "view">;

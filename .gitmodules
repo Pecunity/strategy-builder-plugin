@@ -22,3 +22,6 @@
 [submodule "lib/aave-v3-core"]
 	path = lib/aave-v3-core
 	url = https://github.com/aave/aave-v3-core
+[submodule "lib/modular-account"]
+	path = lib/modular-account
+	url = https://github.com/alchemyplatform/modular-account

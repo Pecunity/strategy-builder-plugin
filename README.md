@@ -1,12 +1,40 @@
-## ERC-6900 Account Plugin
+# StrategyBuilderPlugin - ERC6900 Standard
 
-This is a basic example of an ERC-6900 compatible plugin called CounterPlugin, built in Foundry. It has one function that can be called through a user operation, called `increment`. In `/src` you will find this plugin, documented so you can understand how it works in detail.
+## Overview
 
-You will also find a basic test in `/test` which will show this counter plugin working. Here you'll see how to setup the modular account, install the plugins and send a user operation specifying the intent to increment the count. Use `forge test` to run these tests.
+The **StrategyBuilderPlugin** is a modular smart contract built on the **ERC6900 standard**, designed to automate and execute **advanced DeFi strategies** seamlessly. This plugin integrates with modular smart accounts, allowing users to create, manage, and automate complex financial strategies such as **vault management, borrowing, leveraged yield farming, and more**.
 
-Also included is a helper contract for tests call `AccountTestBase`, which handles the process of setting up the EntryPoint and a testing account. If you're writing your own tests for a custom plugin, you can use this test base to simplify the setup.
+## Features
 
-Feel free to modify the plugin and tests to challenge your understanding of ERC-6900 plugins, or use this to start building your own plugin! Click "Use this template" above to create your own plugin.
+✅ **DeFi Strategy Automation** – Users can define and execute automated strategies involving lending, borrowing, staking, and farming.  
+✅ **Modular & Extensible** – Built within the ERC6900 ecosystem, enabling compatibility with other modular account plugins.  
+✅ **Smart Execution & Conditions** – Allows strategies to execute based on predefined conditions, optimizing yield and efficiency.  
+✅ **Fee Management Integration** – Implements **IFeeController** and **IFeeHandler** to ensure seamless fee handling for automated transactions.  
+✅ **Security & Permissions** – Utilizes **strategy validation** to ensure only authorized actions are executed within a user’s smart account.
+
+## How It Works
+
+1. **Strategy Creation** – Users define custom strategies that include multiple **DeFi actions** (e.g., borrowing, staking, swapping).
+2. **Automated Execution** – The plugin triggers actions based on conditions (e.g., interest rate thresholds, collateral ratios).
+3. **Fee Handling** – Ensures fair and transparent fee structures using external controllers and handlers.
+4. **Smart Account Integration** – Seamlessly integrates with modular smart accounts, leveraging ERC6900’s flexible permissioning system.
+
+## Use Cases
+
+- **Automated Yield Farming** – Deploy capital across multiple DeFi protocols for optimal returns.
+- **Vault Management** – Automatically rebalance or reinvest assets in DeFi vaults.
+- **Leverage Strategies** – Execute leveraged borrowing and farming with automated risk management.
+- **Automated Liquidation Protection** – Prevent unnecessary liquidations by setting up stop-loss mechanisms.
+
+## Why StrategyBuilderPlugin?
+
+By leveraging the **ERC6900 modular account standard**, this plugin enhances DeFi automation, making complex financial strategies **accessible, secure, and highly efficient** for both institutional and individual users.
+
+---
+
+🔗 **Author:** 3Blocks  
+📜 **License:** MIT  
+🚀 **Version:** 0.0.1
 
 ## Foundry Documentation
 

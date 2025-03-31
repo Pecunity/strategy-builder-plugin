@@ -1,11 +1,12 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.24;
 
 import {IFeeController} from "./interfaces/IFeeController.sol";
 import {ITokenGetter} from "./interfaces/ITokenGetter.sol";
 import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract FeeController is IFeeController {
+contract FeeController is Ownable, IFeeController {
     uint256 public constant PERCENTAGE_DIVISOR = 10000;
 
     IPriceOracle private oracle;
@@ -21,7 +22,7 @@ contract FeeController is IFeeController {
     // Mapping: FeeType => Minimum fee in USD (18 decimals)
     mapping(FeeType => uint256) private minFeesInUSD;
 
-    constructor(address _oracle, uint256[] memory _maxFeeLimits, uint256[] memory _minFeesInUSD) {
+    constructor(address _oracle, uint256[] memory _maxFeeLimits, uint256[] memory _minFeesInUSD, address _owner) {
         if (_oracle == address(0)) {
             revert ZeroAddressNotValid();
         }
@@ -29,6 +30,8 @@ contract FeeController is IFeeController {
         if (_maxFeeLimits.length != 3 || _minFeesInUSD.length != 3) {
             revert InvalidArrayLength();
         }
+
+        _transferOwnership(_owner);
 
         oracle = IPriceOracle(_oracle);
 
