@@ -592,6 +592,29 @@ const _abi = [
     stateMutability: "nonpayable",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "uint32",
+        name: "id",
+        type: "uint32",
+      },
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "beneficary",
+        type: "address",
+      },
+    ],
+    name: "executeAutomation",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ] as const;
 
 export class IStrategyBuilderPlugin__factory {

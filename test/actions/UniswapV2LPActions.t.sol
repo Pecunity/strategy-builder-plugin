@@ -46,8 +46,8 @@ contract UniswapV2LPActionsTest is Test {
 
         deal(TOKEN_HOLDER, MAX_ETH);
         vm.startPrank(TOKEN_HOLDER);
-        token1 = new Token("Token 1","T1",MAX_TOKEN_SUPPLY);
-        token2 = new Token("Token 2","T2",MAX_TOKEN_SUPPLY);
+        token1 = new Token("Token 1", "T1", MAX_TOKEN_SUPPLY);
+        token2 = new Token("Token 2", "T2", MAX_TOKEN_SUPPLY);
 
         vm.stopPrank();
     }
@@ -218,8 +218,28 @@ contract UniswapV2LPActionsTest is Test {
         assertEq(liquidityBalance - liqudity, IERC20(pair).balanceOf(WALLET));
     }
 
-    function test_removeLiqudityETH_Success() external {
-        assertTrue(false);
+    function test_removeLiqudityETH_Success(uint256 _amount) external {
+        // add liquidity
+        uint256 amountDesired = 10e19;
+        deal(WALLET, amountDesired);
+        deal(address(token1), WALLET, amountDesired);
+
+        IAction.PluginExecution[] memory lpAddExecutions =
+            lpActions.addLiquidityETH(address(token1), amountDesired, 0, amountDesired, 0, WALLET);
+        execute(lpAddExecutions);
+
+        address factory = IUniswapV2Router01(ROUTER).factory();
+        address pair = IUniswapV2Factory(factory).getPair(address(token1), WETH);
+        uint256 liquidityBalance = IERC20(pair).balanceOf(WALLET);
+
+        uint256 liqudity = bound(_amount, 1e2, liquidityBalance);
+
+        IAction.PluginExecution[] memory executions =
+            lpActions.removeLiquidityETH(address(token1), liqudity, 0, 0, WALLET);
+
+        execute(executions);
+
+        assertEq(liquidityBalance - liqudity, IERC20(pair).balanceOf(WALLET));
     }
 
     function test_addLiquidityPercentage_Success(uint256 _percentage, uint256 _balanceToken1, uint256 _balanceToken2)

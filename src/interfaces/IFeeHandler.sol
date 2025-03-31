@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 interface IFeeHandler {
     error InvalidAmount();
     error ZeroAddressNotValid();
-    error InvalidBeneficiaryOrCreator();
+    error InvalidBeneficiary();
     error PrimaryTokenAlreadyActivated();
     error InvalidPercentageDistribution();
     error InvalidPrimaryTokenDiscount();
@@ -17,6 +17,7 @@ interface IFeeHandler {
     event UpdatedPercentages(uint256 beneficiary, uint256 creator, uint256 vault);
     event UpdatedPrimaryTokenDiscount(uint256 discount);
     event UpdatedTokenAllowance(address token, bool allowed);
+    event UpdatedReduction(address reduction);
 
     function handleFee(address token, uint256 amount, address beneficiary, address creator) external;
     function handleFeeETH(address beneficiary, address creator) external payable;

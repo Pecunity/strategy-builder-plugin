@@ -5,6 +5,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
+import {IFeeReduction} from "./interfaces/IFeeReduction.sol";
 
 contract FeeHandler is Ownable, IFeeHandler {
     using SafeERC20 for IERC20;
@@ -15,6 +16,7 @@ contract FeeHandler is Ownable, IFeeHandler {
     address public vault;
     address public treasury;
     address public primaryToken;
+    address public reduction;
 
     uint256 public beneficiaryPercentage;
     uint256 public creatorPercentage;
@@ -23,38 +25,42 @@ contract FeeHandler is Ownable, IFeeHandler {
 
     mapping(address token => bool) private allowedTokens;
 
-    constructor(address _vault, uint256 _beneficaryPercentage, uint256 _creatorPercentage, uint256 _vaultPercentage) {
+    constructor(
+        address _vault,
+        uint256 _beneficaryPercentage,
+        uint256 _creatorPercentage,
+        uint256 _vaultPercentage,
+        address _owner
+    ) {
         _updateVault(_vault);
         _updatePercentages(_beneficaryPercentage, _creatorPercentage, _vaultPercentage); // Default percentages: 30% beneficiary, 20% creator, 50% vault
+
+        _transferOwnership(_owner);
     }
 
     function handleFee(address token, uint256 amount, address beneficiary, address creator) external {
         _validateAmount(amount);
-        _validateBeneficiaryAndCreator(beneficiary, creator);
+        _validateBeneficiary(beneficiary);
 
         if (!allowedTokens[token]) {
             revert TokenNotAllowed();
         }
 
-        uint256 totalFee = amount;
-        uint256 feeDiscount = 0;
-        uint256 treasuryFee = 0;
-
-        //TODO: Implement Fee Reduction
-
-        if (primaryTokenActive() && token == primaryToken) {
-            feeDiscount = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;
-            totalFee -= feeDiscount;
-        } else if (primaryTokenActive()) {
-            treasuryFee = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;
-            totalFee -= treasuryFee;
-        }
+       
+        (uint256 totalFee, uint256 treasuryFee) = _feeCalculation(amount, token);
 
         (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount) = _tokenDistribution(totalFee);
 
         IERC20(token).safeTransferFrom(msg.sender, beneficiary, beneficiaryAmount);
-        IERC20(token).safeTransferFrom(msg.sender, creator, creatorAmount);
+
+        if(creator!= address(0)){
+            IERC20(token).safeTransferFrom(msg.sender, creator, creatorAmount);
         IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount);
+        }else{
+            
+        IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount +creatorAmount);
+        }
+        
         if (treasuryFee > 0) {
             IERC20(token).safeTransferFrom(msg.sender, treasury, treasuryFee);
         }
@@ -67,16 +73,27 @@ contract FeeHandler is Ownable, IFeeHandler {
             revert TokenNotAllowed();
         }
 
-        _validateBeneficiaryAndCreator(beneficiary, creator);
+        _validateBeneficiary(beneficiary);
 
-        uint256 totalFee = msg.value;
-        _validateAmount(totalFee);
+        uint256 amount = msg.value;
+        _validateAmount(amount);
 
+        (uint256 totalFee, uint256 treasuryFee) = _feeCalculation(amount, address(0));
         (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount) = _tokenDistribution(totalFee);
 
         payable(beneficiary).transfer(beneficiaryAmount);
-        payable(creator).transfer(creatorAmount);
-        payable(vault).transfer(vaultAmount);
+
+        if(creator != address(0)){
+            payable(creator).transfer(creatorAmount);
+            payable(vault).transfer(vaultAmount);
+        }else{
+            payable(vault).transfer(vaultAmount+ creatorAmount);
+        }
+
+        if (treasuryFee > 0) {
+            payable(treasury).transfer(treasuryFee);
+        }
+      
 
         emit FeeHandledETH(msg.value);
     }
@@ -92,6 +109,12 @@ contract FeeHandler is Ownable, IFeeHandler {
 
     function updateVault(address _vault) external onlyOwner {
         _updateVault(_vault);
+    }
+
+    function updateReduction(address _reduction) external onlyOwner {
+        _validateAddress(_reduction);
+        reduction = _reduction;
+        emit UpdatedReduction(_reduction);
     }
 
     function updatePercentages(uint256 _beneficiary, uint256 _creator, uint256 _vault) external onlyOwner {
@@ -134,6 +157,25 @@ contract FeeHandler is Ownable, IFeeHandler {
         return (beneficiaryAmount, creatorAmount, vaultAmount);
     }
 
+    function _feeCalculation(uint256 amount,address token) internal view returns (uint256,  uint256) {
+        uint256 totalFee = amount;
+        uint256 treasuryFee = 0;
+
+        if (reduction != address(0)) {
+            uint256 reductionPercentage = IFeeReduction(reduction).getFeeReduction(msg.sender);
+            totalFee = totalFee - totalFee * reductionPercentage / PERCENTAGE_DIVISOR;
+        }
+
+        if (primaryTokenActive() && primaryToken == token) {
+            uint256 feeDiscount = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;     
+            totalFee -= feeDiscount;    
+        }else if (primaryTokenActive()) {
+            treasuryFee = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;
+            totalFee -= treasuryFee;
+        }
+        return (totalFee,  treasuryFee);
+    }
+
     function _validateAddress(address _addr) internal pure {
         if (_addr == address(0)) {
             revert ZeroAddressNotValid();
@@ -144,8 +186,8 @@ contract FeeHandler is Ownable, IFeeHandler {
         if (amount == 0) revert InvalidAmount();
     }
 
-    function _validateBeneficiaryAndCreator(address beneficiary, address creator) internal pure {
-        if (beneficiary == address(0) || creator == address(0)) revert InvalidBeneficiaryOrCreator();
+    function _validateBeneficiary(address beneficiary) internal pure {
+        if (beneficiary == address(0) ) revert InvalidBeneficiary();
     }
 
     function primaryTokenActive() public view returns (bool) {

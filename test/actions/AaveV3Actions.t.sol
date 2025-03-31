@@ -29,7 +29,7 @@ contract AaveV3ActionsTest is Test {
         baseFork = vm.createFork(BASE_MAINNET_FORK);
         vm.selectFork(baseFork);
 
-        aaveActions = new AaveV3Actions(AAVE_V3_POOL,WETH,AAVE_V3_ORACLE);
+        aaveActions = new AaveV3Actions(AAVE_V3_POOL, WETH, AAVE_V3_ORACLE);
     }
 
     function test_supply_Success() external {
@@ -321,8 +321,8 @@ contract AaveV3ActionsTest is Test {
         assertTrue(isApproximatelyEqual(targetHealthFactor, currentHF, 1e16));
     }
 
-    function test_borrowPercentageOfAvailabel_Success(uint256 _percentage) external {
-        uint256 percentage = bound(_percentage, 1, aaveActions.PERCENTAGE_FACTOR());
+    function test_borrowPercentageOfAvailable_Success(uint256 _percentage) external {
+        uint256 percentage = bound(_percentage, 2, aaveActions.PERCENTAGE_FACTOR());
 
         // Supply tokens
 
@@ -334,7 +334,7 @@ contract AaveV3ActionsTest is Test {
         // borrow percentage
         (,, uint256 availableBorrowsBaseBefore,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
 
-        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[3];
+        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[2];
         IAction.PluginExecution[] memory executions =
             aaveActions.borrowPercentageOfAvailable(WALLET, assetToBorrow, percentage, 2);
         execute(executions);

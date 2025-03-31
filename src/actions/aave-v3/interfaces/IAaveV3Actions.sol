@@ -11,6 +11,7 @@ interface IAaveV3Actions is IAction {
 
     error ZeroAmountNotValid();
     error HealthFactorNotValid();
+    error InvalidTokenGetterID();
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Execution functions    ┃

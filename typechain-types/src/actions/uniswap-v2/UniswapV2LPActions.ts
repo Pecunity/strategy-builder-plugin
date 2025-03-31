@@ -42,12 +42,10 @@ export interface UniswapV2LPActionsInterface extends Interface {
       | "PERCENTAGE_FACTOR"
       | "WETH"
       | "_getSwapAmount"
-      | "addLiqudityPercentageOfMaxPossible"
+      | "addLiqudityPercentage"
+      | "addLiqudityPercentageETH"
       | "addLiquidity"
       | "addLiquidityETH"
-      | "addLiquidityETHPercentage"
-      | "addLiquidityETHPercentageToken"
-      | "addLiquidityPercentage"
       | "factory"
       | "getTokenForSelector"
       | "removeLiquidity"
@@ -75,8 +73,12 @@ export interface UniswapV2LPActionsInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "addLiqudityPercentageOfMaxPossible",
+    functionFragment: "addLiqudityPercentage",
     values: [AddressLike, AddressLike, BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "addLiqudityPercentageETH",
+    values: [AddressLike, BigNumberish, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "addLiquidity",
@@ -100,18 +102,6 @@ export interface UniswapV2LPActionsInterface extends Interface {
       BigNumberish,
       AddressLike
     ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addLiquidityETHPercentage",
-    values: [AddressLike, BigNumberish, AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addLiquidityETHPercentageToken",
-    values: [AddressLike, BigNumberish, AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "addLiquidityPercentage",
-    values: [BigNumberish, AddressLike, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(
@@ -173,7 +163,11 @@ export interface UniswapV2LPActionsInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addLiqudityPercentageOfMaxPossible",
+    functionFragment: "addLiqudityPercentage",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "addLiqudityPercentageETH",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -182,18 +176,6 @@ export interface UniswapV2LPActionsInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "addLiquidityETH",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addLiquidityETHPercentage",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addLiquidityETHPercentageToken",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "addLiquidityPercentage",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
@@ -285,13 +267,19 @@ export interface UniswapV2LPActions extends BaseContract {
     "view"
   >;
 
-  addLiqudityPercentageOfMaxPossible: TypedContractMethod<
+  addLiqudityPercentage: TypedContractMethod<
     [
       tokenA: AddressLike,
       tokenB: AddressLike,
       percentage: BigNumberish,
-      to: AddressLike
+      wallet: AddressLike
     ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+
+  addLiqudityPercentageETH: TypedContractMethod<
+    [token: AddressLike, percentage: BigNumberish, wallet: AddressLike],
     [IAction.PluginExecutionStructOutput[]],
     "view"
   >;
@@ -323,33 +311,10 @@ export interface UniswapV2LPActions extends BaseContract {
     "view"
   >;
 
-  addLiquidityETHPercentage: TypedContractMethod<
-    [token: AddressLike, percentageETHDesired: BigNumberish, to: AddressLike],
-    [IAction.PluginExecutionStructOutput[]],
-    "view"
-  >;
-
-  addLiquidityETHPercentageToken: TypedContractMethod<
-    [token: AddressLike, percentageTokenDesired: BigNumberish, to: AddressLike],
-    [IAction.PluginExecutionStructOutput[]],
-    "view"
-  >;
-
-  addLiquidityPercentage: TypedContractMethod<
-    [
-      percentageADesired: BigNumberish,
-      tokenA: AddressLike,
-      tokenB: AddressLike,
-      to: AddressLike
-    ],
-    [IAction.PluginExecutionStructOutput[]],
-    "view"
-  >;
-
   factory: TypedContractMethod<[], [string], "view">;
 
   getTokenForSelector: TypedContractMethod<
-    [arg0: BytesLike, arg1: BytesLike],
+    [selector: BytesLike, params: BytesLike],
     [string],
     "view"
   >;
@@ -421,7 +386,7 @@ export interface UniswapV2LPActions extends BaseContract {
       to: AddressLike
     ],
     [IAction.PluginExecutionStructOutput[]],
-    "nonpayable"
+    "view"
   >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
@@ -441,14 +406,21 @@ export interface UniswapV2LPActions extends BaseContract {
     nameOrSignature: "_getSwapAmount"
   ): TypedContractMethod<[r: BigNumberish, a: BigNumberish], [bigint], "view">;
   getFunction(
-    nameOrSignature: "addLiqudityPercentageOfMaxPossible"
+    nameOrSignature: "addLiqudityPercentage"
   ): TypedContractMethod<
     [
       tokenA: AddressLike,
       tokenB: AddressLike,
       percentage: BigNumberish,
-      to: AddressLike
+      wallet: AddressLike
     ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "addLiqudityPercentageETH"
+  ): TypedContractMethod<
+    [token: AddressLike, percentage: BigNumberish, wallet: AddressLike],
     [IAction.PluginExecutionStructOutput[]],
     "view"
   >;
@@ -482,37 +454,15 @@ export interface UniswapV2LPActions extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "addLiquidityETHPercentage"
-  ): TypedContractMethod<
-    [token: AddressLike, percentageETHDesired: BigNumberish, to: AddressLike],
-    [IAction.PluginExecutionStructOutput[]],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "addLiquidityETHPercentageToken"
-  ): TypedContractMethod<
-    [token: AddressLike, percentageTokenDesired: BigNumberish, to: AddressLike],
-    [IAction.PluginExecutionStructOutput[]],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "addLiquidityPercentage"
-  ): TypedContractMethod<
-    [
-      percentageADesired: BigNumberish,
-      tokenA: AddressLike,
-      tokenB: AddressLike,
-      to: AddressLike
-    ],
-    [IAction.PluginExecutionStructOutput[]],
-    "view"
-  >;
-  getFunction(
     nameOrSignature: "factory"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "getTokenForSelector"
-  ): TypedContractMethod<[arg0: BytesLike, arg1: BytesLike], [string], "view">;
+  ): TypedContractMethod<
+    [selector: BytesLike, params: BytesLike],
+    [string],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "removeLiquidity"
   ): TypedContractMethod<
@@ -590,7 +540,7 @@ export interface UniswapV2LPActions extends BaseContract {
       to: AddressLike
     ],
     [IAction.PluginExecutionStructOutput[]],
-    "nonpayable"
+    "view"
   >;
 
   filters: {};

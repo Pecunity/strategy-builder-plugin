@@ -14,6 +14,10 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "IAaveOracle",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAaveOracle__factory>;
+    getContractFactory(
       name: "IPool",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPool__factory>;
@@ -90,13 +94,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC165__factory>;
     getContractFactory(
-      name: "AaveV3Base",
+      name: "AaveV3Actions",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AaveV3Base__factory>;
+    ): Promise<Contracts.AaveV3Actions__factory>;
+    getContractFactory(
+      name: "IAaveV3Actions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAaveV3Actions__factory>;
     getContractFactory(
       name: "IUniswapV2Base",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IUniswapV2Base__factory>;
+    getContractFactory(
+      name: "IUniswapV2LPActions",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IUniswapV2LPActions__factory>;
     getContractFactory(
       name: "IUniswapV2SwapActions",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -142,6 +154,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IFeeHandler__factory>;
     getContractFactory(
+      name: "IFeeReduction",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IFeeReduction__factory>;
+    getContractFactory(
       name: "IPriceOracle",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPriceOracle__factory>;
@@ -171,6 +187,11 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.Token__factory>;
 
     getContractAt(
+      name: "IAaveOracle",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAaveOracle>;
+    getContractAt(
       name: "IPool",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -266,15 +287,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ERC165>;
     getContractAt(
-      name: "AaveV3Base",
+      name: "AaveV3Actions",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.AaveV3Base>;
+    ): Promise<Contracts.AaveV3Actions>;
+    getContractAt(
+      name: "IAaveV3Actions",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAaveV3Actions>;
     getContractAt(
       name: "IUniswapV2Base",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IUniswapV2Base>;
+    getContractAt(
+      name: "IUniswapV2LPActions",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IUniswapV2LPActions>;
     getContractAt(
       name: "IUniswapV2SwapActions",
       address: string | ethers.Addressable,
@@ -330,6 +361,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IFeeHandler>;
+    getContractAt(
+      name: "IFeeReduction",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IFeeReduction>;
     getContractAt(
       name: "IPriceOracle",
       address: string | ethers.Addressable,
@@ -367,6 +403,10 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.Token>;
 
     deployContract(
+      name: "IAaveOracle",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAaveOracle>;
+    deployContract(
       name: "IPool",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPool>;
@@ -443,13 +483,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ERC165>;
     deployContract(
-      name: "AaveV3Base",
+      name: "AaveV3Actions",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.AaveV3Base>;
+    ): Promise<Contracts.AaveV3Actions>;
+    deployContract(
+      name: "IAaveV3Actions",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAaveV3Actions>;
     deployContract(
       name: "IUniswapV2Base",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IUniswapV2Base>;
+    deployContract(
+      name: "IUniswapV2LPActions",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IUniswapV2LPActions>;
     deployContract(
       name: "IUniswapV2SwapActions",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -494,6 +542,10 @@ declare module "hardhat/types/runtime" {
       name: "IFeeHandler",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IFeeHandler>;
+    deployContract(
+      name: "IFeeReduction",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IFeeReduction>;
     deployContract(
       name: "IPriceOracle",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -524,6 +576,11 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.Token>;
 
     deployContract(
+      name: "IAaveOracle",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAaveOracle>;
+    deployContract(
       name: "IPool",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -619,15 +676,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ERC165>;
     deployContract(
-      name: "AaveV3Base",
+      name: "AaveV3Actions",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.AaveV3Base>;
+    ): Promise<Contracts.AaveV3Actions>;
+    deployContract(
+      name: "IAaveV3Actions",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAaveV3Actions>;
     deployContract(
       name: "IUniswapV2Base",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IUniswapV2Base>;
+    deployContract(
+      name: "IUniswapV2LPActions",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IUniswapV2LPActions>;
     deployContract(
       name: "IUniswapV2SwapActions",
       args: any[],
@@ -683,6 +750,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IFeeHandler>;
+    deployContract(
+      name: "IFeeReduction",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IFeeReduction>;
     deployContract(
       name: "IPriceOracle",
       args: any[],

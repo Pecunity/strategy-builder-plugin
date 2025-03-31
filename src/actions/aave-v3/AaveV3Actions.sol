@@ -34,13 +34,6 @@ contract AaveV3Actions is IAaveV3Actions {
         _;
     }
 
-    modifier noValidHealthFactor(uint256 hFactor) {
-        if (hFactor < 1e18) {
-            revert HealthFactorNotValid();
-        }
-        _;
-    }
-
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Constructor         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -49,6 +42,23 @@ contract AaveV3Actions is IAaveV3Actions {
         pool = (_aaveV3Pool);
         WETH = (_WETH);
         oracle = IAaveOracle(_priceOracle);
+
+        tokenGetterIDs[IAaveV3Actions.supplyETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.withdrawETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.borrowETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.repayETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.supplyPercentageOfBalanceETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.changeSupplyToHealthFactorETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.borrowPercentageOfAvailableETH.selector] = 1;
+
+        tokenGetterIDs[IAaveV3Actions.supplyPercentageOfBalance.selector] = 2;
+        tokenGetterIDs[IAaveV3Actions.changeSupplyToHealthFactor.selector] = 2;
+        tokenGetterIDs[IAaveV3Actions.supply.selector] = 2;
+        tokenGetterIDs[IAaveV3Actions.withdraw.selector] = 2;
+
+        tokenGetterIDs[IAaveV3Actions.borrow.selector] = 3;
+        tokenGetterIDs[IAaveV3Actions.repay.selector] = 3;
+        tokenGetterIDs[IAaveV3Actions.borrowPercentageOfAvailable.selector] = 3;
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -211,6 +221,10 @@ contract AaveV3Actions is IAaveV3Actions {
         if (isWithdraw) {
             return withdrawETH(wallet, deltaAmount);
         } else {
+            // uint256 maxAmount = wallet.balance;
+            // if (deltaAmount > maxAmount) {
+            //     deltaAmount = maxAmount;
+            // }
             return supplyETH(wallet, deltaAmount);
         }
     }
@@ -226,6 +240,10 @@ contract AaveV3Actions is IAaveV3Actions {
         if (isWithdraw) {
             return withdraw(wallet, asset, deltaAmount);
         } else {
+            // uint256 maxAmount = IERC20(asset).balanceOf(wallet);
+            // if (deltaAmount > maxAmount) {
+            //     deltaAmount = maxAmount;
+            // }
             return supply(wallet, asset, deltaAmount);
         }
     }
@@ -357,6 +375,30 @@ contract AaveV3Actions is IAaveV3Actions {
     function _validateHealtfactor(uint256 healthFactor) internal pure {
         if (healthFactor < 1e18) {
             revert HealthFactorNotValid();
+        }
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    View functions     ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function getTokenForSelector(bytes4 selector, bytes memory params) external view returns (address) {
+        uint8 tokenGetterID = tokenGetterIDs[selector];
+
+        if (tokenGetterID == 0 || tokenGetterID > 3) {
+            revert InvalidTokenGetterID();
+        }
+
+        if (tokenGetterID == 1) {
+            return address(0);
+        }
+
+        if (tokenGetterID == 2) {
+            (, address token,) = abi.decode(params, (address, address, uint256));
+            return token;
+        } else {
+            (, address token,,) = abi.decode(params, (address, address, uint256, uint256));
+            return token;
         }
     }
 }

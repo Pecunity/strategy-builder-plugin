@@ -71,7 +71,7 @@ contract StrategyBuilderTest is Test {
         account1 = UpgradeableModularAccount(payable(factory.createAccount(owner1, 0)));
         vm.deal(address(account1), 100 ether);
 
-        strategyBuilderPlugin = new StrategyBuilderPlugin(feeController,feeHandler);
+        strategyBuilderPlugin = new StrategyBuilderPlugin(feeController, feeHandler);
         bytes32 manifestHash = keccak256(abi.encode(strategyBuilderPlugin.pluginManifest()));
 
         // we will have a single function dependency for our counter contract: the single owner user op validation
@@ -91,7 +91,7 @@ contract StrategyBuilderTest is Test {
         });
 
         vm.prank(owner1);
-        token = new Token("Mock Token","MOCK",MAX_TOKEN_SUPPLY);
+        token = new Token("Mock Token", "MOCK", MAX_TOKEN_SUPPLY);
 
         vm.prank(owner1);
         token.transfer(address(account1), MAX_TOKEN_SUPPLY);

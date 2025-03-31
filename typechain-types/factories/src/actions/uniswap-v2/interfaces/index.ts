@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { IUniswapV2Base__factory } from "./IUniswapV2Base__factory";
+export { IUniswapV2LPActions__factory } from "./IUniswapV2LPActions__factory";
 export { IUniswapV2SwapActions__factory } from "./IUniswapV2SwapActions__factory";

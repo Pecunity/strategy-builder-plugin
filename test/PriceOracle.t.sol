@@ -16,7 +16,7 @@ contract PriceOracleTest is Test {
 
     function setUp() external {
         vm.prank(OWNER);
-        oracle = new PriceOracle(PYTH_ORACLE);
+        oracle = new PriceOracle(PYTH_ORACLE, OWNER);
     }
 
     function test_setOracleID_Success(bytes32 id) external {

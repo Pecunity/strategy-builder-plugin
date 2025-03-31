@@ -44,8 +44,8 @@ contract UniswapV2SwapActionsTest is Test {
 
         deal(TOKEN_HOLDER, MAX_ETH);
         vm.startPrank(TOKEN_HOLDER);
-        token1 = new Token("Token 1","T1",MAX_TOKEN_SUPPLY);
-        token2 = new Token("Token 2","T2",MAX_TOKEN_SUPPLY);
+        token1 = new Token("Token 1", "T1", MAX_TOKEN_SUPPLY);
+        token2 = new Token("Token 2", "T2", MAX_TOKEN_SUPPLY);
 
         token1.approve(ROUTER, MAX_TOKEN_SUPPLY);
         token2.approve(ROUTER, MAX_TOKEN_SUPPLY / 2);

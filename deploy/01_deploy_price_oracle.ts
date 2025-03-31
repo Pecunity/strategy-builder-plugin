@@ -21,12 +21,14 @@ const deployPriceOracle: DeployFunction = async (
     const config = deploymentConfig[chainId].priceOracle;
 
     const pythOracle = config.pythOracle;
+    const owner = config.owner;
 
     console.log("Deployment Parameter PriceOracle:");
     console.log(`pythOracle (contract): ${pythOracle}`);
+    console.log(`owner (address): ${owner}`)
 
     //arguments
-    const args = [config.pythOracle];
+    const args = [config.pythOracle, owner];
 
     const priceOracleDeployment = await deploy("PriceOracle", {
       from: deployer,

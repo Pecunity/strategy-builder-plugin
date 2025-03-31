@@ -11,8 +11,10 @@ contract PriceOracle is Ownable, IPriceOracle {
 
     mapping(address token => bytes32 oracleID) private oracleIDs;
 
-    constructor(address _pythOracle) {
+    constructor(address _pythOracle, address _owner) {
         pythOracle = IPyth(_pythOracle);
+
+        _transferOwnership(_owner);
     }
 
     function setOracleID(address _token, bytes32 _oracleID) external onlyOwner {

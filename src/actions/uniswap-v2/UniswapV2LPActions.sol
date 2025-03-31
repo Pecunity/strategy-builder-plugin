@@ -16,10 +16,17 @@ contract UniswapV2LPActions is UniswapV2Base, IUniswapV2LPActions {
     constructor(address _router) UniswapV2Base(_router) {
         tokenGetterIDs[IUniswapV2LPActions.addLiquidityETH.selector] = 1;
         tokenGetterIDs[IUniswapV2LPActions.addLiqudityPercentageETH.selector] = 1;
+        tokenGetterIDs[IUniswapV2LPActions.removeLiquidityETH.selector] = 1;
+        tokenGetterIDs[IUniswapV2LPActions.removeLiquidityETHPercentage.selector] = 1;
+        tokenGetterIDs[IUniswapV2LPActions.zapETH.selector] = 1;
 
         tokenGetterIDs[IUniswapV2LPActions.addLiquidity.selector] = 2;
 
         tokenGetterIDs[IUniswapV2LPActions.removeLiquidity.selector] = 3;
+
+        tokenGetterIDs[IUniswapV2LPActions.zap.selector] = 4;
+        tokenGetterIDs[IUniswapV2LPActions.removeLiquidityPercentage.selector] = 4;
+        tokenGetterIDs[IUniswapV2LPActions.addLiqudityPercentage.selector] = 4;
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -216,7 +223,7 @@ contract UniswapV2LPActions is UniswapV2Base, IUniswapV2LPActions {
         (uint256 amountToken, uint256 amountETH, PluginExecution[] memory swapExecutions) =
             _swapToETHorETH(token, amountIn, inputETH, to);
 
-        PluginExecution[] memory executions = new PluginExecution[](swapExecutions.length+2);
+        PluginExecution[] memory executions = new PluginExecution[](swapExecutions.length + 2);
 
         PluginExecution[] memory lpExecutions = addLiquidityETH(token, amountToken, 0, amountETH, 0, to);
 
@@ -232,15 +239,6 @@ contract UniswapV2LPActions is UniswapV2Base, IUniswapV2LPActions {
         }
 
         return executions;
-    }
-
-    function getTokenForSelector(bytes4 selector, bytes memory params) external view override returns (address) {
-        uint8 tokenGetterID = tokenGetterIDs[selector];
-
-        if (tokenGetterID == 1) {
-            (address token,,,,,,) = abi.decode(params, (address, address, uint256, uint256, uint256, uint256, address));
-            return token;
-        }
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -417,6 +415,31 @@ contract UniswapV2LPActions is UniswapV2Base, IUniswapV2LPActions {
         } else {
             (amountETH, swapExecutions) = _swapToETH(token, swapAmount, to);
             amountToken = amountIn - swapAmount;
+        }
+    }
+
+    function getTokenForSelector(bytes4 selector, bytes memory params) external view override returns (address) {
+        uint8 tokenGetterID = tokenGetterIDs[selector];
+
+        if (tokenGetterID == 0 || tokenGetterID > 4) {
+            revert InvalidTokenGetterID();
+        }
+
+        if (tokenGetterID == 1) {
+            return address(0);
+        }
+
+        if (tokenGetterID == 2) {
+            (address token,,,,,,) = abi.decode(params, (address, address, uint256, uint256, uint256, uint256, address));
+            return token;
+        }
+
+        if (tokenGetterID == 3) {
+            (address token,,,,,) = abi.decode(params, (address, address, uint256, uint256, uint256, address));
+            return token;
+        } else {
+            (address token,,,) = abi.decode(params, (address, address, uint256, address));
+            return token;
         }
     }
 }

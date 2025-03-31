@@ -98,8 +98,8 @@ contract StrategyUniswapV2SwapActionTest is Test {
 
         deal(TOKEN_HOLDER, MAX_ETH);
         vm.startPrank(TOKEN_HOLDER);
-        token1 = new Token("Token 1","T1",MAX_TOKEN_SUPPLY);
-        token2 = new Token("Token 2","T2",MAX_TOKEN_SUPPLY);
+        token1 = new Token("Token 1", "T1", MAX_TOKEN_SUPPLY);
+        token2 = new Token("Token 2", "T2", MAX_TOKEN_SUPPLY);
 
         token1.approve(ROUTER, MAX_TOKEN_SUPPLY);
         token2.approve(ROUTER, MAX_TOKEN_SUPPLY / 2);
@@ -142,10 +142,10 @@ contract StrategyUniswapV2SwapActionTest is Test {
 
         //Deploy all necessary contracts for the strategy builder plugin
         vm.startPrank(OWNER);
-        oracle = new PriceOracle(pythOracle);
-        feeController = new FeeController(address(oracle),maxFeeLimits,minFeesInUSD);
-        feeHandler = new FeeHandler(VAULT,BENEFICARY_PERCENTAGE,CREATOR_PERCENTAGE,VAULT_PERCENTAGE);
-        strategyBuilderPlugin = new StrategyBuilderPlugin(address(feeController),address(feeHandler));
+        oracle = new PriceOracle(pythOracle, OWNER);
+        feeController = new FeeController(address(oracle), maxFeeLimits, minFeesInUSD, OWNER);
+        feeHandler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE, OWNER);
+        strategyBuilderPlugin = new StrategyBuilderPlugin(address(feeController), address(feeHandler));
         vm.stopPrank();
 
         vm.startPrank(OWNER);

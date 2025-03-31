@@ -43,6 +43,7 @@ export interface IFeeHandlerInterface extends Interface {
       | "PrimaryTokenActivated"
       | "UpdatedPercentages"
       | "UpdatedPrimaryTokenDiscount"
+      | "UpdatedReduction"
       | "UpdatedTokenAllowance"
       | "UpdatedVault"
   ): EventFragment;
@@ -176,6 +177,18 @@ export namespace UpdatedPrimaryTokenDiscountEvent {
   export type OutputTuple = [discount: bigint];
   export interface OutputObject {
     discount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UpdatedReductionEvent {
+  export type InputTuple = [reduction: AddressLike];
+  export type OutputTuple = [reduction: string];
+  export interface OutputObject {
+    reduction: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -386,6 +399,13 @@ export interface IFeeHandler extends BaseContract {
     UpdatedPrimaryTokenDiscountEvent.OutputObject
   >;
   getEvent(
+    key: "UpdatedReduction"
+  ): TypedContractEvent<
+    UpdatedReductionEvent.InputTuple,
+    UpdatedReductionEvent.OutputTuple,
+    UpdatedReductionEvent.OutputObject
+  >;
+  getEvent(
     key: "UpdatedTokenAllowance"
   ): TypedContractEvent<
     UpdatedTokenAllowanceEvent.InputTuple,
@@ -454,6 +474,17 @@ export interface IFeeHandler extends BaseContract {
       UpdatedPrimaryTokenDiscountEvent.InputTuple,
       UpdatedPrimaryTokenDiscountEvent.OutputTuple,
       UpdatedPrimaryTokenDiscountEvent.OutputObject
+    >;
+
+    "UpdatedReduction(address)": TypedContractEvent<
+      UpdatedReductionEvent.InputTuple,
+      UpdatedReductionEvent.OutputTuple,
+      UpdatedReductionEvent.OutputObject
+    >;
+    UpdatedReduction: TypedContractEvent<
+      UpdatedReductionEvent.InputTuple,
+      UpdatedReductionEvent.OutputTuple,
+      UpdatedReductionEvent.OutputObject
     >;
 
     "UpdatedTokenAllowance(address,bool)": TypedContractEvent<

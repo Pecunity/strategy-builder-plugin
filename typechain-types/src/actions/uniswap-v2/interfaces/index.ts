@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { IUniswapV2Base } from "./IUniswapV2Base";
+export type { IUniswapV2LPActions } from "./IUniswapV2LPActions";
 export type { IUniswapV2SwapActions } from "./IUniswapV2SwapActions";

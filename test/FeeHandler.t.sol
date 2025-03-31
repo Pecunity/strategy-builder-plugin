@@ -21,7 +21,7 @@ contract FeeHandlerTest is Test {
 
     function setUp() external {
         vm.prank(OWNER);
-        handler = new FeeHandler(VAULT,BENEFICARY_PERCENTAGE,CREATOR_PERCENTAGE,VAULT_PERCENTAGE);
+        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE, OWNER);
     }
 
     function test_deployment_Success() external {
@@ -34,13 +34,13 @@ contract FeeHandlerTest is Test {
 
     function test_deployment_VaultZeroAddress() external {
         vm.expectRevert(IFeeHandler.ZeroAddressNotValid.selector);
-        handler = new FeeHandler(address(0),BENEFICARY_PERCENTAGE,CREATOR_PERCENTAGE,VAULT_PERCENTAGE);
+        handler = new FeeHandler(address(0), BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE, OWNER);
     }
 
     function test_deployment_SumPercentageNotCorrect() external {
         vm.expectRevert(IFeeHandler.InvalidPercentageDistribution.selector);
 
-        handler = new FeeHandler(VAULT,BENEFICARY_PERCENTAGE,CREATOR_PERCENTAGE,VAULT_PERCENTAGE+1);
+        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE + 1, OWNER);
     }
 
     function test_activatePrimaryToken_Success(address token, address treasury) external {
@@ -145,7 +145,7 @@ contract FeeHandlerTest is Test {
     function test_handleFee_Success(uint256 amount, address beneficiary, address creator) external {
         uint256 _maxTokenSupply = 1000 * 1e18;
         vm.prank(FEE_PAYER);
-        Token _token = new Token("test","MT",_maxTokenSupply);
+        Token _token = new Token("test", "MT", _maxTokenSupply);
 
         uint256 _amount = bound(amount, 100, _maxTokenSupply);
         vm.assume(beneficiary != address(0));
@@ -195,7 +195,7 @@ contract FeeHandlerTest is Test {
         address beneficiary = address(0);
 
         vm.startPrank(FEE_PAYER);
-        vm.expectRevert(IFeeHandler.InvalidBeneficiaryOrCreator.selector);
+        vm.expectRevert(IFeeHandler.InvalidBeneficiary.selector);
 
         handler.handleFee(token, amount, beneficiary, creator);
     }
@@ -206,7 +206,7 @@ contract FeeHandlerTest is Test {
 
         uint256 _maxTokenSupply = 1000 * 1e18;
         vm.prank(FEE_PAYER);
-        Token _token = new Token("test","MT",_maxTokenSupply);
+        Token _token = new Token("test", "MT", _maxTokenSupply);
 
         vm.startPrank(OWNER);
         handler.activatePrimaryToken(primaryToken, treasury);
@@ -231,7 +231,7 @@ contract FeeHandlerTest is Test {
         uint256 _maxTokenSupply = 1000 * 1e18;
 
         vm.prank(FEE_PAYER);
-        Token primaryToken = new Token("test","MT",_maxTokenSupply);
+        Token primaryToken = new Token("test", "MT", _maxTokenSupply);
         address treasury = makeAddr("treasury");
 
         vm.startPrank(OWNER);

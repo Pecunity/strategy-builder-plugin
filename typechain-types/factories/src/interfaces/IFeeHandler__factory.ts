@@ -16,7 +16,7 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "InvalidBeneficiaryOrCreator",
+    name: "InvalidBeneficiary",
     type: "error",
   },
   {
@@ -131,6 +131,19 @@ const _abi = [
       },
     ],
     name: "UpdatedPrimaryTokenDiscount",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "reduction",
+        type: "address",
+      },
+    ],
+    name: "UpdatedReduction",
     type: "event",
   },
   {

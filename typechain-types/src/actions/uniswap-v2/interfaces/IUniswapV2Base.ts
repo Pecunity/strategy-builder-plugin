@@ -20,15 +20,25 @@ import type {
 } from "../../../../common";
 
 export interface IUniswapV2BaseInterface extends Interface {
-  getFunction(nameOrSignature: "getTokenForSelector"): FunctionFragment;
+  getFunction(
+    nameOrSignature: "getTokenForSelector" | "uniswapV2RouterAddress"
+  ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "getTokenForSelector",
     values: [BytesLike, BytesLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "uniswapV2RouterAddress",
+    values?: undefined
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "getTokenForSelector",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "uniswapV2RouterAddress",
     data: BytesLike
   ): Result;
 }
@@ -82,6 +92,8 @@ export interface IUniswapV2Base extends BaseContract {
     "view"
   >;
 
+  uniswapV2RouterAddress: TypedContractMethod<[], [string], "view">;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -93,6 +105,9 @@ export interface IUniswapV2Base extends BaseContract {
     [string],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "uniswapV2RouterAddress"
+  ): TypedContractMethod<[], [string], "view">;
 
   filters: {};
 }

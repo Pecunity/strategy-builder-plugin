@@ -10,7 +10,7 @@ import { verify } from "../helper-functions";
 const deployFeeHandler: DeployFunction = async (
   hre: HardhatRuntimeEnvironment
 ) => {
-  const { deploy, get } = hre.deployments;
+  const { deploy } = hre.deployments;
 
   const { deployer } = await hre.getNamedAccounts();
 
@@ -23,18 +23,21 @@ const deployFeeHandler: DeployFunction = async (
     const beneficiaryPercentage = config.beneficiaryPercentage;
     const creatorPercentage = config.creatorPercentage;
     const vaultPercentage = config.vaultPercentage;
+    const owner = config.owner
 
     console.log("Deployment Parameter FeeHandler:");
     console.log(`vault: ${vault}`);
     console.log(`beneficiaryPercentage: ${beneficiaryPercentage}`);
     console.log(`creatorPercentage: ${creatorPercentage}`);
     console.log(`vaultPercentage: ${vaultPercentage}`);
+    console.log(`owner: ${owner}`);
 
     const args = [
       vault,
       beneficiaryPercentage,
       creatorPercentage,
       vaultPercentage,
+      owner
     ];
 
     const feeHandlerDeployment = await deploy("FeeHandler", {
