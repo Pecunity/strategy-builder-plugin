@@ -42,10 +42,14 @@ export interface IAaveV3ActionsInterface extends Interface {
       | "borrowETH"
       | "borrowPercentageOfAvailable"
       | "borrowPercentageOfAvailableETH"
+      | "changeDebtToHealthFactor"
+      | "changeDebtToHealthFactorETH"
       | "changeSupplyToHealthFactor"
       | "changeSupplyToHealthFactorETH"
       | "repay"
       | "repayETH"
+      | "repayPercentageOfDebt"
+      | "repayPercentageOfDebtETH"
       | "supply"
       | "supplyETH"
       | "supplyPercentageOfBalance"
@@ -71,6 +75,14 @@ export interface IAaveV3ActionsInterface extends Interface {
     values: [AddressLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "changeDebtToHealthFactor",
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "changeDebtToHealthFactorETH",
+    values: [AddressLike, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "changeSupplyToHealthFactor",
     values: [AddressLike, AddressLike, BigNumberish]
   ): string;
@@ -84,6 +96,14 @@ export interface IAaveV3ActionsInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "repayETH",
+    values: [AddressLike, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "repayPercentageOfDebt",
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "repayPercentageOfDebtETH",
     values: [AddressLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
@@ -122,6 +142,14 @@ export interface IAaveV3ActionsInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "changeDebtToHealthFactor",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "changeDebtToHealthFactorETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "changeSupplyToHealthFactor",
     data: BytesLike
   ): Result;
@@ -131,6 +159,14 @@ export interface IAaveV3ActionsInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "repay", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "repayETH", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "repayPercentageOfDebt",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "repayPercentageOfDebtETH",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "supply", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "supplyETH", data: BytesLike): Result;
   decodeFunctionResult(
@@ -229,6 +265,27 @@ export interface IAaveV3Actions extends BaseContract {
     "view"
   >;
 
+  changeDebtToHealthFactor: TypedContractMethod<
+    [
+      wallet: AddressLike,
+      asset: AddressLike,
+      targetHealthFactor: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+
+  changeDebtToHealthFactorETH: TypedContractMethod<
+    [
+      wallet: AddressLike,
+      targetHealthFactor: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+
   changeSupplyToHealthFactor: TypedContractMethod<
     [wallet: AddressLike, asset: AddressLike, targetHealthFactor: BigNumberish],
     [IAction.PluginExecutionStructOutput[]],
@@ -254,6 +311,27 @@ export interface IAaveV3Actions extends BaseContract {
 
   repayETH: TypedContractMethod<
     [wallet: AddressLike, amount: BigNumberish, interestRateMode: BigNumberish],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+
+  repayPercentageOfDebt: TypedContractMethod<
+    [
+      wallet: AddressLike,
+      asset: AddressLike,
+      percentage: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+
+  repayPercentageOfDebtETH: TypedContractMethod<
+    [
+      wallet: AddressLike,
+      percentage: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
     [IAction.PluginExecutionStructOutput[]],
     "view"
   >;
@@ -341,6 +419,29 @@ export interface IAaveV3Actions extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "changeDebtToHealthFactor"
+  ): TypedContractMethod<
+    [
+      wallet: AddressLike,
+      asset: AddressLike,
+      targetHealthFactor: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "changeDebtToHealthFactorETH"
+  ): TypedContractMethod<
+    [
+      wallet: AddressLike,
+      targetHealthFactor: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "changeSupplyToHealthFactor"
   ): TypedContractMethod<
     [wallet: AddressLike, asset: AddressLike, targetHealthFactor: BigNumberish],
@@ -370,6 +471,29 @@ export interface IAaveV3Actions extends BaseContract {
     nameOrSignature: "repayETH"
   ): TypedContractMethod<
     [wallet: AddressLike, amount: BigNumberish, interestRateMode: BigNumberish],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "repayPercentageOfDebt"
+  ): TypedContractMethod<
+    [
+      wallet: AddressLike,
+      asset: AddressLike,
+      percentage: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
+    [IAction.PluginExecutionStructOutput[]],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "repayPercentageOfDebtETH"
+  ): TypedContractMethod<
+    [
+      wallet: AddressLike,
+      percentage: BigNumberish,
+      interestRateMode: BigNumberish
+    ],
     [IAction.PluginExecutionStructOutput[]],
     "view"
   >;

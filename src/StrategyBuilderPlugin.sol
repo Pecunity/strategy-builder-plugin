@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import {BasePlugin} from "modular-account-libs/plugins/BasePlugin.sol";
 import {IPluginExecutor} from "modular-account-libs/interfaces/IPluginExecutor.sol";
@@ -18,6 +18,10 @@ import {IFeeController} from "./interfaces/IFeeController.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IAction} from "./interfaces/IAction.sol";
 
+/**
+ * @title StrategyBuilderPlugin
+ * @dev A plugin for creating, executing, and managing automated strategies based on predefined conditions and actions.
+ */
 contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
@@ -34,11 +38,16 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     // in other words, we'll say "make sure the person calling increment is an owner of the account using our single plugin"
     uint256 internal constant _MANIFEST_DEPENDENCY_INDEX_OWNER_USER_OP_VALIDATION = 0;
 
+    /// @notice Fee controller contract
     IFeeController public immutable feeController;
+    /// @notice Fee handler contract
     IFeeHandler public immutable feeHandler;
 
+    /// @notice Maps strategy IDs to strategy data
     mapping(bytes32 => Strategy) private strategies;
-    mapping(bytes32 => uint32[]) private strategiesUsed; //All automations where the strategy is used
+    /// @notice Tracks where each strategy is used
+    mapping(bytes32 => uint32[]) private strategiesUsed;
+    /// @notice Maps automation IDs to their index in the owner's strategy usage array
     mapping(bytes32 => uint32) private automationsToIndex; //Maps each automation ID to its index in the owner's used strategy array.
     mapping(bytes32 => Automation) private automations;
 
@@ -95,7 +104,6 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
 
         Strategy storage newStrategy = strategies[getStorageId(msg.sender, id)];
 
-        //TODO: Dont allow zero address!
         newStrategy.creator = creator;
 
         for (uint256 i = 0; i < steps.length; i++) {
@@ -389,6 +397,8 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
             }
         } else {
             _changeAutomationInCondition(_wallet, _condition.conditionAddress, _condition.id, _actionId, false);
+
+            //TODO: Delete condition
         }
     }
 

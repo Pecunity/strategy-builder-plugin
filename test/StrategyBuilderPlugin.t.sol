@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -260,8 +260,6 @@ contract StrategyBuilderTest is Test {
         createAutomation(1);
 
         mockFeeController();
-
-        address executor = makeAddr("executor");
 
         vm.prank(executor);
         vm.expectRevert(

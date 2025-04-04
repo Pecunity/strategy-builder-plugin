@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 interface ICondition {
     function checkCondition(address wallet, uint32 id) external view returns (uint8);
 
     function isUpdateable(address wallet, uint32 id) external view returns (bool);
 
-    function actionValid(address wallet, uint32 id, uint32 action) external view returns (bool);
+    function automationValid(address wallet, uint32 id, uint32 action) external view returns (bool);
 
     function strategyValid(address wallet, uint32 id, uint32 strategy) external view returns (bool);
 

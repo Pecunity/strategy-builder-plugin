@@ -24,9 +24,9 @@ import type {
 export interface IConditionInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "actionValid"
       | "addAutomationToCondition"
       | "addStrategyToCondition"
+      | "automationValid"
       | "checkCondition"
       | "conditionActive"
       | "deleteCondition"
@@ -38,16 +38,16 @@ export interface IConditionInterface extends Interface {
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "actionValid",
-    values: [AddressLike, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "addAutomationToCondition",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "addStrategyToCondition",
     values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "automationValid",
+    values: [AddressLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "checkCondition",
@@ -83,15 +83,15 @@ export interface IConditionInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "actionValid",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "addAutomationToCondition",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "addStrategyToCondition",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "automationValid",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -171,12 +171,6 @@ export interface ICondition extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  actionValid: TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
-    [boolean],
-    "view"
-  >;
-
   addAutomationToCondition: TypedContractMethod<
     [id: BigNumberish, action: BigNumberish],
     [boolean],
@@ -187,6 +181,12 @@ export interface ICondition extends BaseContract {
     [id: BigNumberish, action: BigNumberish],
     [boolean],
     "nonpayable"
+  >;
+
+  automationValid: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
+    [boolean],
+    "view"
   >;
 
   checkCondition: TypedContractMethod<
@@ -242,13 +242,6 @@ export interface ICondition extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "actionValid"
-  ): TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
-    [boolean],
-    "view"
-  >;
-  getFunction(
     nameOrSignature: "addAutomationToCondition"
   ): TypedContractMethod<
     [id: BigNumberish, action: BigNumberish],
@@ -261,6 +254,13 @@ export interface ICondition extends BaseContract {
     [id: BigNumberish, action: BigNumberish],
     [boolean],
     "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "automationValid"
+  ): TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
+    [boolean],
+    "view"
   >;
   getFunction(
     nameOrSignature: "checkCondition"

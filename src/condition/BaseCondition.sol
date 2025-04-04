@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import {ICondition} from "../interfaces/ICondition.sol";
 
@@ -55,7 +55,7 @@ abstract contract BaseCondition is ICondition {
         }
     }
 
-    function actionValid(address wallet, uint32 id, uint32 action) public view returns (bool) {
+    function automationValid(address wallet, uint32 id, uint32 action) public view returns (bool) {
         // Validate the action (placeholder implementation)
         return automationConditionIndex[wallet][action] == id;
     }

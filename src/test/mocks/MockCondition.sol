@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.26;
 
 import {BaseCondition} from "../../condition/BaseCondition.sol";
 
@@ -15,9 +15,9 @@ contract MockCondition is BaseCondition {
         conditions[msg.sender][id] = condition;
     }
 
-    function _isConditionActive(address, uint32 _id) internal view override returns (bool) {
-        return conditions[msg.sender][_id].active;
-    }
+    // function _isConditionActive(address, uint32 _id) internal view override returns (bool) {
+    //     return conditions[msg.sender][_id].active;
+    // }
 
     function checkCondition(address wallet, uint32 id) public view override returns (uint8) {
         return conditions[wallet][id].result ? 1 : 0;

@@ -17,35 +17,6 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "address",
-        name: "wallet",
-        type: "address",
-      },
-      {
-        internalType: "uint32",
-        name: "id",
-        type: "uint32",
-      },
-      {
-        internalType: "uint32",
-        name: "action",
-        type: "uint32",
-      },
-    ],
-    name: "actionValid",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "uint32",
         name: "id",
         type: "uint32",
@@ -89,6 +60,35 @@ const _abi = [
       },
     ],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "uint32",
+        name: "id",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "action",
+        type: "uint32",
+      },
+    ],
+    name: "automationValid",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
