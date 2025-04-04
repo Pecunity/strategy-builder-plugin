@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
 import {IAaveOracle} from "@aave/core-v3/contracts/interfaces/IAaveOracle.sol";
 import {IWETH} from "@aave/core-v3/contracts/misc/interfaces/IWETH.sol";
+import {DataTypes} from "@aave/core-v3/contracts/protocol/libraries/types/DataTypes.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IAaveV3Actions} from "./interfaces/IAaveV3Actions.sol";
@@ -34,6 +35,13 @@ contract AaveV3Actions is IAaveV3Actions {
         _;
     }
 
+    modifier validPercentage(uint256 percentage) {
+        if (percentage > PERCENTAGE_FACTOR) {
+            revert InvalidPercentage();
+        }
+        _;
+    }
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Constructor         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -50,6 +58,8 @@ contract AaveV3Actions is IAaveV3Actions {
         tokenGetterIDs[IAaveV3Actions.supplyPercentageOfBalanceETH.selector] = 1;
         tokenGetterIDs[IAaveV3Actions.changeSupplyToHealthFactorETH.selector] = 1;
         tokenGetterIDs[IAaveV3Actions.borrowPercentageOfAvailableETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.repayPercentageOfDebtETH.selector] = 1;
+        tokenGetterIDs[IAaveV3Actions.changeDebtToHealthFactorETH.selector] = 1;
 
         tokenGetterIDs[IAaveV3Actions.supplyPercentageOfBalance.selector] = 2;
         tokenGetterIDs[IAaveV3Actions.changeSupplyToHealthFactor.selector] = 2;
@@ -59,6 +69,8 @@ contract AaveV3Actions is IAaveV3Actions {
         tokenGetterIDs[IAaveV3Actions.borrow.selector] = 3;
         tokenGetterIDs[IAaveV3Actions.repay.selector] = 3;
         tokenGetterIDs[IAaveV3Actions.borrowPercentageOfAvailable.selector] = 3;
+        tokenGetterIDs[IAaveV3Actions.repayPercentageOfDebt.selector] = 3;
+        tokenGetterIDs[IAaveV3Actions.changeDebtToHealthFactor.selector] = 3;
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -192,6 +204,7 @@ contract AaveV3Actions is IAaveV3Actions {
         public
         view
         nonZeroAmount(percentage)
+        validPercentage(percentage)
         returns (PluginExecution[] memory)
     {
         uint256 supplyAmount = _calculatePercentageAmountOfAssetBalance(wallet, asset, percentage, false);
@@ -203,6 +216,7 @@ contract AaveV3Actions is IAaveV3Actions {
         public
         view
         nonZeroAmount(percentage)
+        validPercentage(percentage)
         returns (PluginExecution[] memory)
     {
         uint256 supplyAmount = _calculatePercentageAmountOfAssetBalance(wallet, WETH, percentage, true);
@@ -219,12 +233,23 @@ contract AaveV3Actions is IAaveV3Actions {
         (uint256 deltaAmount, bool isWithdraw) = _calculateDeltaCol(wallet, WETH, targetHealthFactor);
 
         if (isWithdraw) {
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
+            address supplyToken = _getSupplyToken(WETH);
+            uint256 maxWithdrawAmount = IERC20(supplyToken).balanceOf(wallet);
+            if (deltaAmount > maxWithdrawAmount) {
+                deltaAmount = maxWithdrawAmount;
+            }
             return withdrawETH(wallet, deltaAmount);
         } else {
-            // uint256 maxAmount = wallet.balance;
-            // if (deltaAmount > maxAmount) {
-            //     deltaAmount = maxAmount;
-            // }
+            uint256 maxAmount = wallet.balance;
+            if (deltaAmount > maxAmount) {
+                deltaAmount = maxAmount;
+            }
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
             return supplyETH(wallet, deltaAmount);
         }
     }
@@ -238,12 +263,23 @@ contract AaveV3Actions is IAaveV3Actions {
         (uint256 deltaAmount, bool isWithdraw) = _calculateDeltaCol(wallet, asset, targetHealthFactor);
 
         if (isWithdraw) {
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
+            address supplyToken = _getSupplyToken(asset);
+            uint256 maxWithdrawAmount = IERC20(supplyToken).balanceOf(wallet);
+            if (deltaAmount > maxWithdrawAmount) {
+                deltaAmount = maxWithdrawAmount;
+            }
             return withdraw(wallet, asset, deltaAmount);
         } else {
-            // uint256 maxAmount = IERC20(asset).balanceOf(wallet);
-            // if (deltaAmount > maxAmount) {
-            //     deltaAmount = maxAmount;
-            // }
+            uint256 maxAmount = IERC20(asset).balanceOf(wallet);
+            if (deltaAmount > maxAmount) {
+                deltaAmount = maxAmount;
+            }
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
             return supply(wallet, asset, deltaAmount);
         }
     }
@@ -252,6 +288,7 @@ contract AaveV3Actions is IAaveV3Actions {
         public
         view
         nonZeroAmount(percentage)
+        validPercentage(percentage)
         returns (PluginExecution[] memory)
     {
         uint256 borowAmount = _calculateBorrowAmount(wallet, asset, percentage);
@@ -263,6 +300,7 @@ contract AaveV3Actions is IAaveV3Actions {
         public
         view
         nonZeroAmount(percentage)
+        validPercentage(percentage)
         returns (PluginExecution[] memory)
     {
         uint256 borowAmount = _calculateBorrowAmount(wallet, WETH, percentage);
@@ -270,9 +308,87 @@ contract AaveV3Actions is IAaveV3Actions {
         return borrowETH(wallet, borowAmount, interestRateMode);
     }
 
-    function changeDebtToHealthFactor() public view {}
+    function repayPercentageOfDebt(address wallet, address asset, uint256 percentage, uint256 interestRateMode)
+        public
+        view
+        nonZeroAmount(percentage)
+        validPercentage(percentage)
+        returns (PluginExecution[] memory)
+    {
+        address debtToken = _getDebtToken(asset, interestRateMode);
 
-    function changeDebtToHealthFactorETH() public view {}
+        uint256 debt = IERC20(debtToken).balanceOf(wallet);
+        uint256 repayAmount = debt * percentage / PERCENTAGE_FACTOR;
+        return repay(wallet, asset, repayAmount, interestRateMode);
+    }
+
+    function repayPercentageOfDebtETH(address wallet, uint256 percentage, uint256 interestRateMode)
+        public
+        view
+        nonZeroAmount(percentage)
+        validPercentage(percentage)
+        returns (PluginExecution[] memory)
+    {
+        address debtToken = _getDebtToken(WETH, interestRateMode);
+        uint256 debt = IERC20(debtToken).balanceOf(wallet);
+        uint256 repayAmount = debt * percentage / PERCENTAGE_FACTOR;
+        return repayETH(wallet, repayAmount, interestRateMode);
+    }
+
+    function changeDebtToHealthFactor(
+        address wallet,
+        address asset,
+        uint256 targetHealthFactor,
+        uint256 interestRateMode
+    ) public view returns (PluginExecution[] memory) {
+        _validateHealtfactor(targetHealthFactor);
+
+        (uint256 deltaAmount, bool isRepay) = _calculateDeltaDebt(wallet, asset, targetHealthFactor);
+
+        if (isRepay) {
+            address debtToken = _getDebtToken(asset, interestRateMode);
+            uint256 maxAmount = IERC20(asset).balanceOf(wallet) > IERC20(debtToken).balanceOf(wallet) ? IERC20(asset).balanceOf(wallet) : IERC20(debtToken).balanceOf(wallet);
+            
+            if (deltaAmount > maxAmount) {
+                deltaAmount = maxAmount;
+            }
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
+            return repay(wallet, asset, deltaAmount, interestRateMode);
+        } else {
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
+            return borrow(wallet, asset, deltaAmount, interestRateMode);
+        }
+    }
+
+    function changeDebtToHealthFactorETH(address wallet, uint256 targetHealthFactor, uint256 interestRateMode)
+        public
+        view
+        returns (PluginExecution[] memory)
+    {
+        _validateHealtfactor(targetHealthFactor);
+        (uint256 deltaAmount, bool isRepay) = _calculateDeltaDebt(wallet, WETH, targetHealthFactor);
+
+        if (isRepay) {            
+            address debtToken = _getDebtToken(WETH, interestRateMode);
+            uint256 maxAmount = wallet.balance > IERC20(debtToken).balanceOf(wallet) ? wallet.balance : IERC20(debtToken).balanceOf(wallet);
+            if (deltaAmount > maxAmount) {
+                deltaAmount = maxAmount;
+            }
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
+            return repayETH(wallet, deltaAmount, interestRateMode);
+        } else {
+            if (deltaAmount == 0) {
+                return new PluginExecution[](0);
+            }
+            return borrowETH(wallet, deltaAmount, interestRateMode);
+        }
+    }
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Internal functions     ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -339,6 +455,29 @@ contract AaveV3Actions is IAaveV3Actions {
         return (maxBorrowAmount) * percentage / PERCENTAGE_FACTOR;
     }
 
+    function _calculateDeltaDebt(address wallet, address asset, uint256 targetHealthFactor)
+        internal
+        view
+        returns (uint256 deltaDebt, bool isRepay)
+    {
+        (uint256 currentCol, uint256 currentDebt,, uint256 currentLT,,) = IPool(pool).getUserAccountData(wallet);
+
+        uint256 targetDebt = (((currentCol * currentLT) / PERCENTAGE_FACTOR) * 1e18) / targetHealthFactor;
+
+        uint256 deltaDebtInBaseCurrency;
+        if (targetDebt < currentDebt) {
+            isRepay = true;
+            deltaDebtInBaseCurrency = currentDebt - targetDebt;
+        } else {
+            deltaDebtInBaseCurrency = targetDebt - currentDebt;
+        }
+
+        uint256 assetPrice = oracle.getAssetPrice(asset);
+        uint256 decimals = IERC20Metadata(asset).decimals();
+
+        deltaDebt = assetPrice > 0 ? (deltaDebtInBaseCurrency * 10 ** decimals) / assetPrice : 0;
+    }
+
     function _calculateDeltaCol(address wallet, address asset, uint256 targetHealthFactor)
         internal
         view
@@ -370,6 +509,20 @@ contract AaveV3Actions is IAaveV3Actions {
         uint256 totalBalance = native ? wallet.balance : IERC20(asset).balanceOf(wallet);
 
         return (totalBalance * percentage) / PERCENTAGE_FACTOR;
+    }
+
+    function _getDebtToken(address asset, uint256 interestMoode) internal view returns (address) {
+        DataTypes.ReserveData memory reserveData = IPool(pool).getReserveData(asset);
+
+        if (interestMoode == 1) {
+            return reserveData.stableDebtTokenAddress;
+        } else {
+            return reserveData.variableDebtTokenAddress;
+        }
+    }
+
+    function _getSupplyToken(address asset) internal view returns(address){
+        return IPool(pool).getReserveData(asset).aTokenAddress;
     }
 
     function _validateHealtfactor(uint256 healthFactor) internal pure {

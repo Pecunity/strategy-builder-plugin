@@ -70,8 +70,14 @@ export type { UniswapV2LPActions } from "./src/actions/uniswap-v2/UniswapV2LPAct
 export { UniswapV2LPActions__factory } from "./factories/src/actions/uniswap-v2/UniswapV2LPActions__factory";
 export type { UniswapV2SwapActions } from "./src/actions/uniswap-v2/UniswapV2SwapActions";
 export { UniswapV2SwapActions__factory } from "./factories/src/actions/uniswap-v2/UniswapV2SwapActions__factory";
+export type { HealthFactorCondition } from "./src/condition/aave-v3/HealthFactorCondition";
+export { HealthFactorCondition__factory } from "./factories/src/condition/aave-v3/HealthFactorCondition__factory";
+export type { IHealthFactorCondition } from "./src/condition/aave-v3/interfaces/IHealthFactorCondition";
+export { IHealthFactorCondition__factory } from "./factories/src/condition/aave-v3/interfaces/IHealthFactorCondition__factory";
 export type { BaseCondition } from "./src/condition/BaseCondition";
 export { BaseCondition__factory } from "./factories/src/condition/BaseCondition__factory";
+export type { ERC20Condition } from "./src/condition/ERC20Condition";
+export { ERC20Condition__factory } from "./factories/src/condition/ERC20Condition__factory";
 export type { TimeCondition } from "./src/condition/TimeCondition";
 export { TimeCondition__factory } from "./factories/src/condition/TimeCondition__factory";
 export type { FeeController } from "./src/FeeController";

@@ -126,9 +126,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniswapV2SwapActions__factory>;
     getContractFactory(
+      name: "HealthFactorCondition",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.HealthFactorCondition__factory>;
+    getContractFactory(
+      name: "IHealthFactorCondition",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IHealthFactorCondition__factory>;
+    getContractFactory(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BaseCondition__factory>;
+    getContractFactory(
+      name: "ERC20Condition",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC20Condition__factory>;
     getContractFactory(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -327,10 +339,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.UniswapV2SwapActions>;
     getContractAt(
+      name: "HealthFactorCondition",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.HealthFactorCondition>;
+    getContractAt(
+      name: "IHealthFactorCondition",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IHealthFactorCondition>;
+    getContractAt(
       name: "BaseCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.BaseCondition>;
+    getContractAt(
+      name: "ERC20Condition",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC20Condition>;
     getContractAt(
       name: "TimeCondition",
       address: string | ethers.Addressable,
@@ -515,9 +542,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2SwapActions>;
     deployContract(
+      name: "HealthFactorCondition",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.HealthFactorCondition>;
+    deployContract(
+      name: "IHealthFactorCondition",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IHealthFactorCondition>;
+    deployContract(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseCondition>;
+    deployContract(
+      name: "ERC20Condition",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ERC20Condition>;
     deployContract(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -716,10 +755,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2SwapActions>;
     deployContract(
+      name: "HealthFactorCondition",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.HealthFactorCondition>;
+    deployContract(
+      name: "IHealthFactorCondition",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IHealthFactorCondition>;
+    deployContract(
       name: "BaseCondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseCondition>;
+    deployContract(
+      name: "ERC20Condition",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ERC20Condition>;
     deployContract(
       name: "TimeCondition",
       args: any[],

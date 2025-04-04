@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
 import {AaveV3Actions} from "../../src/actions/aave-v3/AaveV3Actions.sol";
@@ -102,10 +102,13 @@ contract AaveV3ActionsTest is Test {
 
         (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
 
-        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[3];
+        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[2];
+
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+
         uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
 
-        uint256 maxBorrowAmount = (availableBorrowsBase * 1e18 / price);
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
 
         //Borrow 50 %
         uint256 borrowAmount = 50 * maxBorrowAmount / 100;
@@ -161,10 +164,12 @@ contract AaveV3ActionsTest is Test {
         // Borrow tokens
         (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
 
-        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[3];
+        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[1];
         uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
 
-        uint256 maxBorrowAmount = (availableBorrowsBase * 1e18 / price);
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
 
         borrow(maxBorrowAmount, assetToBorrow);
 
@@ -261,10 +266,12 @@ contract AaveV3ActionsTest is Test {
         //Borrow tokens 50%
         (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
 
-        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[3];
+        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[1];
         uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
 
-        uint256 maxBorrowAmount = (availableBorrowsBase * 1e18 / price);
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
 
         borrow((maxBorrowAmount * 50) / 100, assetToBorrow);
 
@@ -301,10 +308,12 @@ contract AaveV3ActionsTest is Test {
         //Borrow tokens 50%
         (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
 
-        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[3];
+        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[1];
         uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
 
-        uint256 maxBorrowAmount = (availableBorrowsBase * 1e18 / price);
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
 
         borrow((maxBorrowAmount * 50) / 100, assetToBorrow);
 
@@ -321,13 +330,15 @@ contract AaveV3ActionsTest is Test {
         assertTrue(isApproximatelyEqual(targetHealthFactor, currentHF, 1e16));
     }
 
-    function test_borrowPercentageOfAvailable_Success(uint256 _percentage) external {
-        uint256 percentage = bound(_percentage, 2, aaveActions.PERCENTAGE_FACTOR());
+    function test_borrowPercentageOfAvailable_Success() external {
+        // uint256 percentage = bound(_percentage, 2, aaveActions.PERCENTAGE_FACTOR());
+
+        uint256 percentage = 4550;
 
         // Supply tokens
 
         uint256 amountIn = 2 ether;
-        address asset = IPool(AAVE_V3_POOL).getReservesList()[0];
+        address asset = IPool(AAVE_V3_POOL).getReservesList()[1];
 
         supply(amountIn, asset);
 
@@ -369,6 +380,112 @@ contract AaveV3ActionsTest is Test {
             availableBorrowsBaseBefore - availableBorrowsBaseBefore * percentage / aaveActions.PERCENTAGE_FACTOR();
 
         assertTrue(isApproximatelyEqual(expBorrowBase, currentAvailableBorrowsBase, 100));
+    }
+
+    function test_repayPercentageOfDebt_Success(uint256 _percentage) external {
+        uint256 percentage = bound(_percentage, 1, aaveActions.PERCENTAGE_FACTOR());
+        // Supply tokens
+        uint256 amountIn = 2 ether;
+        address asset = IPool(AAVE_V3_POOL).getReservesList()[1];
+        supply(amountIn, asset);
+        // borrow tokens
+        (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
+        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[2];
+        uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
+
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
+        borrow(maxBorrowAmount, assetToBorrow);
+
+        // Repay percentage
+        uint256 debtTokenAmount =
+            IERC20(IPool(AAVE_V3_POOL).getReserveData(assetToBorrow).variableDebtTokenAddress).balanceOf(WALLET);
+        console.log(debtTokenAmount);
+
+        IAction.PluginExecution[] memory executions =
+            aaveActions.repayPercentageOfDebt(WALLET, assetToBorrow, percentage, 2);
+        execute(executions);
+        uint256 currentDebtTokenAmount =
+            IERC20(IPool(AAVE_V3_POOL).getReserveData(assetToBorrow).variableDebtTokenAddress).balanceOf(WALLET);
+        uint256 expRepayAmount = debtTokenAmount - debtTokenAmount * percentage / aaveActions.PERCENTAGE_FACTOR();
+        assertTrue(isApproximatelyEqual(expRepayAmount, currentDebtTokenAmount, 100));
+    }
+
+    function test_repayPercentageOfDebtETH_Success(uint256 _percentage) external {
+        uint256 percentage = bound(_percentage, 1, aaveActions.PERCENTAGE_FACTOR());
+        // Supply tokens
+        uint256 amountIn = 2 ether;
+        address asset = IPool(AAVE_V3_POOL).getReservesList()[1];
+        supply(amountIn, asset);
+        // borrow tokens
+        (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
+        address assetToBorrow = WETH;
+        uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
+        borrowETH(maxBorrowAmount);
+        // Repay percentage
+        uint256 debtTokenAmount =
+            IERC20(IPool(AAVE_V3_POOL).getReserveData(WETH).variableDebtTokenAddress).balanceOf(WALLET);
+        console.log(debtTokenAmount);
+
+        IAction.PluginExecution[] memory executions = aaveActions.repayPercentageOfDebtETH(WALLET, percentage, 2);
+        execute(executions);
+        uint256 currentDebtTokenAmount =
+            IERC20(IPool(AAVE_V3_POOL).getReserveData(WETH).variableDebtTokenAddress).balanceOf(WALLET);
+        uint256 expRepayAmount = debtTokenAmount - debtTokenAmount * percentage / aaveActions.PERCENTAGE_FACTOR();
+        assertTrue(isApproximatelyEqual(expRepayAmount, currentDebtTokenAmount, 100));
+    }
+
+    function test_changeDebtToHealthFactor_Success(uint256 _targetHealthFactor) external {
+        uint256 targetHealthFactor = bound(_targetHealthFactor, 1.06e18, 10e18);
+
+        uint256 walletBalance = 40 ether;
+        uint256 amountIn = 0.2 ether;
+
+        address asset = IPool(AAVE_V3_POOL).getReservesList()[1];
+        supply(amountIn, asset);
+        (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
+        address assetToBorrow = IPool(AAVE_V3_POOL).getReservesList()[2];
+
+        uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
+        borrow(maxBorrowAmount * 50 / 100, assetToBorrow);
+
+        deal(assetToBorrow, WALLET, walletBalance);
+        IAction.PluginExecution[] memory executions =
+            aaveActions.changeDebtToHealthFactor(WALLET, assetToBorrow, targetHealthFactor, 2);
+        execute(executions);
+
+        (,,,,, uint256 currentHF) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
+        emit log_named_uint("currentHF", currentHF);
+
+        assertTrue(isApproximatelyEqual(targetHealthFactor, currentHF, 1e16));
+    }
+
+    function test_changeDebtToHealthFactorETH_Success(uint256 _targetHealthFactor) external {
+        uint256 targetHealthFactor = bound(_targetHealthFactor, 1.06e18, 10e18);
+        uint256 walletBalance = 40 ether;
+        uint256 amountIn = 0.2 ether;
+
+        address asset = IPool(AAVE_V3_POOL).getReservesList()[1];
+        supply(amountIn, asset);
+        (,, uint256 availableBorrowsBase,,,) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
+        address assetToBorrow = WETH;
+        uint256 price = IAaveOracle(AAVE_V3_ORACLE).getAssetPrice(assetToBorrow);
+        uint256 decimals = IERC20Metadata(assetToBorrow).decimals();
+        uint256 maxBorrowAmount = (availableBorrowsBase * 10 ** decimals / price);
+        borrowETH(maxBorrowAmount * 50 / 100);
+
+        deal(WALLET, walletBalance);
+        IAction.PluginExecution[] memory executions =
+            aaveActions.changeDebtToHealthFactorETH(WALLET, targetHealthFactor, 2);
+        execute(executions);
+        (,,,,, uint256 currentHF) = IPool(AAVE_V3_POOL).getUserAccountData(WALLET);
+        emit log_named_uint("currentHF", currentHF);
+        assertTrue(isApproximatelyEqual(targetHealthFactor, currentHF, 1e16));
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━┓

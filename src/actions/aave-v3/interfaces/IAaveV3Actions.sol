@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import {IAction} from "../../../interfaces/IAction.sol";
 import {ITokenGetter} from "../../../interfaces/ITokenGetter.sol";
@@ -12,6 +12,7 @@ interface IAaveV3Actions is IAction {
     error ZeroAmountNotValid();
     error HealthFactorNotValid();
     error InvalidTokenGetterID();
+    error InvalidPercentage();
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Execution functions    ┃
@@ -60,6 +61,24 @@ interface IAaveV3Actions is IAction {
         view
         returns (PluginExecution[] memory);
     function borrowPercentageOfAvailableETH(address wallet, uint256 percentage, uint256 interestRateMode)
+        external
+        view
+        returns (PluginExecution[] memory);
+    function repayPercentageOfDebt(address wallet, address asset, uint256 percentage, uint256 interestRateMode)
+        external
+        view
+        returns (PluginExecution[] memory);
+    function repayPercentageOfDebtETH(address wallet, uint256 percentage, uint256 interestRateMode)
+        external
+        view
+        returns (PluginExecution[] memory);
+    function changeDebtToHealthFactor(
+        address wallet,
+        address asset,
+        uint256 targetHealthFactor,
+        uint256 interestRateMode
+    ) external view returns (PluginExecution[] memory);
+    function changeDebtToHealthFactorETH(address wallet, uint256 targetHealthFactor, uint256 interestRateMode)
         external
         view
         returns (PluginExecution[] memory);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -46,21 +46,19 @@ contract FeeHandler is Ownable, IFeeHandler {
             revert TokenNotAllowed();
         }
 
-       
         (uint256 totalFee, uint256 treasuryFee) = _feeCalculation(amount, token);
 
         (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount) = _tokenDistribution(totalFee);
 
         IERC20(token).safeTransferFrom(msg.sender, beneficiary, beneficiaryAmount);
 
-        if(creator!= address(0)){
+        if (creator != address(0)) {
             IERC20(token).safeTransferFrom(msg.sender, creator, creatorAmount);
-        IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount);
-        }else{
-            
-        IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount +creatorAmount);
+            IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount);
+        } else {
+            IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount + creatorAmount);
         }
-        
+
         if (treasuryFee > 0) {
             IERC20(token).safeTransferFrom(msg.sender, treasury, treasuryFee);
         }
@@ -83,17 +81,16 @@ contract FeeHandler is Ownable, IFeeHandler {
 
         payable(beneficiary).transfer(beneficiaryAmount);
 
-        if(creator != address(0)){
+        if (creator != address(0)) {
             payable(creator).transfer(creatorAmount);
             payable(vault).transfer(vaultAmount);
-        }else{
-            payable(vault).transfer(vaultAmount+ creatorAmount);
+        } else {
+            payable(vault).transfer(vaultAmount + creatorAmount);
         }
 
         if (treasuryFee > 0) {
             payable(treasury).transfer(treasuryFee);
         }
-      
 
         emit FeeHandledETH(msg.value);
     }
@@ -157,7 +154,7 @@ contract FeeHandler is Ownable, IFeeHandler {
         return (beneficiaryAmount, creatorAmount, vaultAmount);
     }
 
-    function _feeCalculation(uint256 amount,address token) internal view returns (uint256,  uint256) {
+    function _feeCalculation(uint256 amount, address token) internal view returns (uint256, uint256) {
         uint256 totalFee = amount;
         uint256 treasuryFee = 0;
 
@@ -167,13 +164,13 @@ contract FeeHandler is Ownable, IFeeHandler {
         }
 
         if (primaryTokenActive() && primaryToken == token) {
-            uint256 feeDiscount = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;     
-            totalFee -= feeDiscount;    
-        }else if (primaryTokenActive()) {
+            uint256 feeDiscount = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;
+            totalFee -= feeDiscount;
+        } else if (primaryTokenActive()) {
             treasuryFee = (amount * primaryTokenDiscount) / PERCENTAGE_DIVISOR;
             totalFee -= treasuryFee;
         }
-        return (totalFee,  treasuryFee);
+        return (totalFee, treasuryFee);
     }
 
     function _validateAddress(address _addr) internal pure {
@@ -187,7 +184,7 @@ contract FeeHandler is Ownable, IFeeHandler {
     }
 
     function _validateBeneficiary(address beneficiary) internal pure {
-        if (beneficiary == address(0) ) revert InvalidBeneficiary();
+        if (beneficiary == address(0)) revert InvalidBeneficiary();
     }
 
     function primaryTokenActive() public view returns (bool) {

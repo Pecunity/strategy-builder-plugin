@@ -16,6 +16,11 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "InvalidPercentage",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "InvalidTokenGetterID",
     type: "error",
   },
@@ -235,6 +240,103 @@ const _abi = [
         name: "targetHealthFactor",
         type: "uint256",
       },
+      {
+        internalType: "uint256",
+        name: "interestRateMode",
+        type: "uint256",
+      },
+    ],
+    name: "changeDebtToHealthFactor",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct IAction.PluginExecution[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "targetHealthFactor",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "interestRateMode",
+        type: "uint256",
+      },
+    ],
+    name: "changeDebtToHealthFactorETH",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct IAction.PluginExecution[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "targetHealthFactor",
+        type: "uint256",
+      },
     ],
     name: "changeSupplyToHealthFactor",
     outputs: [
@@ -375,6 +477,103 @@ const _abi = [
       },
     ],
     name: "repayETH",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct IAction.PluginExecution[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "asset",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "percentage",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "interestRateMode",
+        type: "uint256",
+      },
+    ],
+    name: "repayPercentageOfDebt",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct IAction.PluginExecution[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "percentage",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "interestRateMode",
+        type: "uint256",
+      },
+    ],
+    name: "repayPercentageOfDebtETH",
     outputs: [
       {
         components: [

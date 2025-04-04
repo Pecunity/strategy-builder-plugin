@@ -29,7 +29,7 @@ function getInfuraNetwork(name: string): NetworkUserConfig {
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.24", // Your Solidity version
+    version: "0.8.26", // Your Solidity version
     settings: {
       optimizer: {
         enabled: true, // Enable optimization
