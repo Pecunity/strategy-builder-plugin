@@ -18,17 +18,17 @@ contract StrategyExecutionTest is Test {
     }
 
     function test_automationExecution() external {
-        // address wallet = 0xA286BA348C6b051c721723a1fAC7391272bE867a;
-        // uint32 automationId = 3033276506;
+        address wallet = 0xF5C623BC8f11Aa5b8A5bE0A133f16342f82e3D4E;
+        uint32 automationId = 4074435609;
 
-        // // IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
-        // //     conditionAddress: 0x611cff612D70088428E37D87a1F5BD8Fbb61233A,
-        // //     id: automationId,
-        // //     result0: 0,
-        // //     result1: 0
-        // // });
+        // IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
+        //     conditionAddress: 0x611cff612D70088428E37D87a1F5BD8Fbb61233A,
+        //     id: automationId,
+        //     result0: 0,
+        //     result1: 0
+        // });
 
-        // vm.prank(EXECUTOR);
-        // IStrategyBuilderPlugin(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
+        vm.prank(EXECUTOR);
+        IStrategyBuilderPlugin(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
     }
 }

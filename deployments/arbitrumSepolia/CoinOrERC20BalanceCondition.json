@@ -1,0 +1,690 @@
+{
+  "address": "0x63Cdf4c4fF8091229E1088eDDB36DA1BB3Cfe5B5",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "BaseCondition__ConditionDoesNotExist",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "BaseCondition__ConditionIsInUse",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidComparison",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "baseToken",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum ICoinOrERC20BalanceCondition.Comparison",
+              "name": "comparison",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "updateable",
+              "type": "bool"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct ICoinOrERC20BalanceCondition.Condition",
+          "name": "condition",
+          "type": "tuple"
+        }
+      ],
+      "name": "ConditionAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "name": "ConditionDeleted",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "action",
+          "type": "uint32"
+        }
+      ],
+      "name": "addAutomationToCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "baseToken",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum ICoinOrERC20BalanceCondition.Comparison",
+              "name": "comparison",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "updateable",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ICoinOrERC20BalanceCondition.Condition",
+          "name": "condition",
+          "type": "tuple"
+        }
+      ],
+      "name": "addCondition",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "strategy",
+          "type": "uint32"
+        }
+      ],
+      "name": "addStrategyToCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "action",
+          "type": "uint32"
+        }
+      ],
+      "name": "automationValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        }
+      ],
+      "name": "automations",
+      "outputs": [
+        {
+          "internalType": "uint32[]",
+          "name": "",
+          "type": "uint32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        }
+      ],
+      "name": "checkCondition",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "conditionActive",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "deleteCondition",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        }
+      ],
+      "name": "isUpdateable",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "automation",
+          "type": "uint32"
+        }
+      ],
+      "name": "removeAutomationFromCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "strategy",
+          "type": "uint32"
+        }
+      ],
+      "name": "removeStrategyFromCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        }
+      ],
+      "name": "strategies",
+      "outputs": [
+        {
+          "internalType": "uint32[]",
+          "name": "",
+          "type": "uint32[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "id",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "strategy",
+          "type": "uint32"
+        }
+      ],
+      "name": "strategyValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "updateCondition",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_id",
+          "type": "uint32"
+        }
+      ],
+      "name": "walletCondition",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "baseToken",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "enum ICoinOrERC20BalanceCondition.Comparison",
+              "name": "comparison",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bool",
+              "name": "updateable",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ICoinOrERC20BalanceCondition.Condition",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xdf248367383d81e8fbaeba6b343acf69caf1a141ecbb78174b1fa143af80d6ad",
+  "receipt": {
+    "to": null,
+    "from": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123",
+    "contractAddress": "0x63Cdf4c4fF8091229E1088eDDB36DA1BB3Cfe5B5",
+    "transactionIndex": 1,
+    "gasUsed": "1127097",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x949a5e7ca6381ad11414be21578d7097a7ca98385027eb4edde007a82275e266",
+    "transactionHash": "0xdf248367383d81e8fbaeba6b343acf69caf1a141ecbb78174b1fa143af80d6ad",
+    "logs": [],
+    "blockNumber": 140152711,
+    "cumulativeGasUsed": "1127097",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "d196abb346eead52fb94d05938bc4bae",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.26+commit.8a97fa7a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"BaseCondition__ConditionDoesNotExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"BaseCondition__ConditionIsInUse\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidComparison\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"baseToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"enum ICoinOrERC20BalanceCondition.Comparison\",\"name\":\"comparison\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"updateable\",\"type\":\"bool\"}],\"indexed\":false,\"internalType\":\"struct ICoinOrERC20BalanceCondition.Condition\",\"name\":\"condition\",\"type\":\"tuple\"}],\"name\":\"ConditionAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"}],\"name\":\"ConditionDeleted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"action\",\"type\":\"uint32\"}],\"name\":\"addAutomationToCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"},{\"components\":[{\"internalType\":\"address\",\"name\":\"baseToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"enum ICoinOrERC20BalanceCondition.Comparison\",\"name\":\"comparison\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"updateable\",\"type\":\"bool\"}],\"internalType\":\"struct ICoinOrERC20BalanceCondition.Condition\",\"name\":\"condition\",\"type\":\"tuple\"}],\"name\":\"addCondition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"strategy\",\"type\":\"uint32\"}],\"name\":\"addStrategyToCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"action\",\"type\":\"uint32\"}],\"name\":\"automationValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"}],\"name\":\"automations\",\"outputs\":[{\"internalType\":\"uint32[]\",\"name\":\"\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"}],\"name\":\"checkCondition\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"conditionActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"deleteCondition\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"}],\"name\":\"isUpdateable\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"automation\",\"type\":\"uint32\"}],\"name\":\"removeAutomationFromCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"strategy\",\"type\":\"uint32\"}],\"name\":\"removeStrategyFromCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"}],\"name\":\"strategies\",\"outputs\":[{\"internalType\":\"uint32[]\",\"name\":\"\",\"type\":\"uint32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"id\",\"type\":\"uint32\"},{\"internalType\":\"uint32\",\"name\":\"strategy\",\"type\":\"uint32\"}],\"name\":\"strategyValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"updateCondition\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_wallet\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"_id\",\"type\":\"uint32\"}],\"name\":\"walletCondition\",\"outputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"baseToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"enum ICoinOrERC20BalanceCondition.Comparison\",\"name\":\"comparison\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"updateable\",\"type\":\"bool\"}],\"internalType\":\"struct ICoinOrERC20BalanceCondition.Condition\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/condition/CoinOrERC20BalanceCondition.sol\":\"CoinOrERC20BalanceCondition\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC20 standard as defined in the EIP.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the amount of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the amount of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves `amount` tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 amount) external returns (bool);\\n\\n    /**\\n     * @dev Moves `amount` tokens from `from` to `to` using the\\n     * allowance mechanism. `amount` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 amount) external returns (bool);\\n}\\n\",\"keccak256\":\"0x287b55befed2961a7eabd7d7b1b2839cbca8a5b80ef8dcbb25ed3d4c2002c305\",\"license\":\"MIT\"},\"src/condition/BaseCondition.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.26;\\n\\nimport {ICondition} from \\\"../interfaces/ICondition.sol\\\";\\n\\nerror BaseCondition__ConditionDoesNotExist();\\nerror BaseCondition__ConditionAlreadyExist();\\nerror BaseCondition__ConditionIsInUse();\\n\\nabstract contract BaseCondition is ICondition {\\n    // Storage for conditions, strategies, and automations\\n    mapping(address => mapping(uint32 => uint32[])) private conditionStrategies; // (wallet => (id => strategies))\\n    mapping(address => mapping(uint32 => uint32[])) private conditionAutomations; // (wallet => (id => automations))\\n    mapping(address => mapping(uint32 => uint32)) private strategyConditionIndex;\\n    mapping(address => mapping(uint32 => uint32)) private automationConditionIndex;\\n\\n    modifier conditionExist(uint32 id) {\\n        if (!_isConditionActive(msg.sender, id)) {\\n            revert BaseCondition__ConditionDoesNotExist();\\n        }\\n        _;\\n    }\\n\\n    modifier conditionDoesNotExist(uint32 id) {\\n        if (_isConditionActive(msg.sender, id)) {\\n            revert BaseCondition__ConditionAlreadyExist();\\n        }\\n        _;\\n    }\\n\\n    function checkCondition(address, uint32) public view virtual returns (uint8) {\\n        return 0;\\n    }\\n\\n    function isUpdateable(address, uint32) public view virtual returns (bool) {\\n        return false;\\n    }\\n\\n    function updateCondition(uint32) public virtual returns (bool) {\\n        // Default implementation for updateCondition (override in derived contracts)\\n        return false;\\n    }\\n\\n    function conditionActive(address _wallet, uint32 _id) external view returns (bool) {\\n        return _isConditionActive(_wallet, _id);\\n    }\\n\\n    function _isConditionActive(address, uint32) internal view virtual returns (bool) {\\n        return false;\\n    }\\n\\n    function deleteCondition(uint32 _id) public virtual {\\n        if (conditionAutomations[msg.sender][_id].length > 0 || conditionStrategies[msg.sender][_id].length > 0) {\\n            revert BaseCondition__ConditionIsInUse();\\n        }\\n    }\\n\\n    function automationValid(address wallet, uint32 id, uint32 action) public view returns (bool) {\\n        // Validate the action (placeholder implementation)\\n        return automationConditionIndex[wallet][action] == id;\\n    }\\n\\n    function strategyValid(address wallet, uint32 id, uint32 strategy) public view returns (bool) {\\n        // Validate the strategy (placeholder implementation)\\n        return strategyConditionIndex[wallet][strategy] == id;\\n    }\\n\\n    function addAutomationToCondition(uint32 id, uint32 action) public returns (bool) {\\n        conditionAutomations[msg.sender][id].push(action);\\n        automationConditionIndex[msg.sender][action] = uint32(conditionAutomations[msg.sender][id].length - 1);\\n        return true;\\n    }\\n\\n    function addStrategyToCondition(uint32 id, uint32 strategy) public returns (bool) {\\n        conditionStrategies[msg.sender][id].push(strategy);\\n        strategyConditionIndex[msg.sender][strategy] = uint32(conditionStrategies[msg.sender][id].length - 1);\\n        return true;\\n    }\\n\\n    function removeAutomationFromCondition(uint32 id, uint32 automation) public returns (bool) {\\n        uint32[] storage _automations = conditionAutomations[msg.sender][id];\\n\\n        uint32 _actualAutomationIndex = automationConditionIndex[msg.sender][automation];\\n\\n        if (_automations[_actualAutomationIndex] != automation) {\\n            return false;\\n        }\\n\\n        uint256 _lastAutomationIndex = _automations.length - 1;\\n\\n        if (_lastAutomationIndex != _actualAutomationIndex) {\\n            uint32 _lastAutomationId = _automations[_lastAutomationIndex];\\n            automationConditionIndex[msg.sender][_lastAutomationId] = _actualAutomationIndex;\\n            _automations[_actualAutomationIndex] = _lastAutomationId;\\n        }\\n\\n        _automations.pop();\\n\\n        return true;\\n    }\\n\\n    function removeStrategyFromCondition(uint32 id, uint32 strategy) public returns (bool) {\\n        uint32[] storage _strategies = conditionStrategies[msg.sender][id];\\n\\n        uint32 _actualStrategyIndex = strategyConditionIndex[msg.sender][strategy];\\n\\n        if (_strategies[_actualStrategyIndex] != strategy) {\\n            return false;\\n        }\\n\\n        uint256 _lastStrategyIndex = _strategies.length - 1;\\n\\n        if (_lastStrategyIndex != _actualStrategyIndex) {\\n            uint32 _lastStrategyId = _strategies[_lastStrategyIndex];\\n            strategyConditionIndex[msg.sender][_lastStrategyId] = _actualStrategyIndex;\\n            _strategies[_actualStrategyIndex] = _lastStrategyId;\\n        }\\n\\n        _strategies.pop();\\n\\n        return true;\\n    }\\n\\n    function strategies(address wallet, uint32 id) external view returns (uint32[] memory) {\\n        return conditionStrategies[wallet][id];\\n    }\\n\\n    function automations(address wallet, uint32 id) external view returns (uint32[] memory) {\\n        return conditionAutomations[wallet][id];\\n    }\\n}\\n\",\"keccak256\":\"0x6f18b756e979d492081be06febae3fbcb4570fe2cc60ac560d87834a93fd7174\",\"license\":\"MIT\"},\"src/condition/CoinOrERC20BalanceCondition.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.26;\\n\\nimport {BaseCondition} from \\\"./BaseCondition.sol\\\";\\nimport {IERC20} from \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport {ICoinOrERC20BalanceCondition} from \\\"./interfaces/ICoinOrERC20BalanceCondition.sol\\\";\\n\\ncontract CoinOrERC20BalanceCondition is BaseCondition, ICoinOrERC20BalanceCondition {\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503        State Variables           \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n    mapping(address wallet => mapping(uint32 id => Condition condition)) private conditions;\\n    mapping(address wallet => mapping(uint32 id => bool active)) private activeConditions;\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503           Modifiers              \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n    modifier validCondition(Condition calldata _condition) {\\n        \\n        if (_condition.comparison > Comparison.NOT_EQUAL) {\\n            revert InvalidComparison();\\n        }\\n        _;\\n    }\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503       Public Functions           \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n    function addCondition(uint32 _id, Condition calldata condition) external validCondition(condition) {\\n        conditions[msg.sender][_id] = condition;\\n\\n        activeConditions[msg.sender][_id] = true;\\n\\n        emit ConditionAdded(_id, msg.sender, condition);\\n    }\\n\\n     function deleteCondition(uint32 _id) public override conditionExist(_id) {\\n        super.deleteCondition(_id);\\n        delete conditions[msg.sender][_id];\\n\\n        activeConditions[msg.sender][_id] = false;\\n\\n        emit ConditionDeleted(_id, msg.sender);\\n    }\\n\\n    function updateCondition(uint32 _id) public view override conditionExist(_id) returns (bool) {\\n        return conditions[msg.sender][_id].updateable;\\n    }\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503       Internal Functions         \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n\\n      function _isConditionActive(address _wallet, uint32 _id) internal view override returns (bool) {\\n        return activeConditions[_wallet][_id];\\n    }\\n\\n    // \\u250f\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2513\\n    // \\u2503         View Functions           \\u2503\\n    // \\u2517\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u2501\\u251b\\n     function checkCondition(address wallet, uint32 id) public view override returns (uint8) {\\n        Condition memory condition = conditions[wallet][id];\\n\\n        //Get the actual health factor of the wallet\\n        uint256 tokenBalance =condition.baseToken == address(0) ? wallet.balance: IERC20(condition.baseToken).balanceOf(wallet);\\n    \\n        if (condition.comparison == Comparison.GREATER || condition.comparison == Comparison.GREATER_OR_EQUAL) {\\n            if (tokenBalance > condition.amount) {\\n                return 1;\\n            }\\n        }\\n\\n        if (condition.comparison == Comparison.LESS || condition.comparison == Comparison.LESS_OR_EQUAL) {\\n            if (tokenBalance < condition.amount) {\\n                return 1;\\n            }\\n        }\\n\\n        if (\\n            condition.comparison == Comparison.EQUAL || condition.comparison == Comparison.GREATER_OR_EQUAL\\n                || condition.comparison == Comparison.LESS_OR_EQUAL\\n        ) {\\n            if (tokenBalance == condition.amount) {\\n                return 1;\\n            }\\n        }\\n\\n        if (condition.comparison == Comparison.NOT_EQUAL) {\\n            if (tokenBalance != condition.amount) {\\n                return 1;\\n            }\\n        } \\n\\n        return 0;\\n    }\\n\\n    function isUpdateable(address wallet, uint32 id) public view override returns (bool) {\\n        return conditions[wallet][id].updateable;\\n    }\\n\\n    function walletCondition(address _wallet, uint32 _id) public view returns (Condition memory) {\\n        return conditions[_wallet][_id];\\n    }\\n}\\n\",\"keccak256\":\"0x3f4bce24897d438b3118ea85eb84559d1f6171c8f93e91185d2ee475b8d52172\",\"license\":\"MIT\"},\"src/condition/interfaces/ICoinOrERC20BalanceCondition.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.26;\\n\\ninterface ICoinOrERC20BalanceCondition {\\n    enum Comparison {\\n        LESS,\\n        GREATER,\\n        EQUAL,\\n        GREATER_OR_EQUAL,\\n        LESS_OR_EQUAL,\\n        NOT_EQUAL\\n    }\\n\\n    struct Condition {\\n        address baseToken;\\n        uint256 amount;\\n        Comparison comparison;\\n        bool updateable;\\n    }\\n\\n    \\n    error InvalidComparison();\\n\\n    event ConditionAdded(uint32 id, address wallet, Condition condition);\\n    event ConditionDeleted(uint32 id, address wallet);\\n}\\n\",\"keccak256\":\"0x199d1889b729b0390228ec91a7675caea7cbbbd7fb710cfb0068e498cdfae30f\",\"license\":\"MIT\"},\"src/interfaces/ICondition.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.26;\\n\\ninterface ICondition {\\n    function checkCondition(address wallet, uint32 id) external view returns (uint8);\\n\\n    function isUpdateable(address wallet, uint32 id) external view returns (bool);\\n\\n    function automationValid(address wallet, uint32 id, uint32 action) external view returns (bool);\\n\\n    function strategyValid(address wallet, uint32 id, uint32 strategy) external view returns (bool);\\n\\n    function updateCondition(uint32 id) external returns (bool);\\n\\n    function deleteCondition(uint32 id) external;\\n\\n    function addAutomationToCondition(uint32 id, uint32 action) external returns (bool);\\n\\n    function addStrategyToCondition(uint32 id, uint32 action) external returns (bool);\\n\\n    function removeAutomationFromCondition(uint32 id, uint32 automation) external returns (bool);\\n\\n    function removeStrategyFromCondition(uint32 id, uint32 strategy) external returns (bool);\\n\\n    function conditionActive(address wallet, uint32 id) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xe526cb17ab190d77eb0918da5356f2fe96374389b1ed86d317ffa0515d572364\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b506111c98061001f6000396000f3fe608060405234801561001057600080fd5b50600436106100f55760003560e01c80636c088bb011610097578063cff8364011610066578063cff8364014610274578063e5012fb414610287578063eec93dd01461029a578063fff5cf19146102ad57600080fd5b80636c088bb0146102095780636f2b9aff1461021c57806389a78a031461023c5780638a4914c21461026157600080fd5b806314b0af70116100d357806314b0af701461014a578063384c879d1461015d57806357182cae1461017d578063687c0e31146101c657600080fd5b8063023ef5a9146100fa57806303d049bb146101225780631245f29814610135575b600080fd5b61010d610108366004610e18565b6102f0565b60405190151581526020015b60405180910390f35b61010d610130366004610e4b565b610394565b610148610143366004610e4b565b6103f0565b005b61010d610158366004610e18565b6104ba565b61017061016b366004610e7b565b610658565b6040516101199190610e99565b61010d61018b366004610e7b565b6001600160a01b0391909116600090815260046020908152604080832063ffffffff9490941683529290522060020154610100900460ff1690565b61010d6101d4366004610ee2565b6001600160a01b0392909216600090815260036020908152604080832063ffffffff9586168452909152902054821691161490565b610148610217366004610f27565b6106ff565b61022f61022a366004610e7b565b6107db565b6040516101199190610f9e565b61024f61024a366004610e7b565b61088d565b60405160ff9091168152602001610119565b61010d61026f366004610e18565b610b11565b61010d610282366004610e7b565b610c31565b61010d610295366004610e18565b610c44565b6101706102a8366004610e7b565b610ce3565b61010d6102bb366004610ee2565b6001600160a01b0392909216600090815260026020908152604080832063ffffffff9586168452909152902054821691161490565b33600090815260016020818152604080842063ffffffff878116808752918452918520805480860182558187529386206008850401805460079095166004026101000a808502199095169388169490940292909217909255908352546103569190610fdd565b33600090815260036020908152604080832063ffffffff87811685529252909120805463ffffffff1916929091169190911790555060015b92915050565b6000816103a13382610d60565b6103be57604051630453eefd60e11b815260040160405180910390fd5b505033600090815260046020908152604080832063ffffffff9490941683529290522060020154610100900460ff1690565b806103fb3382610d60565b61041857604051630453eefd60e11b815260040160405180910390fd5b61042182610d93565b33600081815260046020908152604080832063ffffffff871680855290835281842080546001600160a01b031916815560018101859055600201805461ffff1916905584845260058352818420818552835292819020805460ff191690558051928352908201929092527f9c33cb453d76063bb338c509094bd32900fe4a7e3ccbb52ef947618994a4a6c3910160405180910390a15050565b3360008181526020818152604080832063ffffffff80881685529083528184209484526002835281842086821680865293529083205484549394939116919083908390811061050b5761050b610ffe565b6000918252602090912060088204015460079091166004026101000a900463ffffffff161461053f5760009250505061038e565b815460009061055090600190610fdd565b90508163ffffffff16811461060d57600083828154811061057357610573610ffe565b6000918252602080832060088304015433845260028252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff1916928616928317905585549092508291869181106105d8576105d8610ffe565b90600052602060002090600891828204019190066004026101000a81548163ffffffff021916908363ffffffff160217905550505b8280548061061d5761061d611014565b600082815260209020600860001990920191820401805463ffffffff600460078516026101000a021916905590555060019250505092915050565b6001600160a01b038216600090815260016020908152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156106f257602002820191906000526020600020906000905b82829054906101000a900463ffffffff1663ffffffff16815260200190600401906020826003010492830192600103820291508084116106b55790505b5050505050905092915050565b8060056107126060830160408401611037565b600581111561072357610723610f66565b11156107425760405163d9e2f2ed60e01b815260040160405180910390fd5b33600090815260046020908152604080832063ffffffff871684529091529020829061076e8282611062565b505033600081815260056020908152604080832063ffffffff8816845290915290819020805460ff19166001179055517f614e762cdffd5250dad0817ed49d3fbf0b9decd46649fc6f9dbc979bd1bf6410916107ce9186919086906110fe565b60405180910390a1505050565b604080516080808201835260008083526020808401829052838501829052606084018290526001600160a01b0387811683526004825285832063ffffffff881684528252918590208551938401865280549092168352600182015490830152600281015492939192909183019060ff16600581111561085c5761085c610f66565b600581111561086d5761086d610f66565b815260029190910154610100900460ff1615156020909101529392505050565b6001600160a01b03808316600090815260046020908152604080832063ffffffff86168452825280832081516080810183528154909516855260018101549285019290925260028201549293849390929183019060ff1660058111156108f5576108f5610f66565b600581111561090657610906610f66565b815260029190910154610100900460ff16151560209091015280519091506000906001600160a01b0316156109a75781516040516370a0823160e01b81526001600160a01b038781166004830152909116906370a0823190602401602060405180830381865afa15801561097e573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906109a2919061117a565b6109b3565b846001600160a01b0316315b90506001826040015160058111156109cd576109cd610f66565b14806109ee57506003826040015160058111156109ec576109ec610f66565b145b15610a0a578160200151811115610a0a5760019250505061038e565b600082604001516005811115610a2257610a22610f66565b1480610a435750600482604001516005811115610a4157610a41610f66565b145b15610a5f578160200151811015610a5f5760019250505061038e565b600282604001516005811115610a7757610a77610f66565b1480610a985750600382604001516005811115610a9657610a96610f66565b145b80610ab85750600482604001516005811115610ab657610ab6610f66565b145b15610ad35781602001518103610ad35760019250505061038e565b600582604001516005811115610aeb57610aeb610f66565b03610b065781602001518114610b065760019250505061038e565b506000949350505050565b33600081815260016020908152604080832063ffffffff808816855290835281842094845260038352818420868216808652935290832054845493949391169190839083908110610b6457610b64610ffe565b6000918252602090912060088204015460079091166004026101000a900463ffffffff1614610b985760009250505061038e565b8154600090610ba990600190610fdd565b90508163ffffffff16811461060d576000838281548110610bcc57610bcc610ffe565b6000918252602080832060088304015433845260038252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff1916928616928317905585549092508291869181106105d8576105d8610ffe565b6000610c3d8383610d60565b9392505050565b3360009081526020818152604080832063ffffffff8681168086529184529184208054600180820183558287529486206008820401805460079092166004026101000a808602199092169488169190910293909317909255835254610ca99190610fdd565b33600090815260026020908152604080832063ffffffff96871684529091529020805463ffffffff19169190931617909155506001919050565b6001600160a01b03821660009081526020818152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156106f2576000918252602091829020805463ffffffff1684529082028301929091600491018084116106b557509498975050505050505050565b6001600160a01b038216600090815260056020908152604080832063ffffffff8516845290915290205460ff1692915050565b33600090815260016020908152604080832063ffffffff85168452909152902054151580610dde57503360009081526020818152604080832063ffffffff8516845290915290205415155b15610dfc5760405163846e233f60e01b815260040160405180910390fd5b50565b803563ffffffff81168114610e1357600080fd5b919050565b60008060408385031215610e2b57600080fd5b610e3483610dff565b9150610e4260208401610dff565b90509250929050565b600060208284031215610e5d57600080fd5b610c3d82610dff565b6001600160a01b0381168114610dfc57600080fd5b60008060408385031215610e8e57600080fd5b8235610e3481610e66565b602080825282518282018190526000918401906040840190835b81811015610ed757835163ffffffff16835260209384019390920191600101610eb3565b509095945050505050565b600080600060608486031215610ef757600080fd5b8335610f0281610e66565b9250610f1060208501610dff565b9150610f1e60408501610dff565b90509250925092565b60008082840360a0811215610f3b57600080fd5b610f4484610dff565b92506080601f1982011215610f5857600080fd5b506020830190509250929050565b634e487b7160e01b600052602160045260246000fd5b60068110610f9a57634e487b7160e01b600052602160045260246000fd5b9052565b81516001600160a01b03168152602080830151908201526040808301516080830191610fcc90840182610f7c565b506060928301511515919092015290565b8181038181111561038e57634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fd5b60068110610dfc57600080fd5b60006020828403121561104957600080fd5b8135610c3d8161102a565b8015158114610dfc57600080fd5b813561106d81610e66565b81546001600160a01b0319166001600160a01b0391909116178155602082013560018201556002810160408301356110a48161102a565b600681106110c257634e487b7160e01b600052602160045260246000fd5b60ff1982541660ff8216811783555050600060608401356110e281611054565b825461ff00191681151560081b61ff0016178355905050505050565b63ffffffff841681526001600160a01b038316602082015260c08101823561112581610e66565b6001600160a01b03166040838101919091526020840135606084015283013561114d8161102a565b61115a6080840182610f7c565b50606083013561116981611054565b80151560a084015250949350505050565b60006020828403121561118c57600080fd5b505191905056fea26469706673582212201ddc36930ed7b875c86f3ca6576bcd6a623b5b6cec142253a3b9be86f805808b64736f6c634300081a0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100f55760003560e01c80636c088bb011610097578063cff8364011610066578063cff8364014610274578063e5012fb414610287578063eec93dd01461029a578063fff5cf19146102ad57600080fd5b80636c088bb0146102095780636f2b9aff1461021c57806389a78a031461023c5780638a4914c21461026157600080fd5b806314b0af70116100d357806314b0af701461014a578063384c879d1461015d57806357182cae1461017d578063687c0e31146101c657600080fd5b8063023ef5a9146100fa57806303d049bb146101225780631245f29814610135575b600080fd5b61010d610108366004610e18565b6102f0565b60405190151581526020015b60405180910390f35b61010d610130366004610e4b565b610394565b610148610143366004610e4b565b6103f0565b005b61010d610158366004610e18565b6104ba565b61017061016b366004610e7b565b610658565b6040516101199190610e99565b61010d61018b366004610e7b565b6001600160a01b0391909116600090815260046020908152604080832063ffffffff9490941683529290522060020154610100900460ff1690565b61010d6101d4366004610ee2565b6001600160a01b0392909216600090815260036020908152604080832063ffffffff9586168452909152902054821691161490565b610148610217366004610f27565b6106ff565b61022f61022a366004610e7b565b6107db565b6040516101199190610f9e565b61024f61024a366004610e7b565b61088d565b60405160ff9091168152602001610119565b61010d61026f366004610e18565b610b11565b61010d610282366004610e7b565b610c31565b61010d610295366004610e18565b610c44565b6101706102a8366004610e7b565b610ce3565b61010d6102bb366004610ee2565b6001600160a01b0392909216600090815260026020908152604080832063ffffffff9586168452909152902054821691161490565b33600090815260016020818152604080842063ffffffff878116808752918452918520805480860182558187529386206008850401805460079095166004026101000a808502199095169388169490940292909217909255908352546103569190610fdd565b33600090815260036020908152604080832063ffffffff87811685529252909120805463ffffffff1916929091169190911790555060015b92915050565b6000816103a13382610d60565b6103be57604051630453eefd60e11b815260040160405180910390fd5b505033600090815260046020908152604080832063ffffffff9490941683529290522060020154610100900460ff1690565b806103fb3382610d60565b61041857604051630453eefd60e11b815260040160405180910390fd5b61042182610d93565b33600081815260046020908152604080832063ffffffff871680855290835281842080546001600160a01b031916815560018101859055600201805461ffff1916905584845260058352818420818552835292819020805460ff191690558051928352908201929092527f9c33cb453d76063bb338c509094bd32900fe4a7e3ccbb52ef947618994a4a6c3910160405180910390a15050565b3360008181526020818152604080832063ffffffff80881685529083528184209484526002835281842086821680865293529083205484549394939116919083908390811061050b5761050b610ffe565b6000918252602090912060088204015460079091166004026101000a900463ffffffff161461053f5760009250505061038e565b815460009061055090600190610fdd565b90508163ffffffff16811461060d57600083828154811061057357610573610ffe565b6000918252602080832060088304015433845260028252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff1916928616928317905585549092508291869181106105d8576105d8610ffe565b90600052602060002090600891828204019190066004026101000a81548163ffffffff021916908363ffffffff160217905550505b8280548061061d5761061d611014565b600082815260209020600860001990920191820401805463ffffffff600460078516026101000a021916905590555060019250505092915050565b6001600160a01b038216600090815260016020908152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156106f257602002820191906000526020600020906000905b82829054906101000a900463ffffffff1663ffffffff16815260200190600401906020826003010492830192600103820291508084116106b55790505b5050505050905092915050565b8060056107126060830160408401611037565b600581111561072357610723610f66565b11156107425760405163d9e2f2ed60e01b815260040160405180910390fd5b33600090815260046020908152604080832063ffffffff871684529091529020829061076e8282611062565b505033600081815260056020908152604080832063ffffffff8816845290915290819020805460ff19166001179055517f614e762cdffd5250dad0817ed49d3fbf0b9decd46649fc6f9dbc979bd1bf6410916107ce9186919086906110fe565b60405180910390a1505050565b604080516080808201835260008083526020808401829052838501829052606084018290526001600160a01b0387811683526004825285832063ffffffff881684528252918590208551938401865280549092168352600182015490830152600281015492939192909183019060ff16600581111561085c5761085c610f66565b600581111561086d5761086d610f66565b815260029190910154610100900460ff1615156020909101529392505050565b6001600160a01b03808316600090815260046020908152604080832063ffffffff86168452825280832081516080810183528154909516855260018101549285019290925260028201549293849390929183019060ff1660058111156108f5576108f5610f66565b600581111561090657610906610f66565b815260029190910154610100900460ff16151560209091015280519091506000906001600160a01b0316156109a75781516040516370a0823160e01b81526001600160a01b038781166004830152909116906370a0823190602401602060405180830381865afa15801561097e573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906109a2919061117a565b6109b3565b846001600160a01b0316315b90506001826040015160058111156109cd576109cd610f66565b14806109ee57506003826040015160058111156109ec576109ec610f66565b145b15610a0a578160200151811115610a0a5760019250505061038e565b600082604001516005811115610a2257610a22610f66565b1480610a435750600482604001516005811115610a4157610a41610f66565b145b15610a5f578160200151811015610a5f5760019250505061038e565b600282604001516005811115610a7757610a77610f66565b1480610a985750600382604001516005811115610a9657610a96610f66565b145b80610ab85750600482604001516005811115610ab657610ab6610f66565b145b15610ad35781602001518103610ad35760019250505061038e565b600582604001516005811115610aeb57610aeb610f66565b03610b065781602001518114610b065760019250505061038e565b506000949350505050565b33600081815260016020908152604080832063ffffffff808816855290835281842094845260038352818420868216808652935290832054845493949391169190839083908110610b6457610b64610ffe565b6000918252602090912060088204015460079091166004026101000a900463ffffffff1614610b985760009250505061038e565b8154600090610ba990600190610fdd565b90508163ffffffff16811461060d576000838281548110610bcc57610bcc610ffe565b6000918252602080832060088304015433845260038252604080852060079094166004026101000a90910463ffffffff90811680865293909252909220805463ffffffff1916928616928317905585549092508291869181106105d8576105d8610ffe565b6000610c3d8383610d60565b9392505050565b3360009081526020818152604080832063ffffffff8681168086529184529184208054600180820183558287529486206008820401805460079092166004026101000a808602199092169488169190910293909317909255835254610ca99190610fdd565b33600090815260026020908152604080832063ffffffff96871684529091529020805463ffffffff19169190931617909155506001919050565b6001600160a01b03821660009081526020818152604080832063ffffffff851684528252918290208054835181840281018401909452808452606093928301828280156106f2576000918252602091829020805463ffffffff1684529082028301929091600491018084116106b557509498975050505050505050565b6001600160a01b038216600090815260056020908152604080832063ffffffff8516845290915290205460ff1692915050565b33600090815260016020908152604080832063ffffffff85168452909152902054151580610dde57503360009081526020818152604080832063ffffffff8516845290915290205415155b15610dfc5760405163846e233f60e01b815260040160405180910390fd5b50565b803563ffffffff81168114610e1357600080fd5b919050565b60008060408385031215610e2b57600080fd5b610e3483610dff565b9150610e4260208401610dff565b90509250929050565b600060208284031215610e5d57600080fd5b610c3d82610dff565b6001600160a01b0381168114610dfc57600080fd5b60008060408385031215610e8e57600080fd5b8235610e3481610e66565b602080825282518282018190526000918401906040840190835b81811015610ed757835163ffffffff16835260209384019390920191600101610eb3565b509095945050505050565b600080600060608486031215610ef757600080fd5b8335610f0281610e66565b9250610f1060208501610dff565b9150610f1e60408501610dff565b90509250925092565b60008082840360a0811215610f3b57600080fd5b610f4484610dff565b92506080601f1982011215610f5857600080fd5b506020830190509250929050565b634e487b7160e01b600052602160045260246000fd5b60068110610f9a57634e487b7160e01b600052602160045260246000fd5b9052565b81516001600160a01b03168152602080830151908201526040808301516080830191610fcc90840182610f7c565b506060928301511515919092015290565b8181038181111561038e57634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052603160045260246000fd5b60068110610dfc57600080fd5b60006020828403121561104957600080fd5b8135610c3d8161102a565b8015158114610dfc57600080fd5b813561106d81610e66565b81546001600160a01b0319166001600160a01b0391909116178155602082013560018201556002810160408301356110a48161102a565b600681106110c257634e487b7160e01b600052602160045260246000fd5b60ff1982541660ff8216811783555050600060608401356110e281611054565b825461ff00191681151560081b61ff0016178355905050505050565b63ffffffff841681526001600160a01b038316602082015260c08101823561112581610e66565b6001600160a01b03166040838101919091526020840135606084015283013561114d8161102a565b61115a6080840182610f7c565b50606083013561116981611054565b80151560a084015250949350505050565b60006020828403121561118c57600080fd5b505191905056fea26469706673582212201ddc36930ed7b875c86f3ca6576bcd6a623b5b6cec142253a3b9be86f805808b64736f6c634300081a0033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 4257,
+        "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+        "label": "conditionStrategies",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_array(t_uint32)dyn_storage))"
+      },
+      {
+        "astId": 4264,
+        "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+        "label": "conditionAutomations",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_array(t_uint32)dyn_storage))"
+      },
+      {
+        "astId": 4270,
+        "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+        "label": "strategyConditionIndex",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_uint32))"
+      },
+      {
+        "astId": 4276,
+        "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+        "label": "automationConditionIndex",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_uint32))"
+      },
+      {
+        "astId": 4738,
+        "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+        "label": "conditions",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_struct(Condition)5401_storage))"
+      },
+      {
+        "astId": 4744,
+        "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+        "label": "activeConditions",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_address,t_mapping(t_uint32,t_bool))"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_uint32)dyn_storage": {
+        "base": "t_uint32",
+        "encoding": "dynamic_array",
+        "label": "uint32[]",
+        "numberOfBytes": "32"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_enum(Comparison)5391": {
+        "encoding": "inplace",
+        "label": "enum ICoinOrERC20BalanceCondition.Comparison",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_mapping(t_uint32,t_array(t_uint32)dyn_storage))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint32 => uint32[]))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_array(t_uint32)dyn_storage)"
+      },
+      "t_mapping(t_address,t_mapping(t_uint32,t_bool))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint32 => bool))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_bool)"
+      },
+      "t_mapping(t_address,t_mapping(t_uint32,t_struct(Condition)5401_storage))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint32 => struct ICoinOrERC20BalanceCondition.Condition))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_struct(Condition)5401_storage)"
+      },
+      "t_mapping(t_address,t_mapping(t_uint32,t_uint32))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(uint32 => uint32))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_uint32,t_uint32)"
+      },
+      "t_mapping(t_uint32,t_array(t_uint32)dyn_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => uint32[])",
+        "numberOfBytes": "32",
+        "value": "t_array(t_uint32)dyn_storage"
+      },
+      "t_mapping(t_uint32,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_uint32,t_struct(Condition)5401_storage)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => struct ICoinOrERC20BalanceCondition.Condition)",
+        "numberOfBytes": "32",
+        "value": "t_struct(Condition)5401_storage"
+      },
+      "t_mapping(t_uint32,t_uint32)": {
+        "encoding": "mapping",
+        "key": "t_uint32",
+        "label": "mapping(uint32 => uint32)",
+        "numberOfBytes": "32",
+        "value": "t_uint32"
+      },
+      "t_struct(Condition)5401_storage": {
+        "encoding": "inplace",
+        "label": "struct ICoinOrERC20BalanceCondition.Condition",
+        "members": [
+          {
+            "astId": 5393,
+            "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+            "label": "baseToken",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_address"
+          },
+          {
+            "astId": 5395,
+            "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+            "label": "amount",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 5398,
+            "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+            "label": "comparison",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_enum(Comparison)5391"
+          },
+          {
+            "astId": 5400,
+            "contract": "src/condition/CoinOrERC20BalanceCondition.sol:CoinOrERC20BalanceCondition",
+            "label": "updateable",
+            "offset": 1,
+            "slot": "2",
+            "type": "t_bool"
+          }
+        ],
+        "numberOfBytes": "96"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint32": {
+        "encoding": "inplace",
+        "label": "uint32",
+        "numberOfBytes": "4"
+      }
+    }
+  }
+}

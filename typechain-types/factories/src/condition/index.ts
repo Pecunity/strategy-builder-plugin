@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as aaveV3 from "./aave-v3";
+export * as interfaces from "./interfaces";
 export { BaseCondition__factory } from "./BaseCondition__factory";
-export { ERC20Condition__factory } from "./ERC20Condition__factory";
+export { CoinOrERC20BalanceCondition__factory } from "./CoinOrERC20BalanceCondition__factory";
 export { TimeCondition__factory } from "./TimeCondition__factory";

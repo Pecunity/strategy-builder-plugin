@@ -347,8 +347,10 @@ contract AaveV3Actions is IAaveV3Actions {
 
         if (isRepay) {
             address debtToken = _getDebtToken(asset, interestRateMode);
-            uint256 maxAmount = IERC20(asset).balanceOf(wallet) > IERC20(debtToken).balanceOf(wallet) ? IERC20(asset).balanceOf(wallet) : IERC20(debtToken).balanceOf(wallet);
-            
+            uint256 maxAmount = IERC20(asset).balanceOf(wallet) > IERC20(debtToken).balanceOf(wallet)
+                ? IERC20(asset).balanceOf(wallet)
+                : IERC20(debtToken).balanceOf(wallet);
+
             if (deltaAmount > maxAmount) {
                 deltaAmount = maxAmount;
             }
@@ -372,9 +374,11 @@ contract AaveV3Actions is IAaveV3Actions {
         _validateHealtfactor(targetHealthFactor);
         (uint256 deltaAmount, bool isRepay) = _calculateDeltaDebt(wallet, WETH, targetHealthFactor);
 
-        if (isRepay) {            
+        if (isRepay) {
             address debtToken = _getDebtToken(WETH, interestRateMode);
-            uint256 maxAmount = wallet.balance > IERC20(debtToken).balanceOf(wallet) ? wallet.balance : IERC20(debtToken).balanceOf(wallet);
+            uint256 maxAmount = wallet.balance > IERC20(debtToken).balanceOf(wallet)
+                ? wallet.balance
+                : IERC20(debtToken).balanceOf(wallet);
             if (deltaAmount > maxAmount) {
                 deltaAmount = maxAmount;
             }
@@ -521,7 +525,7 @@ contract AaveV3Actions is IAaveV3Actions {
         }
     }
 
-    function _getSupplyToken(address asset) internal view returns(address){
+    function _getSupplyToken(address asset) internal view returns (address) {
         return IPool(pool).getReserveData(asset).aTokenAddress;
     }
 

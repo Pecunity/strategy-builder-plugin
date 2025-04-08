@@ -32,9 +32,7 @@ export interface TokenInterface extends Interface {
       | "decimals"
       | "decreaseAllowance"
       | "increaseAllowance"
-      | "mint"
       | "name"
-      | "setDecimals"
       | "symbol"
       | "totalSupply"
       | "transfer"
@@ -64,15 +62,7 @@ export interface TokenInterface extends Interface {
     functionFragment: "increaseAllowance",
     values: [AddressLike, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "mint",
-    values: [AddressLike, BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "setDecimals",
-    values: [BigNumberish]
-  ): string;
   encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "totalSupply",
@@ -99,12 +89,7 @@ export interface TokenInterface extends Interface {
     functionFragment: "increaseAllowance",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "setDecimals",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalSupply",
@@ -224,19 +209,7 @@ export interface Token extends BaseContract {
     "nonpayable"
   >;
 
-  mint: TypedContractMethod<
-    [account: AddressLike, amount: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
-
   name: TypedContractMethod<[], [string], "view">;
-
-  setDecimals: TypedContractMethod<
-    [_newDecimals: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
 
   symbol: TypedContractMethod<[], [string], "view">;
 
@@ -293,18 +266,8 @@ export interface Token extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "mint"
-  ): TypedContractMethod<
-    [account: AddressLike, amount: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
-  getFunction(
     nameOrSignature: "name"
   ): TypedContractMethod<[], [string], "view">;
-  getFunction(
-    nameOrSignature: "setDecimals"
-  ): TypedContractMethod<[_newDecimals: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "symbol"
   ): TypedContractMethod<[], [string], "view">;

@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as aaveV3 from "./aave-v3";
 export type { aaveV3 };
+import type * as interfaces from "./interfaces";
+export type { interfaces };
 export type { BaseCondition } from "./BaseCondition";
-export type { ERC20Condition } from "./ERC20Condition";
+export type { CoinOrERC20BalanceCondition } from "./CoinOrERC20BalanceCondition";
 export type { TimeCondition } from "./TimeCondition";

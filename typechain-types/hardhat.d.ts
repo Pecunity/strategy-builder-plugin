@@ -126,9 +126,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UniswapV2SwapActions__factory>;
     getContractFactory(
+      name: "AaveV3PositionBalance",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AaveV3PositionBalance__factory>;
+    getContractFactory(
       name: "HealthFactorCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.HealthFactorCondition__factory>;
+    getContractFactory(
+      name: "IAaveV3PositionBalance",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAaveV3PositionBalance__factory>;
     getContractFactory(
       name: "IHealthFactorCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -138,9 +146,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BaseCondition__factory>;
     getContractFactory(
-      name: "ERC20Condition",
+      name: "CoinOrERC20BalanceCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ERC20Condition__factory>;
+    ): Promise<Contracts.CoinOrERC20BalanceCondition__factory>;
+    getContractFactory(
+      name: "ICoinOrERC20BalanceCondition",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ICoinOrERC20BalanceCondition__factory>;
     getContractFactory(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -339,10 +351,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.UniswapV2SwapActions>;
     getContractAt(
+      name: "AaveV3PositionBalance",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AaveV3PositionBalance>;
+    getContractAt(
       name: "HealthFactorCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.HealthFactorCondition>;
+    getContractAt(
+      name: "IAaveV3PositionBalance",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAaveV3PositionBalance>;
     getContractAt(
       name: "IHealthFactorCondition",
       address: string | ethers.Addressable,
@@ -354,10 +376,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.BaseCondition>;
     getContractAt(
-      name: "ERC20Condition",
+      name: "CoinOrERC20BalanceCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.ERC20Condition>;
+    ): Promise<Contracts.CoinOrERC20BalanceCondition>;
+    getContractAt(
+      name: "ICoinOrERC20BalanceCondition",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
     getContractAt(
       name: "TimeCondition",
       address: string | ethers.Addressable,
@@ -542,9 +569,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2SwapActions>;
     deployContract(
+      name: "AaveV3PositionBalance",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.AaveV3PositionBalance>;
+    deployContract(
       name: "HealthFactorCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.HealthFactorCondition>;
+    deployContract(
+      name: "IAaveV3PositionBalance",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAaveV3PositionBalance>;
     deployContract(
       name: "IHealthFactorCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -554,9 +589,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseCondition>;
     deployContract(
-      name: "ERC20Condition",
+      name: "CoinOrERC20BalanceCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC20Condition>;
+    ): Promise<Contracts.CoinOrERC20BalanceCondition>;
+    deployContract(
+      name: "ICoinOrERC20BalanceCondition",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
     deployContract(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -755,10 +794,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UniswapV2SwapActions>;
     deployContract(
+      name: "AaveV3PositionBalance",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.AaveV3PositionBalance>;
+    deployContract(
       name: "HealthFactorCondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.HealthFactorCondition>;
+    deployContract(
+      name: "IAaveV3PositionBalance",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAaveV3PositionBalance>;
     deployContract(
       name: "IHealthFactorCondition",
       args: any[],
@@ -770,10 +819,15 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseCondition>;
     deployContract(
-      name: "ERC20Condition",
+      name: "CoinOrERC20BalanceCondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC20Condition>;
+    ): Promise<Contracts.CoinOrERC20BalanceCondition>;
+    deployContract(
+      name: "ICoinOrERC20BalanceCondition",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
     deployContract(
       name: "TimeCondition",
       args: any[],
