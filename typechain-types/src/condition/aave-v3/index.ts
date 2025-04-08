@@ -3,4 +3,5 @@
 /* eslint-disable */
 import type * as interfaces from "./interfaces";
 export type { interfaces };
+export type { AaveV3PositionBalance } from "./AaveV3PositionBalance";
 export type { HealthFactorCondition } from "./HealthFactorCondition";

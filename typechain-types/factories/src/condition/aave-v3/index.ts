@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as interfaces from "./interfaces";
+export { AaveV3PositionBalance__factory } from "./AaveV3PositionBalance__factory";
 export { HealthFactorCondition__factory } from "./HealthFactorCondition__factory";

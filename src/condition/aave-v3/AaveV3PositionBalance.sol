@@ -2,23 +2,26 @@
 pragma solidity ^0.8.26;
 
 import {BaseCondition} from "../BaseCondition.sol";
-import {IHealthFactorCondition} from "./interfaces/IHealthFactorCondition.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
+import {IAaveV3PositionBalance} from "./interfaces/IAaveV3PositionBalance.sol";
 
-contract HealthFactorCondition is BaseCondition, IHealthFactorCondition {
+contract AaveV3PositionBalance is BaseCondition, IAaveV3PositionBalance {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃        State Variables           ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     address public immutable pool;
+    address public immutable WETH;
     mapping(address wallet => mapping(uint32 id => Condition condition)) private conditions;
+    mapping(address wallet => mapping(uint32 id => bool active)) private activeConditions;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃           Modifiers              ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     modifier validCondition(Condition calldata _condition) {
-        if (_condition.healthFactor < 1e18) {
-            revert HealthFactorLowerThanMinimum();
+        if (_condition.positionType > PositionType.STABLE_DEBT) {
+            revert InvalidPositionType();
         }
         if (_condition.comparison > Comparison.NOT_EQUAL) {
             revert InvalidComparison();
@@ -29,26 +32,27 @@ contract HealthFactorCondition is BaseCondition, IHealthFactorCondition {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Constructor         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-    constructor(address _pool) {
+    constructor(address _pool, address _WETH) {
         pool = _pool;
+        WETH = _WETH;
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Public Functions           ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-    function addCondition(uint32 _id, Condition calldata condition)
-        external
-        conditionDoesNotExist(_id)
-        validCondition(condition)
-    {
+    function addCondition(uint32 _id, Condition calldata condition) external validCondition(condition) {
         conditions[msg.sender][_id] = condition;
+
+        activeConditions[msg.sender][_id] = true;
+
         emit ConditionAdded(_id, msg.sender, condition);
     }
 
     function deleteCondition(uint32 _id) public override conditionExist(_id) {
         super.deleteCondition(_id);
         delete conditions[msg.sender][_id];
+
+        activeConditions[msg.sender][_id] = false;
 
         emit ConditionDeleted(_id, msg.sender);
     }
@@ -62,27 +66,39 @@ contract HealthFactorCondition is BaseCondition, IHealthFactorCondition {
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     function _isConditionActive(address _wallet, uint32 _id) internal view override returns (bool) {
-        return conditions[_wallet][_id].healthFactor != 0;
+        return activeConditions[_wallet][_id];
+    }
+
+    function _getPositionToken(address asset, PositionType positionType) internal view returns (address) {
+        if (positionType == PositionType.STABLE_DEBT) {
+            return IPool(pool).getReserveData(asset == address(0) ? WETH : asset).stableDebtTokenAddress;
+        }
+        if (positionType == PositionType.COLLATERAL) {
+            return IPool(pool).getReserveData(asset == address(0) ? WETH : asset).aTokenAddress;
+        } else {
+            return IPool(pool).getReserveData(asset == address(0) ? WETH : asset).variableDebtTokenAddress;
+        }
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃         View Functions           ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
     function checkCondition(address wallet, uint32 id) public view override returns (uint8) {
         Condition memory condition = conditions[wallet][id];
 
-        //Get the actual health factor of the wallet
-        (,,,,, uint256 currentHF) = IPool(pool).getUserAccountData(wallet);
+        //Get the actual position balance of the wallet
+        address token = _getPositionToken(condition.asset, condition.positionType);
+
+        uint256 tokenBalance = IERC20(token).balanceOf(wallet);
 
         if (condition.comparison == Comparison.GREATER || condition.comparison == Comparison.GREATER_OR_EQUAL) {
-            if (currentHF > condition.healthFactor) {
+            if (tokenBalance > condition.balance) {
                 return 1;
             }
         }
 
         if (condition.comparison == Comparison.LESS || condition.comparison == Comparison.LESS_OR_EQUAL) {
-            if (currentHF < condition.healthFactor) {
+            if (tokenBalance < condition.balance) {
                 return 1;
             }
         }
@@ -91,13 +107,13 @@ contract HealthFactorCondition is BaseCondition, IHealthFactorCondition {
             condition.comparison == Comparison.EQUAL || condition.comparison == Comparison.GREATER_OR_EQUAL
                 || condition.comparison == Comparison.LESS_OR_EQUAL
         ) {
-            if (currentHF == condition.healthFactor) {
+            if (tokenBalance == condition.balance) {
                 return 1;
             }
         }
 
         if (condition.comparison == Comparison.NOT_EQUAL) {
-            if (currentHF != condition.healthFactor) {
+            if (tokenBalance != condition.balance) {
                 return 1;
             }
         }
@@ -109,7 +125,11 @@ contract HealthFactorCondition is BaseCondition, IHealthFactorCondition {
         return conditions[wallet][id].updateable;
     }
 
-    function walletCondition(address _wallet, uint32 _id) public view returns (Condition memory) {
-        return conditions[_wallet][_id];
+    function walletCondition(address wallet, uint32 id) public view returns (Condition memory) {
+        return conditions[wallet][id];
+    }
+
+    function activeCondition(address wallet, uint32 id) public view returns (bool) {
+        return activeConditions[wallet][id];
     }
 }
