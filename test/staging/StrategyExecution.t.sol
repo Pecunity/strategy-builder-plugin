@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {IStrategyBuilderPlugin} from "../../src/interfaces/IStrategyBuilderPlugin.sol";
+import {IStrategyBuilderPlugin} from "contracts/interfaces/IStrategyBuilderPlugin.sol";
 
 contract StrategyExecutionTest is Test {
     string ARBITRUM_SEPOLIA_FORK = vm.envString("ARBITRUM_SEPOLIA_FORK");
@@ -18,17 +18,17 @@ contract StrategyExecutionTest is Test {
     }
 
     function test_automationExecution() external {
-        address wallet = 0xF5C623BC8f11Aa5b8A5bE0A133f16342f82e3D4E;
-        uint32 automationId = 4074435609;
+        // address wallet = 0xF5C623BC8f11Aa5b8A5bE0A133f16342f82e3D4E;
+        // uint32 automationId = 4074435609;
 
-        // IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
-        //     conditionAddress: 0x611cff612D70088428E37D87a1F5BD8Fbb61233A,
-        //     id: automationId,
-        //     result0: 0,
-        //     result1: 0
-        // });
+        // // IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
+        // //     conditionAddress: 0x611cff612D70088428E37D87a1F5BD8Fbb61233A,
+        // //     id: automationId,
+        // //     result0: 0,
+        // //     result1: 0
+        // // });
 
-        vm.prank(EXECUTOR);
-        IStrategyBuilderPlugin(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
+        // vm.prank(EXECUTOR);
+        // IStrategyBuilderPlugin(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
     }
 }

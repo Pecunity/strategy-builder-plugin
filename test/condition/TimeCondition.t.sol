@@ -7,7 +7,7 @@ import {
     TimeCondition__ExecutionTimeNotValid,
     TimeCondition__DeltaNotValid,
     TimeCondition__ConditionsIsNotUpdateable
-} from "../../src/condition/TimeCondition.sol";
+} from "contracts/condition/TimeCondition.sol";
 
 contract TimeConditionTest is Test {
     TimeCondition public timeCondition;

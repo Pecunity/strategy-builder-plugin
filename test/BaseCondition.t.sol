@@ -2,7 +2,7 @@
 pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {MockCondition} from "../src/test/mocks/MockCondition.sol";
+import {MockCondition} from "contracts/test/mocks/MockCondition.sol";
 
 contract BaseConditionTest is Test {
     MockCondition condition;

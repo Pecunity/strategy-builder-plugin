@@ -3,8 +3,8 @@ pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {CoinOrERC20BalanceCondition} from "src/condition/CoinOrERC20BalanceCondition.sol";
-import {ICoinOrERC20BalanceCondition} from "src/condition/interfaces/ICoinOrERC20BalanceCondition.sol";
+import {CoinOrERC20BalanceCondition} from "contracts/condition/CoinOrERC20BalanceCondition.sol";
+import {ICoinOrERC20BalanceCondition} from "contracts/condition/interfaces/ICoinOrERC20BalanceCondition.sol";
 
 contract CoinOrERC20BalanceConditionTest is Test {
     CoinOrERC20BalanceCondition condition;

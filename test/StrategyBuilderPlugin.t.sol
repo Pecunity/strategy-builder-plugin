@@ -15,12 +15,12 @@ import {IEntryPoint} from "@eth-infinitism/account-abstraction/interfaces/IEntry
 import {EntryPoint} from "@eth-infinitism/account-abstraction/core/EntryPoint.sol";
 import {UserOperation} from "@eth-infinitism/account-abstraction/interfaces/UserOperation.sol";
 
-import {StrategyBuilderPlugin} from "../src/StrategyBuilderPlugin.sol";
-import {IStrategyBuilderPlugin} from "../src/interfaces/IStrategyBuilderPlugin.sol";
-import {IFeeController} from "../src/interfaces/IFeeController.sol";
-import {IFeeHandler} from "../src/interfaces/IFeeHandler.sol";
-import {Token} from "../src/test/mocks/MockToken.sol";
-import {MockCondition} from "../src/test/mocks/MockCondition.sol";
+import {StrategyBuilderPlugin} from "contracts/StrategyBuilderPlugin.sol";
+import {IStrategyBuilderPlugin} from "contracts/interfaces/IStrategyBuilderPlugin.sol";
+import {IFeeController} from "contracts/interfaces/IFeeController.sol";
+import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
+import {Token} from "contracts/test/mocks/MockToken.sol";
+import {MockCondition} from "contracts/test/mocks/MockCondition.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract StrategyBuilderTest is Test {

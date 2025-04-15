@@ -14,26 +14,6 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
-      name: "IAaveOracle",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IAaveOracle__factory>;
-    getContractFactory(
-      name: "IPool",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPool__factory>;
-    getContractFactory(
-      name: "IPoolAddressesProvider",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPoolAddressesProvider__factory>;
-    getContractFactory(
-      name: "IPriceOracleGetter",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPriceOracleGetter__factory>;
-    getContractFactory(
-      name: "IWETH",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IWETH__factory>;
-    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
@@ -61,86 +41,6 @@ declare module "hardhat/types/runtime" {
       name: "IPythEvents",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPythEvents__factory>;
-    getContractFactory(
-      name: "IUniswapV2Factory",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV2Factory__factory>;
-    getContractFactory(
-      name: "IUniswapV2Pair",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV2Pair__factory>;
-    getContractFactory(
-      name: "IUniswapV2Router01",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV2Router01__factory>;
-    getContractFactory(
-      name: "IERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC165__factory>;
-    getContractFactory(
-      name: "IPlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPlugin__factory>;
-    getContractFactory(
-      name: "IPluginExecutor",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPluginExecutor__factory>;
-    getContractFactory(
-      name: "BasePlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BasePlugin__factory>;
-    getContractFactory(
-      name: "ERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ERC165__factory>;
-    getContractFactory(
-      name: "AaveV3Actions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AaveV3Actions__factory>;
-    getContractFactory(
-      name: "IAaveV3Actions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IAaveV3Actions__factory>;
-    getContractFactory(
-      name: "IUniswapV2Base",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV2Base__factory>;
-    getContractFactory(
-      name: "IUniswapV2LPActions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV2LPActions__factory>;
-    getContractFactory(
-      name: "IUniswapV2SwapActions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IUniswapV2SwapActions__factory>;
-    getContractFactory(
-      name: "UniswapV2Base",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.UniswapV2Base__factory>;
-    getContractFactory(
-      name: "UniswapV2LPActions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.UniswapV2LPActions__factory>;
-    getContractFactory(
-      name: "UniswapV2SwapActions",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.UniswapV2SwapActions__factory>;
-    getContractFactory(
-      name: "AaveV3PositionBalance",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AaveV3PositionBalance__factory>;
-    getContractFactory(
-      name: "HealthFactorCondition",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.HealthFactorCondition__factory>;
-    getContractFactory(
-      name: "IAaveV3PositionBalance",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IAaveV3PositionBalance__factory>;
-    getContractFactory(
-      name: "IHealthFactorCondition",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IHealthFactorCondition__factory>;
     getContractFactory(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -209,32 +109,27 @@ declare module "hardhat/types/runtime" {
       name: "Token",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Token__factory>;
+    getContractFactory(
+      name: "IERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165__factory>;
+    getContractFactory(
+      name: "IPlugin",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPlugin__factory>;
+    getContractFactory(
+      name: "IPluginExecutor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPluginExecutor__factory>;
+    getContractFactory(
+      name: "BasePlugin",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.BasePlugin__factory>;
+    getContractFactory(
+      name: "ERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC165__factory>;
 
-    getContractAt(
-      name: "IAaveOracle",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IAaveOracle>;
-    getContractAt(
-      name: "IPool",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPool>;
-    getContractAt(
-      name: "IPoolAddressesProvider",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPoolAddressesProvider>;
-    getContractAt(
-      name: "IPriceOracleGetter",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPriceOracleGetter>;
-    getContractAt(
-      name: "IWETH",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IWETH>;
     getContractAt(
       name: "Ownable",
       address: string | ethers.Addressable,
@@ -270,106 +165,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IPythEvents>;
-    getContractAt(
-      name: "IUniswapV2Factory",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV2Factory>;
-    getContractAt(
-      name: "IUniswapV2Pair",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV2Pair>;
-    getContractAt(
-      name: "IUniswapV2Router01",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV2Router01>;
-    getContractAt(
-      name: "IERC165",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC165>;
-    getContractAt(
-      name: "IPlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPlugin>;
-    getContractAt(
-      name: "IPluginExecutor",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPluginExecutor>;
-    getContractAt(
-      name: "BasePlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BasePlugin>;
-    getContractAt(
-      name: "ERC165",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ERC165>;
-    getContractAt(
-      name: "AaveV3Actions",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AaveV3Actions>;
-    getContractAt(
-      name: "IAaveV3Actions",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IAaveV3Actions>;
-    getContractAt(
-      name: "IUniswapV2Base",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV2Base>;
-    getContractAt(
-      name: "IUniswapV2LPActions",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV2LPActions>;
-    getContractAt(
-      name: "IUniswapV2SwapActions",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IUniswapV2SwapActions>;
-    getContractAt(
-      name: "UniswapV2Base",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.UniswapV2Base>;
-    getContractAt(
-      name: "UniswapV2LPActions",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.UniswapV2LPActions>;
-    getContractAt(
-      name: "UniswapV2SwapActions",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.UniswapV2SwapActions>;
-    getContractAt(
-      name: "AaveV3PositionBalance",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AaveV3PositionBalance>;
-    getContractAt(
-      name: "HealthFactorCondition",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.HealthFactorCondition>;
-    getContractAt(
-      name: "IAaveV3PositionBalance",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IAaveV3PositionBalance>;
-    getContractAt(
-      name: "IHealthFactorCondition",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IHealthFactorCondition>;
     getContractAt(
       name: "BaseCondition",
       address: string | ethers.Addressable,
@@ -455,27 +250,32 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.Token>;
+    getContractAt(
+      name: "IERC165",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165>;
+    getContractAt(
+      name: "IPlugin",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPlugin>;
+    getContractAt(
+      name: "IPluginExecutor",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPluginExecutor>;
+    getContractAt(
+      name: "BasePlugin",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.BasePlugin>;
+    getContractAt(
+      name: "ERC165",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC165>;
 
-    deployContract(
-      name: "IAaveOracle",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IAaveOracle>;
-    deployContract(
-      name: "IPool",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPool>;
-    deployContract(
-      name: "IPoolAddressesProvider",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPoolAddressesProvider>;
-    deployContract(
-      name: "IPriceOracleGetter",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPriceOracleGetter>;
-    deployContract(
-      name: "IWETH",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IWETH>;
     deployContract(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -504,86 +304,6 @@ declare module "hardhat/types/runtime" {
       name: "IPythEvents",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
-    deployContract(
-      name: "IUniswapV2Factory",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Factory>;
-    deployContract(
-      name: "IUniswapV2Pair",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Pair>;
-    deployContract(
-      name: "IUniswapV2Router01",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Router01>;
-    deployContract(
-      name: "IERC165",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC165>;
-    deployContract(
-      name: "IPlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPlugin>;
-    deployContract(
-      name: "IPluginExecutor",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPluginExecutor>;
-    deployContract(
-      name: "BasePlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePlugin>;
-    deployContract(
-      name: "ERC165",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC165>;
-    deployContract(
-      name: "AaveV3Actions",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.AaveV3Actions>;
-    deployContract(
-      name: "IAaveV3Actions",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IAaveV3Actions>;
-    deployContract(
-      name: "IUniswapV2Base",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Base>;
-    deployContract(
-      name: "IUniswapV2LPActions",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2LPActions>;
-    deployContract(
-      name: "IUniswapV2SwapActions",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2SwapActions>;
-    deployContract(
-      name: "UniswapV2Base",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2Base>;
-    deployContract(
-      name: "UniswapV2LPActions",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2LPActions>;
-    deployContract(
-      name: "UniswapV2SwapActions",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2SwapActions>;
-    deployContract(
-      name: "AaveV3PositionBalance",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.AaveV3PositionBalance>;
-    deployContract(
-      name: "HealthFactorCondition",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.HealthFactorCondition>;
-    deployContract(
-      name: "IAaveV3PositionBalance",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IAaveV3PositionBalance>;
-    deployContract(
-      name: "IHealthFactorCondition",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IHealthFactorCondition>;
     deployContract(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -652,32 +372,27 @@ declare module "hardhat/types/runtime" {
       name: "Token",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Token>;
+    deployContract(
+      name: "IERC165",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC165>;
+    deployContract(
+      name: "IPlugin",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPlugin>;
+    deployContract(
+      name: "IPluginExecutor",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPluginExecutor>;
+    deployContract(
+      name: "BasePlugin",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BasePlugin>;
+    deployContract(
+      name: "ERC165",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ERC165>;
 
-    deployContract(
-      name: "IAaveOracle",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IAaveOracle>;
-    deployContract(
-      name: "IPool",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPool>;
-    deployContract(
-      name: "IPoolAddressesProvider",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPoolAddressesProvider>;
-    deployContract(
-      name: "IPriceOracleGetter",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPriceOracleGetter>;
-    deployContract(
-      name: "IWETH",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IWETH>;
     deployContract(
       name: "Ownable",
       args: any[],
@@ -713,106 +428,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
-    deployContract(
-      name: "IUniswapV2Factory",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Factory>;
-    deployContract(
-      name: "IUniswapV2Pair",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Pair>;
-    deployContract(
-      name: "IUniswapV2Router01",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Router01>;
-    deployContract(
-      name: "IERC165",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC165>;
-    deployContract(
-      name: "IPlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPlugin>;
-    deployContract(
-      name: "IPluginExecutor",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPluginExecutor>;
-    deployContract(
-      name: "BasePlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePlugin>;
-    deployContract(
-      name: "ERC165",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC165>;
-    deployContract(
-      name: "AaveV3Actions",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.AaveV3Actions>;
-    deployContract(
-      name: "IAaveV3Actions",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IAaveV3Actions>;
-    deployContract(
-      name: "IUniswapV2Base",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2Base>;
-    deployContract(
-      name: "IUniswapV2LPActions",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2LPActions>;
-    deployContract(
-      name: "IUniswapV2SwapActions",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IUniswapV2SwapActions>;
-    deployContract(
-      name: "UniswapV2Base",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2Base>;
-    deployContract(
-      name: "UniswapV2LPActions",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2LPActions>;
-    deployContract(
-      name: "UniswapV2SwapActions",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.UniswapV2SwapActions>;
-    deployContract(
-      name: "AaveV3PositionBalance",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.AaveV3PositionBalance>;
-    deployContract(
-      name: "HealthFactorCondition",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.HealthFactorCondition>;
-    deployContract(
-      name: "IAaveV3PositionBalance",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IAaveV3PositionBalance>;
-    deployContract(
-      name: "IHealthFactorCondition",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IHealthFactorCondition>;
     deployContract(
       name: "BaseCondition",
       args: any[],
@@ -898,6 +513,31 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Token>;
+    deployContract(
+      name: "IERC165",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC165>;
+    deployContract(
+      name: "IPlugin",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPlugin>;
+    deployContract(
+      name: "IPluginExecutor",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPluginExecutor>;
+    deployContract(
+      name: "BasePlugin",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.BasePlugin>;
+    deployContract(
+      name: "ERC165",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ERC165>;
 
     // default types
     getContractFactory(

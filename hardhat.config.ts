@@ -1,58 +1,42 @@
-import { HardhatUserConfig } from "hardhat/config";
+import { HardhatUserConfig, vars } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
-import "hardhat-deploy";
-import * as dotenv from "dotenv";
-import { NetworkUserConfig } from "hardhat/types";
-dotenv.config();
+import { Network } from "./config/networks";
 
-import "./tasks";
+const ALCHEMY_API_KEY = vars.get("ALCHEMY_API_KEY");
+const PRIVATE_KEY = vars.get("PRIVATE_KEY");
+const ARBISCAN_API_KEY = vars.get("ARBISCAN_API_KEY");
 
-/** @type import('hardhat/config').HardhatUserConfig */
-const deployerPrivateKey =
-  process.env.PRIVATE_KEY ??
-  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+function alchemyUrl(network: Network) {
+  return `https://${network}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
+}
 
-const infuraUrl = (name: string): string =>
-  `https://${name}.infura.io/v3/${process.env.INFURA_ID}`;
-
-function getNetwork(url: string): NetworkUserConfig {
+function getNetwork(network: Network) {
   return {
-    url,
-    accounts: [deployerPrivateKey],
+    url: alchemyUrl(network),
+    accounts: [PRIVATE_KEY],
   };
 }
 
-function getInfuraNetwork(name: string): NetworkUserConfig {
-  return getNetwork(infuraUrl(name));
-}
-
 const config: HardhatUserConfig = {
-  solidity: {
-    version: "0.8.26", // Your Solidity version
-    settings: {
-      optimizer: {
-        enabled: true, // Enable optimization
-        runs: 200, // Set the number of optimization runs (200 is a common balance)
-      },
-    },
-  },
+  solidity: "0.8.28",
   networks: {
-    arbitrumSepolia: getInfuraNetwork("arbitrum-sepolia"),
-  },
-  namedAccounts: {
-    deployer: {
-      // By default, it will take the first Hardhat account as the deployer
-      default: 0,
-    },
-    deterministicDeployer: {
-      default: 0,
-    },
+    arbitrumSepolia: getNetwork(Network.ARBITRUM_SEPOLIA),
   },
   etherscan: {
     apiKey: {
-      arbitrumSepolia: process.env.ARBISCAN_API_KEY ?? "",
+      arbitrumSepolia: ARBISCAN_API_KEY,
     },
+    customChains: [
+      {
+        network: "arbitrumSepolia",
+        chainId: 421614,
+        urls: {
+          apiURL: "https://api-sepolia.arbiscan.io/api",
+          browserURL: "https://sepolia.arbiscan.io/",
+        },
+      },
+    ],
   },
 };
 

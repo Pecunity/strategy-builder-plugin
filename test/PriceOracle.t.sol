@@ -2,8 +2,8 @@
 pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {PriceOracle} from "../src/PriceOracle.sol";
-import {IPriceOracle} from "../src/interfaces/IPriceOracle.sol";
+import {PriceOracle} from "contracts/PriceOracle.sol";
+import {IPriceOracle} from "contracts/interfaces/IPriceOracle.sol";
 import {PythStructs} from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import {IPyth} from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 
@@ -16,7 +16,7 @@ contract PriceOracleTest is Test {
 
     function setUp() external {
         vm.prank(OWNER);
-        oracle = new PriceOracle(PYTH_ORACLE, OWNER);
+        oracle = new PriceOracle(PYTH_ORACLE);
     }
 
     function test_setOracleID_Success(bytes32 id) external {

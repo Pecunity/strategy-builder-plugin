@@ -8,14 +8,16 @@
     "test": "test"
   },
   "files": [
-    "/src/**/*.sol",
-    "!/src/test/**/*"
+    "/contracts/**/*.sol",
+    "!/contracts/test/**/*"
   ],
   "scripts": {
     "test": "forge test",
     "compile": "hardhat compile && forge build",
     "coverage": "forge coverage --report lcov && genhtml lcov.info  --output-dir coverage",
-    "deploy": "hardhat deploy --network"
+    "verify": "npx hardhat ignition verify chain-$CHAIN_ID",
+    "deploy:core": "hardhat run scripts/deploy-core.ts --network $NETWORK",
+    "deploy:conditions": "hardhat run scripts/deploy-conditions.ts --network $NETWORK"
   },
   "keywords": [],
   "author": "3Blocks",

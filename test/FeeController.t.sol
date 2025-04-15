@@ -2,10 +2,10 @@
 pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {FeeController} from "../src/FeeController.sol";
-import {IFeeController} from "../src/interfaces/IFeeController.sol";
-import {ITokenGetter} from "../src/interfaces/ITokenGetter.sol";
-import {IPriceOracle} from "../src/interfaces/IPriceOracle.sol";
+import {FeeController} from "contracts/FeeController.sol";
+import {IFeeController} from "contracts/interfaces/IFeeController.sol";
+import {ITokenGetter} from "contracts/interfaces/ITokenGetter.sol";
+import {IPriceOracle} from "contracts/interfaces/IPriceOracle.sol";
 
 contract FeeControllerTest is Test {
     FeeController controller;
@@ -19,11 +19,11 @@ contract FeeControllerTest is Test {
 
     function setUp() external {
         vm.prank(OWNER);
-        controller = new FeeController(ORACLE, maxFeeLimits, minFeesInUSD, OWNER);
+        controller = new FeeController(ORACLE, maxFeeLimits, minFeesInUSD);
     }
 
     function test_deployment_Success() external {
-        FeeController _newController = new FeeController(ORACLE, maxFeeLimits, minFeesInUSD, OWNER);
+        FeeController _newController = new FeeController(ORACLE, maxFeeLimits, minFeesInUSD);
 
         assertEq(_newController.priceOracle(), ORACLE);
 
@@ -34,7 +34,7 @@ contract FeeControllerTest is Test {
 
     function test_deployment_OracleZeroAddress() external {
         vm.expectRevert(IFeeController.ZeroAddressNotValid.selector);
-        new FeeController(address(0), maxFeeLimits, minFeesInUSD, OWNER);
+        new FeeController(address(0), maxFeeLimits, minFeesInUSD);
     }
 
     function test_setFunctionFeeConfig_Success(bytes4 _selector) external {

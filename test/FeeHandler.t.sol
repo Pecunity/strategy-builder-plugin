@@ -2,9 +2,9 @@
 pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {FeeHandler} from "../src/FeeHandler.sol";
-import {IFeeHandler} from "../src/interfaces/IFeeHandler.sol";
-import {Token} from "../src/test/mocks/MockToken.sol";
+import {FeeHandler} from "contracts/FeeHandler.sol";
+import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
+import {Token} from "contracts/test/mocks/MockToken.sol";
 
 contract FeeHandlerTest is Test {
     FeeHandler handler;
@@ -19,9 +19,12 @@ contract FeeHandlerTest is Test {
     uint256 CREATOR_PERCENTAGE = 500;
     uint256 VAULT_PERCENTAGE = 7500;
 
+    uint256 public constant BURN_PERCENTAGE = 1000;
+    uint256 public constant PRIMARY_TOKEN_BURN_PERCENTAGE = 2000;
+
     function setUp() external {
         vm.prank(OWNER);
-        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE, OWNER);
+        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE);
     }
 
     function test_deployment_Success() external {
@@ -34,36 +37,38 @@ contract FeeHandlerTest is Test {
 
     function test_deployment_VaultZeroAddress() external {
         vm.expectRevert(IFeeHandler.ZeroAddressNotValid.selector);
-        handler = new FeeHandler(address(0), BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE, OWNER);
+        handler = new FeeHandler(address(0), BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE);
     }
 
     function test_deployment_SumPercentageNotCorrect() external {
         vm.expectRevert(IFeeHandler.InvalidPercentageDistribution.selector);
 
-        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE + 1, OWNER);
+        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE + 1);
     }
 
-    function test_activatePrimaryToken_Success(address token, address treasury) external {
-        vm.assume(treasury != address(0));
+    function test_activatePrimaryToken_Success(address token, address burnerAddress) external {
+        vm.assume(burnerAddress != address(0));
         vm.assume(token != address(0));
 
         vm.prank(OWNER);
-        handler.activatePrimaryToken(token, treasury);
+        handler.activatePrimaryToken(token, burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE);
 
-        assert(handler.primaryTokenActive());
-        assertEq(handler.treasury(), treasury);
+        assertTrue(handler.primaryTokenActive());
+        assertEq(handler.burnerAddress(), burnerAddress);
+        assertEq(handler.primaryTokenBurn(), PRIMARY_TOKEN_BURN_PERCENTAGE);
+        assertEq(handler.tokenBurn(), BURN_PERCENTAGE);
     }
 
-    function test_activatePrimaryToken_AlreadyActive(address token, address treasury) external {
-        vm.assume(treasury != address(0));
+    function test_activatePrimaryToken_AlreadyActive(address token, address burnerAddress) external {
+        vm.assume(burnerAddress != address(0));
         vm.assume(token != address(0));
 
         vm.prank(OWNER);
-        handler.activatePrimaryToken(token, treasury);
+        handler.activatePrimaryToken(token, burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE);
 
         vm.prank(OWNER);
         vm.expectRevert(IFeeHandler.PrimaryTokenAlreadyActivated.selector);
-        handler.activatePrimaryToken(token, treasury);
+        handler.activatePrimaryToken(token, burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE);
     }
 
     function test_updateVault_Success(address newVault) external {
@@ -116,23 +121,6 @@ contract FeeHandlerTest is Test {
         vm.prank(OWNER);
         vm.expectRevert(IFeeHandler.InvalidPercentageDistribution.selector);
         handler.updatePercentages(modBeneficiary, modCreator, modVault);
-    }
-
-    function test_updatePrimaryTokenDiscount_Success(uint256 discount) external {
-        vm.assume(discount <= handler.MAX_PRIMARY_TOKEN_DISCOUNT());
-
-        vm.prank(OWNER);
-        handler.updatePrimaryTokenDiscount(discount);
-
-        assertEq(handler.primaryTokenDiscount(), discount);
-    }
-
-    function test_updatePrimaryTokenDiscount_ExceedMaxDiscount(uint256 discount) external {
-        vm.assume(discount > handler.MAX_PRIMARY_TOKEN_DISCOUNT());
-
-        vm.prank(OWNER);
-        vm.expectRevert(IFeeHandler.InvalidPrimaryTokenDiscount.selector);
-        handler.updatePrimaryTokenDiscount(discount);
     }
 
     function test_updateTokenAllowance_Success(address token) external {
@@ -202,14 +190,14 @@ contract FeeHandlerTest is Test {
 
     function test_handleFee_PrimaryTokenActive(uint256 amount, address beneficiary, address creator) external {
         address primaryToken = makeAddr("primary-token");
-        address treasury = makeAddr("treasury");
+        address burnerAddress = makeAddr("burner-address");
 
         uint256 _maxTokenSupply = 1000 * 1e18;
         vm.prank(FEE_PAYER);
         Token _token = new Token("test", "MT", _maxTokenSupply);
 
         vm.startPrank(OWNER);
-        handler.activatePrimaryToken(primaryToken, treasury);
+        handler.activatePrimaryToken(primaryToken, burnerAddress, 1000, 2000);
         handler.updateTokenAllowance(address(_token), true);
         vm.stopPrank();
 
@@ -224,7 +212,7 @@ contract FeeHandlerTest is Test {
         assert(_token.balanceOf(beneficiary) > 0);
         assert(_token.balanceOf(creator) > 0);
         assert(_token.balanceOf(VAULT) > 0);
-        assert(_token.balanceOf(treasury) > 0);
+        assert(_token.balanceOf(burnerAddress) > 0);
     }
 
     function test_handleFee_PrimaryTokenPayment(uint256 amount, address beneficiary, address creator) external {
@@ -232,10 +220,12 @@ contract FeeHandlerTest is Test {
 
         vm.prank(FEE_PAYER);
         Token primaryToken = new Token("test", "MT", _maxTokenSupply);
-        address treasury = makeAddr("treasury");
+        address burnerAddress = makeAddr("burner-address");
 
         vm.startPrank(OWNER);
-        handler.activatePrimaryToken(address(primaryToken), treasury);
+        handler.activatePrimaryToken(
+            address(primaryToken), burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE
+        );
         handler.updateTokenAllowance(address(primaryToken), true);
         vm.stopPrank();
 
@@ -250,7 +240,7 @@ contract FeeHandlerTest is Test {
         assert(primaryToken.balanceOf(beneficiary) > 0);
         assert(primaryToken.balanceOf(creator) > 0);
         assert(primaryToken.balanceOf(VAULT) > 0);
-        assert(primaryToken.balanceOf(treasury) == 0);
+        assert(primaryToken.balanceOf(burnerAddress) > 0);
     }
 
     function test_handleFeeETH_Success(uint256 amount) external {
