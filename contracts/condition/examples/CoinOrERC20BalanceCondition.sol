@@ -32,14 +32,14 @@ contract CoinOrERC20BalanceCondition is BaseCondition, ICoinOrERC20BalanceCondit
         emit ConditionAdded(_id, msg.sender, condition);
     }
 
-    function deleteCondition(uint32 _id) public override conditionExist(_id) {
+    function deleteCondition(uint32 _id) public override {
         super.deleteCondition(_id);
         delete conditions[msg.sender][_id];
 
         emit ConditionDeleted(_id, msg.sender);
     }
 
-    function updateCondition(uint32 _id) public view override conditionExist(_id) returns (bool) {
+    function updateCondition(uint32 _id) public view override returns (bool) {
         return conditions[msg.sender][_id].updateable;
     }
 

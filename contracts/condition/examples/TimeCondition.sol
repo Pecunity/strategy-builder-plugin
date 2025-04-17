@@ -2,23 +2,10 @@
 pragma solidity ^0.8.26;
 
 import {BaseCondition} from "../BaseCondition.sol";
+import {ITimeCondition} from "./interfaces/ITimeCondition.sol";
 
-error TimeCondition__ExecutionTimeNotValid();
-error TimeCondition__DeltaNotValid();
-error TimeCondition__ConditionsIsNotUpdateable();
-
-contract TimeCondition is BaseCondition {
+contract TimeCondition is BaseCondition, ITimeCondition {
     uint256 constant MINIMUM_DELTA = 3600;
-
-    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-    // ┃           Structs                ┃
-    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-    struct Condition {
-        uint256 execution;
-        uint256 delta;
-        bool updateable;
-    }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃        State Variables           ┃
@@ -31,33 +18,21 @@ contract TimeCondition is BaseCondition {
 
     modifier validCondition(Condition calldata _condition) {
         if (_condition.execution < block.timestamp) {
-            revert TimeCondition__ExecutionTimeNotValid();
+            revert ExecutionTimeNotValid();
         }
 
         if (_condition.delta < MINIMUM_DELTA) {
-            revert TimeCondition__DeltaNotValid();
+            revert DeltaNotValid();
         }
 
         _;
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-    // ┃            Events                ┃
-    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-    event ConditionAdded(uint32 id, address wallet, Condition condition);
-    event ConditionDeleted(uint32 id, address wallet);
-    event ConditionUpdated(uint32 id, address wallet, uint256 newExecution);
-
-    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Public Functions           ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    function addCondition(uint32 _id, Condition calldata _condition)
-        external
-        conditionDoesNotExist(_id)
-        validCondition(_condition)
-    {
+    function addCondition(uint32 _id, Condition calldata _condition) external validCondition(_condition) {
         conditions[msg.sender][_id] = _condition;
 
         _addCondition(_id); //BaseCondition.sol metho
@@ -76,7 +51,7 @@ contract TimeCondition is BaseCondition {
         Condition memory _condition = conditions[msg.sender][_id];
 
         if (_condition.execution > block.timestamp) {
-            revert TimeCondition__ConditionsIsNotUpdateable();
+            revert ConditionsIsNotUpdateable();
         }
 
         _condition.execution += _condition.delta;

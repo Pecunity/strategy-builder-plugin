@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ICoinOrERC20BalanceCondition } from "./ICoinOrERC20BalanceCondition";
+export type { ITimeCondition } from "./ITimeCondition";

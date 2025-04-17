@@ -23,7 +23,7 @@ import type {
   TypedContractMethod,
 } from "../../../common";
 
-export declare namespace TimeCondition {
+export declare namespace ITimeCondition {
   export type ConditionStruct = {
     execution: BigNumberish;
     delta: BigNumberish;
@@ -76,7 +76,7 @@ export interface TimeConditionInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "addCondition",
-    values: [BigNumberish, TimeCondition.ConditionStruct]
+    values: [BigNumberish, ITimeCondition.ConditionStruct]
   ): string;
   encodeFunctionData(
     functionFragment: "addStrategyToCondition",
@@ -238,17 +238,17 @@ export namespace ConditionAddedEvent {
   export type InputTuple = [
     id: BigNumberish,
     wallet: AddressLike,
-    condition: TimeCondition.ConditionStruct
+    condition: ITimeCondition.ConditionStruct
   ];
   export type OutputTuple = [
     id: bigint,
     wallet: string,
-    condition: TimeCondition.ConditionStructOutput
+    condition: ITimeCondition.ConditionStructOutput
   ];
   export interface OutputObject {
     id: bigint;
     wallet: string;
-    condition: TimeCondition.ConditionStructOutput;
+    condition: ITimeCondition.ConditionStructOutput;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -386,7 +386,7 @@ export interface TimeCondition extends BaseContract {
   >;
 
   addCondition: TypedContractMethod<
-    [_id: BigNumberish, _condition: TimeCondition.ConditionStruct],
+    [_id: BigNumberish, _condition: ITimeCondition.ConditionStruct],
     [void],
     "nonpayable"
   >;
@@ -471,7 +471,7 @@ export interface TimeCondition extends BaseContract {
 
   walletCondition: TypedContractMethod<
     [_wallet: AddressLike, _id: BigNumberish],
-    [TimeCondition.ConditionStructOutput],
+    [ITimeCondition.ConditionStructOutput],
     "view"
   >;
 
@@ -489,7 +489,7 @@ export interface TimeCondition extends BaseContract {
   getFunction(
     nameOrSignature: "addCondition"
   ): TypedContractMethod<
-    [_id: BigNumberish, _condition: TimeCondition.ConditionStruct],
+    [_id: BigNumberish, _condition: ITimeCondition.ConditionStruct],
     [void],
     "nonpayable"
   >;
@@ -576,7 +576,7 @@ export interface TimeCondition extends BaseContract {
     nameOrSignature: "walletCondition"
   ): TypedContractMethod<
     [_wallet: AddressLike, _id: BigNumberish],
-    [TimeCondition.ConditionStructOutput],
+    [ITimeCondition.ConditionStructOutput],
     "view"
   >;
 
