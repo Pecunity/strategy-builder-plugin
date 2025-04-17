@@ -2,54 +2,45 @@
 pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import {UpgradeableModularAccount} from "erc6900/reference-implementation/src/account/UpgradeableModularAccount.sol";
-import {FunctionReference} from "erc6900/reference-implementation/src/interfaces/IPluginManager.sol";
-import {FunctionReferenceLib} from "erc6900/reference-implementation/src/helpers/FunctionReferenceLib.sol";
 import {SingleOwnerPlugin} from "erc6900/reference-implementation/src/plugins/owner/SingleOwnerPlugin.sol";
 import {ISingleOwnerPlugin} from "erc6900/reference-implementation/src/plugins/owner/ISingleOwnerPlugin.sol";
 import {MSCAFactoryFixture} from "erc6900/reference-implementation/test/mocks/MSCAFactoryFixture.sol";
-
 import {IEntryPoint} from "@eth-infinitism/account-abstraction/interfaces/IEntryPoint.sol";
 import {EntryPoint} from "@eth-infinitism/account-abstraction/core/EntryPoint.sol";
-import {UserOperation} from "@eth-infinitism/account-abstraction/interfaces/UserOperation.sol";
+import {FunctionReference} from "erc6900/reference-implementation/src/interfaces/IPluginManager.sol";
+import {FunctionReferenceLib} from "erc6900/reference-implementation/src/helpers/FunctionReferenceLib.sol";
 
 import {StrategyBuilderPlugin} from "contracts/StrategyBuilderPlugin.sol";
 import {IStrategyBuilderPlugin} from "contracts/interfaces/IStrategyBuilderPlugin.sol";
+
 import {IFeeController} from "contracts/interfaces/IFeeController.sol";
 import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
-import {Token} from "contracts/test/mocks/MockToken.sol";
+
 import {MockCondition} from "contracts/test/mocks/MockCondition.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract StrategyBuilderTest is Test {
-    using ECDSA for bytes32;
-
+contract StrategyBuilderPluginTest is Test {
+    //Modular Account
     IEntryPoint entryPoint;
     UpgradeableModularAccount account1;
-    StrategyBuilderPlugin strategyBuilderPlugin;
     address owner1;
     uint256 owner1Key;
-    address payable beneficiary;
 
-    address feeManager = makeAddr("fee-manager");
-    address feeHandler = makeAddr("fee-handler");
-    address feeController = makeAddr("fee-controller");
-    address receiver = makeAddr("receiver");
-    address executor = makeAddr("executor");
-    address octoInk = makeAddr("octo-ink");
+    // StrategyBuilderPlugin
+    StrategyBuilderPlugin strategyBuilderPlugin;
 
-    uint256 constant CALL_GAS_LIMIT = 1_000_000;
-    uint256 constant VERIFICATION_GAS_LIMIT = 1000000;
+    //Mocks
+    MockCondition mockCondition = new MockCondition();
 
-    Token token;
-    MockCondition condition;
+    address feeHandler = makeAddr("feeHandler");
+    address feeController = makeAddr("feeController");
+    address automationExecutor = makeAddr("automationExecutor");
+    address beneficiary = makeAddr("beneficiary");
+    address creator = makeAddr("creator");
+    address tokenReceiver = makeAddr("tokenReceiver");
 
-    uint256 constant MAX_TOKEN_SUPPLY = 1_000_000 * 1e18;
-    uint256 constant FIXED_FEE = 100;
-
-    uint256 nonce = 0;
+    uint256 constant TOKEN_SEND_AMOUNT = 1 ether;
 
     function setUp() public {
         // we'll be using the entry point so we can send a user operation through
@@ -61,9 +52,6 @@ contract StrategyBuilderTest is Test {
         // we'll use this plugin's validation for our increment function
         SingleOwnerPlugin singleOwnerPlugin = new SingleOwnerPlugin();
         MSCAFactoryFixture factory = new MSCAFactoryFixture(entryPoint, singleOwnerPlugin);
-
-        // the beneficiary of the fees at the entry point
-        beneficiary = payable(makeAddr("beneficiary"));
 
         // create a single owner for this account and provide the address to our modular account
         // we'll also add ether to our account to pay for gas fees
@@ -89,331 +77,352 @@ contract StrategyBuilderTest is Test {
             pluginInstallData: "0x",
             dependencies: dependencies
         });
-
-        vm.prank(owner1);
-        token = new Token("Mock Token", "MOCK", MAX_TOKEN_SUPPLY);
-
-        vm.prank(owner1);
-        token.transfer(address(account1), MAX_TOKEN_SUPPLY);
-
-        condition = new MockCondition();
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
-        vm.prank(address(account1));
-        condition.addCondition(0, _condition);
     }
 
     ////////////////////////////////
     ////// createStrategy //////////
     ////////////////////////////////
 
-    function test_createStrategy_Success() public {
-        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](1);
+    function test_createStrategy_Success(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
 
-        IStrategyBuilderPlugin.Condition memory emptyCondition;
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
 
-        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
-        actions[0] = IStrategyBuilderPlugin.Action({
-            selector: UpgradeableModularAccount.execute.selector,
-            parameter: abi.encode(1, 1, 1),
-            actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL,
-            target: receiver,
-            value: 1
-        });
+        //Assert
+        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), strategyID);
 
-        IStrategyBuilderPlugin.StrategyStep memory step =
-            IStrategyBuilderPlugin.StrategyStep({condition: emptyCondition, actions: actions});
-
-        steps[0] = step;
-
-        address creator = makeAddr("creator");
-        uint16 id = 16;
-
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.createStrategy, (id, creator, steps)));
-
-        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), id);
         assertEq(strategy.creator, creator);
-
-        assertEq(strategy.steps[0].actions.length, 2);
+        assertEq(strategy.steps.length, numSteps);
     }
 
-    /////////////////////////////////
-    ////// executeStrategy //////////
-    /////////////////////////////////
+    function test_createStrategy_Revert_AlreadyExists(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
 
-    function test_executeStrategy_Success(uint256 amount) external {
-        amount = bound(amount, 1, MAX_TOKEN_SUPPLY - 1);
-
-        strategyWithConditionAdded(amount);
-
-        //Mock Fee Controller calls
-        vm.mockCall(
-            feeController,
-            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
-            abi.encode(address(0), false)
-        );
-
-        IFeeController.FeeConfig memory config =
-            IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0});
-        vm.mockCall(
-            feeController, abi.encodeWithSelector(IFeeController.functionFeeConfig.selector), abi.encode(config)
-        );
-
-        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(1));
-
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)));
-
-        assert(IERC20(token).balanceOf(receiver) > 0);
+        vm.expectRevert(IStrategyBuilderPlugin.StrategyAlreadyExist.selector);
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
     }
 
-    function test_executeStrategy_TwoSteps(uint256 amount) external {
-        amount = bound(amount, 1, MAX_TOKEN_SUPPLY - 1);
+    function test_createStrategy_Success_StepsWithCondition(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategyStepsWithCondition(numSteps);
 
-        strategyWithTwoStepsAdd(amount);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
 
-        //Mock Fee Controller calls
-        vm.mockCall(
-            feeController,
-            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
-            abi.encode(address(0), false)
-        );
+        //Assert
+        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), strategyID);
 
-        IFeeController.FeeConfig memory config =
-            IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0});
-        vm.mockCall(
-            feeController, abi.encodeWithSelector(IFeeController.functionFeeConfig.selector), abi.encode(config)
-        );
+        assertEq(strategy.creator, creator);
+        assertEq(strategy.steps.length, numSteps);
 
-        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(1));
+        assertTrue(mockCondition.strategies(address(account1), uint32(1)).length > 0);
+    }
 
-        // create a user operation which has the calldata to specify we'd like to increment
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.executeStrategy, (1)));
+    function test_createStrategy_Success_SameConditionMultipleTimesInStrategy(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
 
-        assert(IERC20(token).balanceOf(receiver) > 0);
+        uint32 conditionId = 22;
+        IStrategyBuilderPlugin.StrategyStep[] memory steps =
+            _createStrategyStepsWithSameCondition(numSteps, conditionId);
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+
+        //Assert
+        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), strategyID);
+        assertEq(strategy.creator, creator);
+        assertEq(strategy.steps.length, numSteps);
+        assertTrue(mockCondition.strategies(address(account1), conditionId).length > 0);
+        assertTrue(mockCondition.conditionInStrategy(address(account1), conditionId, strategyID));
+    }
+
+    function test_createStrategy_Revert_InvalidNextStepId(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategyStepsWithCondition(numSteps);
+
+        steps[steps.length - 1].condition.result1 = 100; // Invalid next step ID
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderPlugin.InvalidNextStepIndex.selector);
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
     }
 
     /////////////////////////////////
     ////// deleteStrategy ///////////
     /////////////////////////////////
 
-    function test_deleteStrategy_Success() external {
-        uint16 _id = 1;
-        uint256 transfer = 1 ether;
-        strategyWithConditionAdded(transfer);
+    function test_deleteStrategy_Success(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
 
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.deleteStrategy, (_id)));
+        //Act
+        vm.startPrank(address(account1));
+        strategyBuilderPlugin.deleteStrategy(strategyID);
+        vm.stopPrank();
 
-        IStrategyBuilderPlugin.Strategy memory strategy = strategyBuilderPlugin.strategy(address(account1), _id);
-        assertEq(strategy.creator, address(0));
-
-        assertEq(strategy.steps.length, 0);
+        //Assert
+        assertTrue(strategyBuilderPlugin.strategy(address(account1), strategyID).creator == address(0));
+        assertTrue(strategyBuilderPlugin.strategy(address(account1), strategyID).steps.length == 0);
     }
 
-    //////////////////////////////////
-    ////// createAutomation   ////////
-    //////////////////////////////////
+    function test_deleteStrategy_Success_StrategyWithConditions(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategyStepsWithCondition(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+        //Act
+        vm.startPrank(address(account1));
+        strategyBuilderPlugin.deleteStrategy(strategyID);
+        vm.stopPrank();
+        //Assert
+        assertTrue(strategyBuilderPlugin.strategy(address(account1), strategyID).creator == address(0));
+        assertTrue(strategyBuilderPlugin.strategy(address(account1), strategyID).steps.length == 0);
+    }
 
-    function test_createAutomation_Success() external {
-        uint256 amount = 1 ether;
+    function test_deleteStrategy_Revert_StrategyInUse(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
 
-        strategyWithConditionAdded(amount);
-
-        IStrategyBuilderPlugin.Condition memory _automationCondition =
-            IStrategyBuilderPlugin.Condition({conditionAddress: address(condition), id: 1, result1: 0, result0: 0});
-
+        //Mock FeeController and FeeHandler
         vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
         vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
 
-        sendUserOperation(
-            abi.encodeCall(StrategyBuilderPlugin.createAutomation, (1, 1, address(0), 1 ether, _automationCondition))
-        );
+        vm.startPrank(address(account1));
+        uint32 conditionId = 2222;
+        mockCondition.addCondition(conditionId, MockCondition.Condition({result: true, active: true}));
+        IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
+            conditionAddress: address(mockCondition),
+            id: 2222,
+            result0: 0,
+            result1: 0
+        });
+        strategyBuilderPlugin.createAutomation(1, strategyID, address(0), type(uint256).max, condition);
+        vm.stopPrank();
 
-        address conditionAddress = strategyBuilderPlugin.automation(address(account1), 1).condition.conditionAddress;
+        //Act
 
-        assertEq(conditionAddress, address(condition));
-    }
-
-    //////////////////////////////////
-    ////// executeAutomation /////////
-    //////////////////////////////////
-
-    function test_executeAutomation_Success() external {
-        uint256 amount = 1 ether;
-
-        strategyWithConditionAdded(amount);
-
-        createAutomation(0);
-
-        mockFeeController();
-
-        vm.prank(executor);
-        strategyBuilderPlugin.executeAutomation(1, address(account1), executor);
-    }
-
-    function test_executeAutomation_ConditionIsFalse() external {
-        uint256 amount = 1 ether;
-
-        strategyWithConditionAdded(amount);
-
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: false, active: true});
+        vm.expectRevert(IStrategyBuilderPlugin.StrategyIsInUse.selector);
         vm.prank(address(account1));
-        condition.addCondition(1, _condition);
-        createAutomation(1);
-
-        mockFeeController();
-
-        vm.prank(executor);
-        vm.expectRevert(
-            abi.encodeWithSelector(IStrategyBuilderPlugin.AutomationNotExecutable.selector, address(condition), 1)
-        );
-        strategyBuilderPlugin.executeAutomation(1, address(account1), executor);
+        strategyBuilderPlugin.deleteStrategy(strategyID);
     }
 
-    //////////////////////////////////
-    ////// deleteAutomation /////////
-    //////////////////////////////////
-
-    function test_deleteAutomation_Success() external {
-        uint256 amount = 1 ether;
-
-        strategyWithConditionAdded(amount);
-
-        createAutomation(0);
-
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.deleteAutomation, (1)));
-
-        StrategyBuilderPlugin.Automation memory _automation = strategyBuilderPlugin.automation(address(account1), 1);
-
-        assertEq(_automation.condition.conditionAddress, address(0));
-    }
-
-    //////////////////////
-    ////// HELPER ////////
-    //////////////////////
-
-    function strategyWithConditionAdded(uint256 transferAmount) internal {
-        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](1);
-
-        IStrategyBuilderPlugin.Condition memory _condition;
-        _condition.conditionAddress = address(condition);
-
-        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
-        actions[0] = IStrategyBuilderPlugin.Action({
-            selector: IERC20.transfer.selector,
-            parameter: abi.encode(receiver, transferAmount),
-            actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL,
-            target: address(token),
-            value: 0
-        });
-
-        IStrategyBuilderPlugin.StrategyStep memory step =
-            IStrategyBuilderPlugin.StrategyStep({condition: _condition, actions: actions});
-
-        steps[0] = step;
-        address _creator = makeAddr("creator");
-        uint16 _id = 1;
-
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.createStrategy, (_id, _creator, steps)));
-    }
-
-    function strategyWithTwoStepsAdd(uint256 transferAmount) internal {
-        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](2);
-
-        IStrategyBuilderPlugin.Condition memory _condition;
-        _condition.conditionAddress = address(0);
-        _condition.result1 = 1;
-
-        IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](1);
-        actions[0] = IStrategyBuilderPlugin.Action({
-            selector: IERC20.transfer.selector,
-            parameter: abi.encode(receiver, transferAmount),
-            actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL,
-            target: address(token),
-            value: 0
-        });
-
-        IStrategyBuilderPlugin.StrategyStep memory step =
-            IStrategyBuilderPlugin.StrategyStep({condition: _condition, actions: actions});
-
-        steps[0] = step;
-
-        MockCondition.Condition memory _falseCondition = MockCondition.Condition({result: false, active: true});
+    function test_deleteStrategy_Revert_StrategyDoesNotExist(uint32 strategyId) external {
+        vm.expectRevert(IStrategyBuilderPlugin.StrategyDoesNotExist.selector);
         vm.prank(address(account1));
-        condition.addCondition(1, _falseCondition);
-
-        IStrategyBuilderPlugin.Condition memory _conditionStepTwo;
-        _conditionStepTwo.conditionAddress = address(condition);
-        _conditionStepTwo.id = 1;
-
-        steps[1] = IStrategyBuilderPlugin.StrategyStep({condition: _conditionStepTwo, actions: actions});
-
-        address _creator = makeAddr("creator");
-        uint16 _id = 1;
-
-        // create a user operation which has the calldata to specify we'd like to increment
-        sendUserOperation(abi.encodeCall(StrategyBuilderPlugin.createStrategy, (_id, _creator, steps)));
+        strategyBuilderPlugin.deleteStrategy(strategyId); // Strategy ID doesn't exist
     }
 
-    function createAutomation(uint16 conditionId) internal {
-        IStrategyBuilderPlugin.Condition memory _automationCondition = IStrategyBuilderPlugin.Condition({
-            conditionAddress: address(condition),
-            id: conditionId,
-            result1: 0,
-            result0: 0
-        });
+    /////////////////////////////////
+    ////// executeStrategy //////////
+    /////////////////////////////////
 
-        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
-        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
+    function test_executeStrategy_Success(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
 
-        sendUserOperation(
-            abi.encodeCall(StrategyBuilderPlugin.createAutomation, (1, 1, address(0), 1 ether, _automationCondition))
-        );
-    }
+        deal(address(account1), 100 ether);
 
-    function mockFeeController() internal {
-        //Mock Fee Controller calls
+        //Mocks
         vm.mockCall(
             feeController,
             abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
             abi.encode(address(0), false)
         );
 
-        IFeeController.FeeConfig memory config =
-            IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0});
         vm.mockCall(
-            feeController, abi.encodeWithSelector(IFeeController.functionFeeConfig.selector), abi.encode(config)
+            feeController,
+            abi.encodeWithSelector(IFeeController.functionFeeConfig.selector),
+            abi.encode(IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0}))
         );
-
         vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(0));
+
+        //Act
+        vm.startPrank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+
+        strategyBuilderPlugin.executeStrategy(strategyID);
+        vm.stopPrank();
+
+        //Assert
+        assertEq(tokenReceiver.balance, numSteps * 2 * TOKEN_SEND_AMOUNT);
     }
 
-    /* ====== HELPER FUNCTIONS ====== */
+    /////////////////////////////////
+    ////// createAutomation /////////
+    /////////////////////////////////
 
-    function sendUserOperation(bytes memory callData) internal {
-        // create a user operation which has the calldata to specify we'd like to increment
-        UserOperation memory userOp = UserOperation({
-            sender: address(account1),
-            nonce: nonce,
-            initCode: "",
-            callData: callData,
-            callGasLimit: CALL_GAS_LIMIT,
-            verificationGasLimit: VERIFICATION_GAS_LIMIT,
-            preVerificationGas: 0,
-            maxFeePerGas: 2,
-            maxPriorityFeePerGas: 1,
-            paymasterAndData: "",
-            signature: ""
+    function test_createAutomation_Success(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+
+        //Mock FeeController and FeeHandler
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
+        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
+
+        vm.startPrank(address(account1));
+        uint32 conditionId = 2222;
+        mockCondition.addCondition(conditionId, MockCondition.Condition({result: true, active: true}));
+        IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
+            conditionAddress: address(mockCondition),
+            id: 2222,
+            result0: 0,
+            result1: 0
         });
+        strategyBuilderPlugin.createAutomation(1, strategyID, address(0), type(uint256).max, condition);
+        vm.stopPrank();
 
-        // sign this user operation with the owner, otherwise it will revert due to the singleowner validation
-        bytes32 userOpHash = entryPoint.getUserOpHash(userOp);
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(owner1Key, userOpHash.toEthSignedMessageHash());
-        userOp.signature = abi.encodePacked(r, s, v);
+        //assert
 
-        // send our single user operation to increment our count
-        UserOperation[] memory userOps = new UserOperation[](1);
-        userOps[0] = userOp;
-        entryPoint.handleOps(userOps, beneficiary);
+        IStrategyBuilderPlugin.Automation memory automation = strategyBuilderPlugin.automation(address(account1), 1);
+        assertEq(automation.strategyId, strategyID);
+        assertEq(automation.condition.conditionAddress, address(mockCondition));
+        assertEq(automation.condition.id, conditionId);
+    }
 
-        nonce++;
+    ////////////////////////
+    ////// HELPER //////////
+    ////////////////////////
+
+    function _createStrategySteps(uint256 numSteps)
+        internal
+        view
+        returns (IStrategyBuilderPlugin.StrategyStep[] memory)
+    {
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](numSteps);
+
+        for (uint256 i = 0; i < numSteps; i++) {
+            IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
+                conditionAddress: address(0),
+                id: 0,
+                result0: i == numSteps - 1 ? 1 : uint8(i),
+                result1: i == numSteps - 1 ? 0 : uint8(i + 1)
+            });
+
+            IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
+
+            actions[0] = IStrategyBuilderPlugin.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL
+            });
+
+            actions[1] = IStrategyBuilderPlugin.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL
+            });
+
+            steps[i] = IStrategyBuilderPlugin.StrategyStep({condition: condition, actions: actions});
+        }
+
+        return steps;
+    }
+
+    function _createStrategyStepsWithCondition(uint256 numSteps)
+        internal
+        returns (IStrategyBuilderPlugin.StrategyStep[] memory)
+    {
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](numSteps);
+        for (uint256 i = 0; i < numSteps; i++) {
+            IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
+                conditionAddress: address(mockCondition),
+                id: uint32(i + 1),
+                result0: 0,
+                result1: i == numSteps - 1 ? 0 : uint8(i + 1)
+            });
+
+            vm.prank(address(account1));
+            MockCondition.Condition memory _mockCondition = MockCondition.Condition({result: true, active: true});
+            mockCondition.addCondition(uint32(i + 1), _mockCondition);
+
+            IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
+
+            actions[0] = IStrategyBuilderPlugin.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL
+            });
+
+            actions[1] = IStrategyBuilderPlugin.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL
+            });
+
+            steps[i] = IStrategyBuilderPlugin.StrategyStep({condition: condition, actions: actions});
+        }
+
+        return steps;
+    }
+
+    function _createStrategyStepsWithSameCondition(uint256 numSteps, uint32 conditionId)
+        internal
+        returns (IStrategyBuilderPlugin.StrategyStep[] memory)
+    {
+        vm.prank(address(account1));
+        MockCondition.Condition memory _mockCondition = MockCondition.Condition({result: true, active: true});
+        mockCondition.addCondition(conditionId, _mockCondition);
+
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](numSteps);
+        for (uint256 i = 0; i < numSteps; i++) {
+            IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
+                conditionAddress: address(mockCondition),
+                id: conditionId,
+                result0: 0,
+                result1: i == numSteps - 1 ? 0 : uint8(i + 1)
+            });
+
+            IStrategyBuilderPlugin.Action[] memory actions = new IStrategyBuilderPlugin.Action[](2);
+
+            actions[0] = IStrategyBuilderPlugin.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL
+            });
+
+            actions[1] = IStrategyBuilderPlugin.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderPlugin.ActionType.EXTERNAL
+            });
+
+            steps[i] = IStrategyBuilderPlugin.StrategyStep({condition: condition, actions: actions});
+        }
+
+        return steps;
     }
 }

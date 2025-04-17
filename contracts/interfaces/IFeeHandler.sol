@@ -2,6 +2,10 @@
 pragma solidity ^0.8.26;
 
 interface IFeeHandler {
+    // ┏━━━━━━━━━━━━━━━━━┓
+    // ┃    Errors       ┃
+    // ┗━━━━━━━━━━━━━━━━━┛
+
     error InvalidAmount();
     error ZeroAddressNotValid();
     error InvalidBeneficiary();
@@ -9,6 +13,10 @@ interface IFeeHandler {
     error InvalidPercentageDistribution();
     error TokenNotAllowed();
     error InvalidPercentage();
+
+    // ┏━━━━━━━━━━━━━━━━━━┓
+    // ┃     Events       ┃
+    // ┗━━━━━━━━━━━━━━━━━━┛
 
     event FeeHandled(
         address indexed token,

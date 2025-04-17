@@ -19,7 +19,15 @@ function getNetwork(network: Network) {
 }
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.28",
+  solidity: {
+    version: "0.8.28", // Your Solidity version
+    settings: {
+      optimizer: {
+        enabled: true, // Enable optimization
+        runs: 200, // Set the number of optimization runs (200 is a common balance)
+      },
+    },
+  },
   networks: {
     arbitrumSepolia: getNetwork(Network.ARBITRUM_SEPOLIA),
   },
