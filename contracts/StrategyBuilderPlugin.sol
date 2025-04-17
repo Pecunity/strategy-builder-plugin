@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.8.26;
+pragma solidity ^0.8.28;
 
 import {BasePlugin} from "modular-account-libs/plugins/BasePlugin.sol";
 import {IPluginExecutor} from "modular-account-libs/interfaces/IPluginExecutor.sol";
@@ -17,12 +17,17 @@ import {ICondition} from "./interfaces/ICondition.sol";
 import {IFeeController} from "./interfaces/IFeeController.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IAction} from "./interfaces/IAction.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
  * @title StrategyBuilderPlugin
  * @dev A plugin for creating, executing, and managing automated strategies based on predefined conditions and actions.
  */
-contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
+contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderPlugin {
+    using Address for address;
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -106,7 +111,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         external
         strategyDoesNotExist(msg.sender, id)
     {
-        //TODO: Validate steps
+        _validateSteps(steps);
 
         Strategy storage newStrategy = strategies[getStorageId(msg.sender, id)];
 
@@ -115,17 +120,20 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         for (uint256 i = 0; i < steps.length; i++) {
             StrategyStep memory step = steps[i];
 
+            if (step.condition.conditionAddress != address(0)) {
+                // Validate the condition
+                _validateCondition(step.condition);
+
+                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, id, true);
+            }
+
             // Create a new step in storage
             StrategyStep storage newStep = newStrategy.steps.push();
             newStep.condition = step.condition;
 
-            if (step.condition.conditionAddress != address(0)) {
-                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, id, true);
-            }
-
             // Loop through the actions and add them to the step
             for (uint256 j = 0; j < step.actions.length; j++) {
-                //TODO: Validate each action!
+                _validateAction(step.actions[j]);
                 newStep.actions.push(step.actions[j]);
             }
         }
@@ -156,7 +164,7 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
     }
 
     /// @inheritdoc IStrategyBuilderPlugin
-    function executeStrategy(uint32 id) external strategyExist(msg.sender, id) {
+    function executeStrategy(uint32 id) external strategyExist(msg.sender, id) nonReentrant {
         _executeStrategy(msg.sender, id);
     }
 
@@ -171,6 +179,8 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         //Specific validations
         _validatePaymentToken(paymentToken);
 
+        _validateCondition(condition);
+
         _changeAutomationInCondition(msg.sender, condition.conditionAddress, condition.id, id, true);
 
         bytes32 automationSID = getStorageId(msg.sender, id);
@@ -180,7 +190,6 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         _newAutomation.strategyId = strategyId;
 
         _newAutomation.paymentToken = paymentToken;
-        //TODO: Validate maxFeeAmount
         _newAutomation.maxFeeAmount = maxFeeInUSD;
 
         bytes32 strategySID = getStorageId(msg.sender, strategyId);
@@ -192,32 +201,15 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
 
     /// @inheritdoc IStrategyBuilderPlugin
     function deleteAutomation(uint32 id) external automationExist(msg.sender, id) {
-        // bytes32 automationSID = getStorageId(msg.sender, id);
-        // Automation memory _automation = automations[automationSID];
-
-        // uint32[] storage _usedInAutomations = strategiesUsed[getStorageId(msg.sender, _automation.strategyId)];
-
-        // uint32 _actualAutomationIndex = automationsToIndex[automationSID];
-        // uint256 _lastAutomationIndex = _usedInAutomations.length - 1;
-        // if (_actualAutomationIndex != _lastAutomationIndex) {
-        //     uint32 _lastAutomation = _usedInAutomations[_lastAutomationIndex];
-        //     _usedInAutomations[_actualAutomationIndex] = _lastAutomation;
-        //     automationsToIndex[getStorageId(msg.sender, _lastAutomation)] = _actualAutomationIndex;
-        // }
-        // _usedInAutomations.pop();
-
-        // _changeAutomationInCondition(
-        //     msg.sender, _automation.condition.conditionAddress, _automation.condition.id, id, false
-        // );
-
-        // delete automations[automationSID];
-
-        // emit AutomationDeleted(msg.sender, id);
         _deleteAutomation(msg.sender, id);
     }
 
     /// @inheritdoc IStrategyBuilderPlugin
-    function executeAutomation(uint32 id, address wallet, address beneficary) external automationExist(wallet, id) {
+    function executeAutomation(uint32 id, address wallet, address beneficary)
+        external
+        automationExist(wallet, id)
+        nonReentrant
+    {
         bytes32 automationSID = getStorageId(wallet, id);
         Automation memory _automation = automations[automationSID];
 
@@ -365,14 +357,16 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         uint32 automationId,
         bool _add
     ) internal {
-        bytes memory data = _add
-            ? abi.encodeCall(ICondition.addAutomationToCondition, (_conditionId, automationId))
-            : abi.encodeCall(ICondition.removeAutomationFromCondition, (_conditionId, automationId));
+        if (!ICondition(_condition).conditionInAutomation(_wallet, _conditionId, automationId) == _add) {
+            bytes memory data = _add
+                ? abi.encodeCall(ICondition.addAutomationToCondition, (_conditionId, automationId))
+                : abi.encodeCall(ICondition.removeAutomationFromCondition, (_conditionId, automationId));
 
-        bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
-        bool _success = abi.decode(result, (bool));
-        if (!_success) {
-            revert changeAutomationInConditionFailed();
+            bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
+            bool _success = abi.decode(result, (bool));
+            if (!_success) {
+                revert changeAutomationInConditionFailed();
+            }
         }
     }
 
@@ -383,14 +377,16 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
         uint32 _strategy,
         bool _add
     ) internal {
-        bytes memory data = _add
-            ? abi.encodeCall(ICondition.addStrategyToCondition, (_conditionId, _strategy))
-            : abi.encodeCall(ICondition.removeStrategyFromCondition, (_conditionId, _strategy));
+        if (!ICondition(_condition).conditionInStrategy(_wallet, _conditionId, _strategy) == _add) {
+            bytes memory data = _add
+                ? abi.encodeCall(ICondition.addStrategyToCondition, (_conditionId, _strategy))
+                : abi.encodeCall(ICondition.removeStrategyFromCondition, (_conditionId, _strategy));
 
-        bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
-        bool _success = abi.decode(result, (bool));
-        if (!_success) {
-            revert ChangeStrategyInConditionFailed();
+            bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
+            bool _success = abi.decode(result, (bool));
+            if (!_success) {
+                revert ChangeStrategyInConditionFailed();
+            }
         }
     }
 
@@ -447,6 +443,45 @@ contract StrategyBuilderPlugin is BasePlugin, IStrategyBuilderPlugin {
 
         if (!valid) {
             revert PaymentTokenNotAllowed();
+        }
+    }
+
+    function _validateSteps(StrategyStep[] memory steps) internal pure {
+        for (uint256 i = 0; i < steps.length; i++) {
+            _validateStep(steps[i], steps.length);
+        }
+    }
+
+    function _validateStep(StrategyStep memory step, uint256 maxStepIndex) internal pure {
+        if (step.condition.result0 > maxStepIndex || step.condition.result1 > maxStepIndex) {
+            revert InvalidNextStepIndex();
+        }
+    }
+
+    function _validateAction(Action memory action) internal view {
+        if (action.actionType == ActionType.INTERNAL_ACTION) {
+            if (!action.target.isContract()) {
+                revert InvalidActionTarget();
+            }
+            if (IERC165(action.target).supportsInterface(type(IAction).interfaceId)) {
+                revert InvalidActionTarget();
+            }
+        } else {
+            if (action.target == address(0)) {
+                revert InvalidActionTarget();
+            }
+        }
+    }
+
+    function _validateCondition(Condition memory condition) internal view {
+        if (condition.conditionAddress != address(0)) {
+            if (!condition.conditionAddress.isContract()) {
+                revert InvalidConditionAddress();
+            }
+
+            if (!IERC165(condition.conditionAddress).supportsInterface(type(ICondition).interfaceId)) {
+                revert InvalidCondition();
+            }
         }
     }
 

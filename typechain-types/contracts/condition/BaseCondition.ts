@@ -8,6 +8,7 @@ import type {
   FunctionFragment,
   Result,
   Interface,
+  EventFragment,
   AddressLike,
   ContractRunner,
   ContractMethod,
@@ -17,6 +18,7 @@ import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
+  TypedLogDescription,
   TypedListener,
   TypedContractMethod,
 } from "../../common";
@@ -26,18 +28,28 @@ export interface BaseConditionInterface extends Interface {
     nameOrSignature:
       | "addAutomationToCondition"
       | "addStrategyToCondition"
-      | "automationValid"
       | "automations"
       | "checkCondition"
-      | "conditionActive"
+      | "conditionInAutomation"
+      | "conditionInStrategy"
       | "deleteCondition"
+      | "isConditionActive"
       | "isUpdateable"
       | "removeAutomationFromCondition"
       | "removeStrategyFromCondition"
       | "strategies"
-      | "strategyValid"
+      | "supportsInterface"
       | "updateCondition"
   ): FunctionFragment;
+
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "AutomationAdded"
+      | "AutomationRemoved"
+      | "ConditionDeleted"
+      | "StrategyAdded"
+      | "StrategyRemoved"
+  ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "addAutomationToCondition",
@@ -48,10 +60,6 @@ export interface BaseConditionInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "automationValid",
-    values: [AddressLike, BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "automations",
     values: [AddressLike, BigNumberish]
   ): string;
@@ -60,12 +68,20 @@ export interface BaseConditionInterface extends Interface {
     values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "conditionActive",
-    values: [AddressLike, BigNumberish]
+    functionFragment: "conditionInAutomation",
+    values: [AddressLike, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "conditionInStrategy",
+    values: [AddressLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "deleteCondition",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isConditionActive",
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "isUpdateable",
@@ -84,8 +100,8 @@ export interface BaseConditionInterface extends Interface {
     values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "strategyValid",
-    values: [AddressLike, BigNumberish, BigNumberish]
+    functionFragment: "supportsInterface",
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "updateCondition",
@@ -101,10 +117,6 @@ export interface BaseConditionInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "automationValid",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "automations",
     data: BytesLike
   ): Result;
@@ -113,11 +125,19 @@ export interface BaseConditionInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "conditionActive",
+    functionFragment: "conditionInAutomation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "conditionInStrategy",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "deleteCondition",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isConditionActive",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -134,13 +154,98 @@ export interface BaseConditionInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "strategies", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "strategyValid",
+    functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "updateCondition",
     data: BytesLike
   ): Result;
+}
+
+export namespace AutomationAddedEvent {
+  export type InputTuple = [
+    wallet: AddressLike,
+    id: BigNumberish,
+    automation: BigNumberish
+  ];
+  export type OutputTuple = [wallet: string, id: bigint, automation: bigint];
+  export interface OutputObject {
+    wallet: string;
+    id: bigint;
+    automation: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace AutomationRemovedEvent {
+  export type InputTuple = [
+    wallet: AddressLike,
+    id: BigNumberish,
+    automation: BigNumberish
+  ];
+  export type OutputTuple = [wallet: string, id: bigint, automation: bigint];
+  export interface OutputObject {
+    wallet: string;
+    id: bigint;
+    automation: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace ConditionDeletedEvent {
+  export type InputTuple = [wallet: AddressLike, id: BigNumberish];
+  export type OutputTuple = [wallet: string, id: bigint];
+  export interface OutputObject {
+    wallet: string;
+    id: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace StrategyAddedEvent {
+  export type InputTuple = [
+    wallet: AddressLike,
+    id: BigNumberish,
+    strategy: BigNumberish
+  ];
+  export type OutputTuple = [wallet: string, id: bigint, strategy: bigint];
+  export interface OutputObject {
+    wallet: string;
+    id: bigint;
+    strategy: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace StrategyRemovedEvent {
+  export type InputTuple = [
+    wallet: AddressLike,
+    id: BigNumberish,
+    strategy: BigNumberish
+  ];
+  export type OutputTuple = [wallet: string, id: bigint, strategy: bigint];
+  export interface OutputObject {
+    wallet: string;
+    id: bigint;
+    strategy: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export interface BaseCondition extends BaseContract {
@@ -187,7 +292,7 @@ export interface BaseCondition extends BaseContract {
   ): Promise<this>;
 
   addAutomationToCondition: TypedContractMethod<
-    [id: BigNumberish, action: BigNumberish],
+    [id: BigNumberish, automation: BigNumberish],
     [boolean],
     "nonpayable"
   >;
@@ -196,12 +301,6 @@ export interface BaseCondition extends BaseContract {
     [id: BigNumberish, strategy: BigNumberish],
     [boolean],
     "nonpayable"
-  >;
-
-  automationValid: TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
-    [boolean],
-    "view"
   >;
 
   automations: TypedContractMethod<
@@ -216,16 +315,28 @@ export interface BaseCondition extends BaseContract {
     "view"
   >;
 
-  conditionActive: TypedContractMethod<
-    [_wallet: AddressLike, _id: BigNumberish],
+  conditionInAutomation: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, automationId: BigNumberish],
+    [boolean],
+    "view"
+  >;
+
+  conditionInStrategy: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, strategyId: BigNumberish],
     [boolean],
     "view"
   >;
 
   deleteCondition: TypedContractMethod<
-    [_id: BigNumberish],
+    [id: BigNumberish],
     [void],
     "nonpayable"
+  >;
+
+  isConditionActive: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [boolean],
+    "view"
   >;
 
   isUpdateable: TypedContractMethod<
@@ -252,14 +363,14 @@ export interface BaseCondition extends BaseContract {
     "view"
   >;
 
-  strategyValid: TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, strategy: BigNumberish],
+  supportsInterface: TypedContractMethod<
+    [interfaceId: BytesLike],
     [boolean],
     "view"
   >;
 
   updateCondition: TypedContractMethod<
-    [arg0: BigNumberish],
+    [id: BigNumberish],
     [boolean],
     "nonpayable"
   >;
@@ -271,7 +382,7 @@ export interface BaseCondition extends BaseContract {
   getFunction(
     nameOrSignature: "addAutomationToCondition"
   ): TypedContractMethod<
-    [id: BigNumberish, action: BigNumberish],
+    [id: BigNumberish, automation: BigNumberish],
     [boolean],
     "nonpayable"
   >;
@@ -281,13 +392,6 @@ export interface BaseCondition extends BaseContract {
     [id: BigNumberish, strategy: BigNumberish],
     [boolean],
     "nonpayable"
-  >;
-  getFunction(
-    nameOrSignature: "automationValid"
-  ): TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
-    [boolean],
-    "view"
   >;
   getFunction(
     nameOrSignature: "automations"
@@ -304,15 +408,29 @@ export interface BaseCondition extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "conditionActive"
+    nameOrSignature: "conditionInAutomation"
   ): TypedContractMethod<
-    [_wallet: AddressLike, _id: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish, automationId: BigNumberish],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "conditionInStrategy"
+  ): TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, strategyId: BigNumberish],
     [boolean],
     "view"
   >;
   getFunction(
     nameOrSignature: "deleteCondition"
-  ): TypedContractMethod<[_id: BigNumberish], [void], "nonpayable">;
+  ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "isConditionActive"
+  ): TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [boolean],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "isUpdateable"
   ): TypedContractMethod<
@@ -342,15 +460,102 @@ export interface BaseCondition extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "strategyValid"
-  ): TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, strategy: BigNumberish],
-    [boolean],
-    "view"
-  >;
+    nameOrSignature: "supportsInterface"
+  ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "updateCondition"
-  ): TypedContractMethod<[arg0: BigNumberish], [boolean], "nonpayable">;
+  ): TypedContractMethod<[id: BigNumberish], [boolean], "nonpayable">;
 
-  filters: {};
+  getEvent(
+    key: "AutomationAdded"
+  ): TypedContractEvent<
+    AutomationAddedEvent.InputTuple,
+    AutomationAddedEvent.OutputTuple,
+    AutomationAddedEvent.OutputObject
+  >;
+  getEvent(
+    key: "AutomationRemoved"
+  ): TypedContractEvent<
+    AutomationRemovedEvent.InputTuple,
+    AutomationRemovedEvent.OutputTuple,
+    AutomationRemovedEvent.OutputObject
+  >;
+  getEvent(
+    key: "ConditionDeleted"
+  ): TypedContractEvent<
+    ConditionDeletedEvent.InputTuple,
+    ConditionDeletedEvent.OutputTuple,
+    ConditionDeletedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StrategyAdded"
+  ): TypedContractEvent<
+    StrategyAddedEvent.InputTuple,
+    StrategyAddedEvent.OutputTuple,
+    StrategyAddedEvent.OutputObject
+  >;
+  getEvent(
+    key: "StrategyRemoved"
+  ): TypedContractEvent<
+    StrategyRemovedEvent.InputTuple,
+    StrategyRemovedEvent.OutputTuple,
+    StrategyRemovedEvent.OutputObject
+  >;
+
+  filters: {
+    "AutomationAdded(address,uint32,uint32)": TypedContractEvent<
+      AutomationAddedEvent.InputTuple,
+      AutomationAddedEvent.OutputTuple,
+      AutomationAddedEvent.OutputObject
+    >;
+    AutomationAdded: TypedContractEvent<
+      AutomationAddedEvent.InputTuple,
+      AutomationAddedEvent.OutputTuple,
+      AutomationAddedEvent.OutputObject
+    >;
+
+    "AutomationRemoved(address,uint32,uint32)": TypedContractEvent<
+      AutomationRemovedEvent.InputTuple,
+      AutomationRemovedEvent.OutputTuple,
+      AutomationRemovedEvent.OutputObject
+    >;
+    AutomationRemoved: TypedContractEvent<
+      AutomationRemovedEvent.InputTuple,
+      AutomationRemovedEvent.OutputTuple,
+      AutomationRemovedEvent.OutputObject
+    >;
+
+    "ConditionDeleted(address,uint32)": TypedContractEvent<
+      ConditionDeletedEvent.InputTuple,
+      ConditionDeletedEvent.OutputTuple,
+      ConditionDeletedEvent.OutputObject
+    >;
+    ConditionDeleted: TypedContractEvent<
+      ConditionDeletedEvent.InputTuple,
+      ConditionDeletedEvent.OutputTuple,
+      ConditionDeletedEvent.OutputObject
+    >;
+
+    "StrategyAdded(address,uint32,uint32)": TypedContractEvent<
+      StrategyAddedEvent.InputTuple,
+      StrategyAddedEvent.OutputTuple,
+      StrategyAddedEvent.OutputObject
+    >;
+    StrategyAdded: TypedContractEvent<
+      StrategyAddedEvent.InputTuple,
+      StrategyAddedEvent.OutputTuple,
+      StrategyAddedEvent.OutputObject
+    >;
+
+    "StrategyRemoved(address,uint32,uint32)": TypedContractEvent<
+      StrategyRemovedEvent.InputTuple,
+      StrategyRemovedEvent.OutputTuple,
+      StrategyRemovedEvent.OutputObject
+    >;
+    StrategyRemoved: TypedContractEvent<
+      StrategyRemovedEvent.InputTuple,
+      StrategyRemovedEvent.OutputTuple,
+      StrategyRemovedEvent.OutputObject
+    >;
+  };
 }

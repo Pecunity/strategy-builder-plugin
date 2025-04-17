@@ -34,6 +34,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
+      name: "IERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165__factory>;
+    getContractFactory(
       name: "IPyth",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPyth__factory>;
@@ -65,6 +69,10 @@ declare module "hardhat/types/runtime" {
       name: "FeeHandler",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FeeHandler__factory>;
+    getContractFactory(
+      name: "IAction",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAction__factory>;
     getContractFactory(
       name: "ICondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -156,6 +164,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
+      name: "IERC165",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165>;
+    getContractAt(
       name: "IPyth",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -195,6 +208,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.FeeHandler>;
+    getContractAt(
+      name: "IAction",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAction>;
     getContractAt(
       name: "ICondition",
       address: string | ethers.Addressable,
@@ -297,6 +315,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20>;
     deployContract(
+      name: "IERC165",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC165>;
+    deployContract(
       name: "IPyth",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPyth>;
@@ -328,6 +350,10 @@ declare module "hardhat/types/runtime" {
       name: "FeeHandler",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FeeHandler>;
+    deployContract(
+      name: "IAction",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAction>;
     deployContract(
       name: "ICondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -419,6 +445,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20>;
     deployContract(
+      name: "IERC165",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC165>;
+    deployContract(
       name: "IPyth",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -458,6 +489,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FeeHandler>;
+    deployContract(
+      name: "IAction",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IAction>;
     deployContract(
       name: "ICondition",
       args: any[],

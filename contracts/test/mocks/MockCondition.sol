@@ -13,6 +13,8 @@ contract MockCondition is BaseCondition {
 
     function addCondition(uint32 id, Condition calldata condition) external {
         conditions[msg.sender][id] = condition;
+
+        _addCondition(id);
     }
 
     function checkCondition(address wallet, uint32 id) public view override returns (uint8) {

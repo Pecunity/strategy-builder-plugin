@@ -47,6 +47,31 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "InvalidActionTarget",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidCondition",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidConditionAddress",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidID",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidNextStepIndex",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "PaymentTokenNotAllowed",
     type: "error",
   },

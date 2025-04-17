@@ -26,14 +26,17 @@ export interface IConditionInterface extends Interface {
     nameOrSignature:
       | "addAutomationToCondition"
       | "addStrategyToCondition"
-      | "automationValid"
+      | "automations"
       | "checkCondition"
-      | "conditionActive"
+      | "conditionInAutomation"
+      | "conditionInStrategy"
       | "deleteCondition"
+      | "isConditionActive"
       | "isUpdateable"
       | "removeAutomationFromCondition"
       | "removeStrategyFromCondition"
-      | "strategyValid"
+      | "strategies"
+      | "supportsInterface"
       | "updateCondition"
   ): FunctionFragment;
 
@@ -46,20 +49,28 @@ export interface IConditionInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "automationValid",
-    values: [AddressLike, BigNumberish, BigNumberish]
+    functionFragment: "automations",
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "checkCondition",
     values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "conditionActive",
-    values: [AddressLike, BigNumberish]
+    functionFragment: "conditionInAutomation",
+    values: [AddressLike, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "conditionInStrategy",
+    values: [AddressLike, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "deleteCondition",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isConditionActive",
+    values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "isUpdateable",
@@ -74,8 +85,12 @@ export interface IConditionInterface extends Interface {
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "strategyValid",
-    values: [AddressLike, BigNumberish, BigNumberish]
+    functionFragment: "strategies",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "supportsInterface",
+    values: [BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "updateCondition",
@@ -91,7 +106,7 @@ export interface IConditionInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "automationValid",
+    functionFragment: "automations",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -99,11 +114,19 @@ export interface IConditionInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "conditionActive",
+    functionFragment: "conditionInAutomation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "conditionInStrategy",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "deleteCondition",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isConditionActive",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -118,8 +141,9 @@ export interface IConditionInterface extends Interface {
     functionFragment: "removeStrategyFromCondition",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "strategies", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "strategyValid",
+    functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -172,20 +196,20 @@ export interface ICondition extends BaseContract {
   ): Promise<this>;
 
   addAutomationToCondition: TypedContractMethod<
-    [id: BigNumberish, action: BigNumberish],
+    [id: BigNumberish, automation: BigNumberish],
     [boolean],
     "nonpayable"
   >;
 
   addStrategyToCondition: TypedContractMethod<
-    [id: BigNumberish, action: BigNumberish],
+    [id: BigNumberish, strategy: BigNumberish],
     [boolean],
     "nonpayable"
   >;
 
-  automationValid: TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
-    [boolean],
+  automations: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [bigint[]],
     "view"
   >;
 
@@ -195,8 +219,14 @@ export interface ICondition extends BaseContract {
     "view"
   >;
 
-  conditionActive: TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish],
+  conditionInAutomation: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, automationId: BigNumberish],
+    [boolean],
+    "view"
+  >;
+
+  conditionInStrategy: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, strategyId: BigNumberish],
     [boolean],
     "view"
   >;
@@ -205,6 +235,12 @@ export interface ICondition extends BaseContract {
     [id: BigNumberish],
     [void],
     "nonpayable"
+  >;
+
+  isConditionActive: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [boolean],
+    "view"
   >;
 
   isUpdateable: TypedContractMethod<
@@ -225,8 +261,14 @@ export interface ICondition extends BaseContract {
     "nonpayable"
   >;
 
-  strategyValid: TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, strategy: BigNumberish],
+  strategies: TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [bigint[]],
+    "view"
+  >;
+
+  supportsInterface: TypedContractMethod<
+    [interfaceId: BytesLike],
     [boolean],
     "view"
   >;
@@ -244,22 +286,22 @@ export interface ICondition extends BaseContract {
   getFunction(
     nameOrSignature: "addAutomationToCondition"
   ): TypedContractMethod<
-    [id: BigNumberish, action: BigNumberish],
+    [id: BigNumberish, automation: BigNumberish],
     [boolean],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "addStrategyToCondition"
   ): TypedContractMethod<
-    [id: BigNumberish, action: BigNumberish],
+    [id: BigNumberish, strategy: BigNumberish],
     [boolean],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "automationValid"
+    nameOrSignature: "automations"
   ): TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, action: BigNumberish],
-    [boolean],
+    [wallet: AddressLike, id: BigNumberish],
+    [bigint[]],
     "view"
   >;
   getFunction(
@@ -270,15 +312,29 @@ export interface ICondition extends BaseContract {
     "view"
   >;
   getFunction(
-    nameOrSignature: "conditionActive"
+    nameOrSignature: "conditionInAutomation"
   ): TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish, automationId: BigNumberish],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "conditionInStrategy"
+  ): TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish, strategyId: BigNumberish],
     [boolean],
     "view"
   >;
   getFunction(
     nameOrSignature: "deleteCondition"
   ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "isConditionActive"
+  ): TypedContractMethod<
+    [wallet: AddressLike, id: BigNumberish],
+    [boolean],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "isUpdateable"
   ): TypedContractMethod<
@@ -301,12 +357,15 @@ export interface ICondition extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "strategyValid"
+    nameOrSignature: "strategies"
   ): TypedContractMethod<
-    [wallet: AddressLike, id: BigNumberish, strategy: BigNumberish],
-    [boolean],
+    [wallet: AddressLike, id: BigNumberish],
+    [bigint[]],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "supportsInterface"
+  ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "updateCondition"
   ): TypedContractMethod<[id: BigNumberish], [boolean], "nonpayable">;

@@ -18,7 +18,7 @@ const _abi = [
       },
       {
         internalType: "uint32",
-        name: "action",
+        name: "automation",
         type: "uint32",
       },
     ],
@@ -42,7 +42,7 @@ const _abi = [
       },
       {
         internalType: "uint32",
-        name: "action",
+        name: "strategy",
         type: "uint32",
       },
     ],
@@ -69,18 +69,13 @@ const _abi = [
         name: "id",
         type: "uint32",
       },
-      {
-        internalType: "uint32",
-        name: "action",
-        type: "uint32",
-      },
     ],
-    name: "automationValid",
+    name: "automations",
     outputs: [
       {
-        internalType: "bool",
+        internalType: "uint32[]",
         name: "",
-        type: "bool",
+        type: "uint32[]",
       },
     ],
     stateMutability: "view",
@@ -122,8 +117,42 @@ const _abi = [
         name: "id",
         type: "uint32",
       },
+      {
+        internalType: "uint32",
+        name: "automationId",
+        type: "uint32",
+      },
     ],
-    name: "conditionActive",
+    name: "conditionInAutomation",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "uint32",
+        name: "id",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "strategyId",
+        type: "uint32",
+      },
+    ],
+    name: "conditionInStrategy",
     outputs: [
       {
         internalType: "bool",
@@ -145,6 +174,30 @@ const _abi = [
     name: "deleteCondition",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
+        internalType: "uint32",
+        name: "id",
+        type: "uint32",
+      },
+    ],
+    name: "isConditionActive",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -231,13 +284,27 @@ const _abi = [
         name: "id",
         type: "uint32",
       },
+    ],
+    name: "strategies",
+    outputs: [
       {
-        internalType: "uint32",
-        name: "strategy",
-        type: "uint32",
+        internalType: "uint32[]",
+        name: "",
+        type: "uint32[]",
       },
     ],
-    name: "strategyValid",
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes4",
+        name: "interfaceId",
+        type: "bytes4",
+      },
+    ],
+    name: "supportsInterface",
     outputs: [
       {
         internalType: "bool",

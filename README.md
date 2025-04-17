@@ -1,5 +1,7 @@
 # StrategyBuilderPlugin - ERC6900 Standard
 
+![Octo DeFi Logo](./assets/octo-defi-logo.png)
+
 ## Overview
 
 The **StrategyBuilderPlugin** is a modular smart contract built on the **ERC6900 standard**, designed to automate and execute **advanced DeFi strategies** seamlessly. This plugin integrates with modular smart accounts, allowing users to create, manage, and automate complex financial strategies such as **vault management, borrowing, leveraged yield farming, and more**.

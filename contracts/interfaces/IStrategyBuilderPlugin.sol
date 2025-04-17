@@ -64,6 +64,7 @@ interface IStrategyBuilderPlugin {
     // ┃    Errors       ┃
     // ┗━━━━━━━━━━━━━━━━━┛
 
+    error InvalidID();
     error StrategyDoesNotExist();
     error StrategyAlreadyExist();
     error AutomationNotExecutable(address condition, uint32 id);
@@ -75,6 +76,10 @@ interface IStrategyBuilderPlugin {
     error ChangeStrategyInConditionFailed();
     error UpdateConditionFailed(address condition, uint32 id);
     error PaymentTokenNotAllowed();
+    error InvalidNextStepIndex();
+    error InvalidActionTarget();
+    error InvalidConditionAddress();
+    error InvalidCondition();
 
     // ┏━━━━━━━━━━━━━━━━━━┓
     // ┃     Events       ┃
