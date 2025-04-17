@@ -32,6 +32,8 @@ export type { CoinOrERC20BalanceCondition } from "./contracts/condition/examples
 export { CoinOrERC20BalanceCondition__factory } from "./factories/contracts/condition/examples/CoinOrERC20BalanceCondition__factory";
 export type { ICoinOrERC20BalanceCondition } from "./contracts/condition/examples/interfaces/ICoinOrERC20BalanceCondition";
 export { ICoinOrERC20BalanceCondition__factory } from "./factories/contracts/condition/examples/interfaces/ICoinOrERC20BalanceCondition__factory";
+export type { ITimeCondition } from "./contracts/condition/examples/interfaces/ITimeCondition";
+export { ITimeCondition__factory } from "./factories/contracts/condition/examples/interfaces/ITimeCondition__factory";
 export type { TimeCondition } from "./contracts/condition/examples/TimeCondition";
 export { TimeCondition__factory } from "./factories/contracts/condition/examples/TimeCondition__factory";
 export type { FeeController } from "./contracts/FeeController";

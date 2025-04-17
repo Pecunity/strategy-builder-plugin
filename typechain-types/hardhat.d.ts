@@ -58,6 +58,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ICoinOrERC20BalanceCondition__factory>;
     getContractFactory(
+      name: "ITimeCondition",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ITimeCondition__factory>;
+    getContractFactory(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TimeCondition__factory>;
@@ -194,6 +198,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
     getContractAt(
+      name: "ITimeCondition",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ITimeCondition>;
+    getContractAt(
       name: "TimeCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -339,6 +348,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
     deployContract(
+      name: "ITimeCondition",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITimeCondition>;
+    deployContract(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TimeCondition>;
@@ -474,6 +487,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
+    deployContract(
+      name: "ITimeCondition",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITimeCondition>;
     deployContract(
       name: "TimeCondition",
       args: any[],
