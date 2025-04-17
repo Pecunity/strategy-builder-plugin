@@ -463,7 +463,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
             if (!action.target.isContract()) {
                 revert InvalidActionTarget();
             }
-            if (IERC165(action.target).supportsInterface(type(IAction).interfaceId)) {
+            if (!IERC165(action.target).supportsInterface(type(IAction).interfaceId)) {
                 revert InvalidActionTarget();
             }
         } else {

@@ -2,12 +2,8 @@
 pragma solidity ^0.8.26;
 
 import {Test, console} from "forge-std/Test.sol";
-import {
-    TimeCondition,
-    TimeCondition__ExecutionTimeNotValid,
-    TimeCondition__DeltaNotValid,
-    TimeCondition__ConditionsIsNotUpdateable
-} from "contracts/condition/examples/TimeCondition.sol";
+import {TimeCondition} from "contracts/condition/examples/TimeCondition.sol";
+import {ITimeCondition} from "contracts/condition/examples/interfaces/ITimeCondition.sol";
 
 contract TimeConditionTest is Test {
     TimeCondition public timeCondition;
@@ -30,7 +26,7 @@ contract TimeConditionTest is Test {
 
     function testAddValidCondition() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: true});
+            ITimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: true});
 
         vm.expectEmit(true, true, true, true);
         emit ConditionAdded(conditionId, wallet, condition);
@@ -45,23 +41,23 @@ contract TimeConditionTest is Test {
 
     function testCannotAddConditionWithPastExecution() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: block.timestamp - 1, delta: MINIMUM_DELTA, updateable: true});
+            ITimeCondition.Condition({execution: block.timestamp - 1, delta: MINIMUM_DELTA, updateable: true});
 
-        vm.expectRevert(TimeCondition__ExecutionTimeNotValid.selector);
+        vm.expectRevert(ITimeCondition.ExecutionTimeNotValid.selector);
         timeCondition.addCondition(conditionId, condition);
     }
 
     function testCannotAddConditionWithInvalidDelta() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA - 1, updateable: true});
+            ITimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA - 1, updateable: true});
 
-        vm.expectRevert(TimeCondition__DeltaNotValid.selector);
+        vm.expectRevert(ITimeCondition.DeltaNotValid.selector);
         timeCondition.addCondition(conditionId, condition);
     }
 
     function testDeleteCondition() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: true});
+            ITimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: true});
 
         timeCondition.addCondition(conditionId, condition);
 
@@ -76,7 +72,7 @@ contract TimeConditionTest is Test {
 
     function testUpdateCondition() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: block.timestamp + 1 hours, delta: MINIMUM_DELTA, updateable: true});
+            ITimeCondition.Condition({execution: block.timestamp + 1 hours, delta: MINIMUM_DELTA, updateable: true});
 
         timeCondition.addCondition(conditionId, condition);
 
@@ -95,17 +91,17 @@ contract TimeConditionTest is Test {
 
     function testCannotUpdateBeforeExecutionTime() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: block.timestamp + 1 hours, delta: MINIMUM_DELTA, updateable: true});
+            ITimeCondition.Condition({execution: block.timestamp + 1 hours, delta: MINIMUM_DELTA, updateable: true});
 
         timeCondition.addCondition(conditionId, condition);
 
-        vm.expectRevert(TimeCondition__ConditionsIsNotUpdateable.selector);
+        vm.expectRevert(ITimeCondition.ExecutionTimeNotValid.selector);
         timeCondition.updateCondition(conditionId);
     }
 
     function testCheckCondition() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: block.timestamp + 1 hours, delta: MINIMUM_DELTA, updateable: true});
+            ITimeCondition.Condition({execution: block.timestamp + 1 hours, delta: MINIMUM_DELTA, updateable: true});
 
         timeCondition.addCondition(conditionId, condition);
 
@@ -123,13 +119,13 @@ contract TimeConditionTest is Test {
 
     function testIsUpdateable() public {
         TimeCondition.Condition memory condition =
-            TimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: true});
+            ITimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: true});
 
         timeCondition.addCondition(conditionId, condition);
         assertTrue(timeCondition.isUpdateable(wallet, conditionId));
 
         TimeCondition.Condition memory nonUpdateableCondition =
-            TimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: false});
+            ITimeCondition.Condition({execution: FUTURE_TIMESTAMP, delta: MINIMUM_DELTA, updateable: false});
 
         timeCondition.addCondition(2, nonUpdateableCondition);
         assertFalse(timeCondition.isUpdateable(wallet, 2));
