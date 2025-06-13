@@ -1,6 +1,6 @@
 {
   "name": "strategy-builder-plugin",
-  "version": "1.1.1",
+  "version": "1.1.0",
   "description": "This is  an ERC-6900 compatible plugin called StrategyBuilderPlugin, built in Foundry. It has one function that can be called through a user operation, called `increment`. In `/src` you will find this plugin, documented so you can understand how it works in detail.",
   "main": "index.js",
   "directories": {
