@@ -80,6 +80,7 @@ interface IStrategyBuilderPlugin {
     error InvalidActionTarget();
     error InvalidConditionAddress();
     error InvalidCondition();
+    error PluginExecutionFailed();
 
     // ┏━━━━━━━━━━━━━━━━━━┓
     // ┃     Events       ┃

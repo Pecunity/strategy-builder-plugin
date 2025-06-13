@@ -114,6 +114,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.StrategyBuilderPlugin__factory>;
     getContractFactory(
+      name: "MockAction",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockAction__factory>;
+    getContractFactory(
       name: "MockCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MockCondition__factory>;
@@ -121,6 +125,10 @@ declare module "hardhat/types/runtime" {
       name: "Token",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Token__factory>;
+    getContractFactory(
+      name: "WrongInterfaceContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.WrongInterfaceContract__factory>;
     getContractFactory(
       name: "IERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -268,6 +276,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.StrategyBuilderPlugin>;
     getContractAt(
+      name: "MockAction",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockAction>;
+    getContractAt(
       name: "MockCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -277,6 +290,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.Token>;
+    getContractAt(
+      name: "WrongInterfaceContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.WrongInterfaceContract>;
     getContractAt(
       name: "IERC165",
       address: string | ethers.Addressable,
@@ -404,6 +422,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderPlugin>;
     deployContract(
+      name: "MockAction",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockAction>;
+    deployContract(
       name: "MockCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockCondition>;
@@ -411,6 +433,10 @@ declare module "hardhat/types/runtime" {
       name: "Token",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Token>;
+    deployContract(
+      name: "WrongInterfaceContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.WrongInterfaceContract>;
     deployContract(
       name: "IERC165",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -558,6 +584,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderPlugin>;
     deployContract(
+      name: "MockAction",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockAction>;
+    deployContract(
       name: "MockCondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -567,6 +598,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Token>;
+    deployContract(
+      name: "WrongInterfaceContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.WrongInterfaceContract>;
     deployContract(
       name: "IERC165",
       args: any[],

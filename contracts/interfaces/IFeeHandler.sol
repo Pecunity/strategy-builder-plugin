@@ -49,12 +49,16 @@ interface IFeeHandler {
     /// @param amount Total fee amount.
     /// @param beneficiary Address receiving the beneficiary share.
     /// @param creator Address receiving the creator share.
-    function handleFee(address token, uint256 amount, address beneficiary, address creator) external;
+    /// @return totalFee Total fee amount.
+    function handleFee(address token, uint256 amount, address beneficiary, address creator)
+        external
+        returns (uint256);
 
     /// @notice Handles fee distribution for native ETH payments.
     /// @param beneficiary Address receiving the beneficiary share.
     /// @param creator Address receiving the creator share.
-    function handleFeeETH(address beneficiary, address creator) external payable;
+    /// @return totalFee Total fee amount.
+    function handleFeeETH(address beneficiary, address creator) external payable returns (uint256);
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃            Admin Functions          ┃
@@ -63,10 +67,16 @@ interface IFeeHandler {
     /// @notice Activates primary token for fee discounts.
     /// @param token Address of the primary token.
     /// @param treasury Address of the treasury.
+    /// @param primaryTokenBurn The percenetage of primary token discount.
     /// @param primaryTokenBurn The percenetage of primary token burned.
     /// @param tokenBurn The percentage of token burned.
-    function activatePrimaryToken(address token, address treasury, uint256 primaryTokenBurn, uint256 tokenBurn)
-        external;
+    function activatePrimaryToken(
+        address token,
+        address treasury,
+        uint256 primaryTokenDiscount,
+        uint256 primaryTokenBurn,
+        uint256 tokenBurn
+    ) external;
 
     /// @notice Updates vault address.
     /// @param vault New vault address.

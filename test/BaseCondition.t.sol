@@ -22,7 +22,8 @@ contract BaseConditionTest is Test {
         uint32 conditionId = 22;
 
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(conditionId, _condition);
 
         assertTrue(condition.isConditionActive(wallet, conditionId));
@@ -41,7 +42,8 @@ contract BaseConditionTest is Test {
     function test_updateCondition_ReturnFalseAsDefault() external {
         uint32 conditionId = 22;
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(conditionId, _condition);
 
         vm.prank(wallet);
@@ -54,7 +56,8 @@ contract BaseConditionTest is Test {
     function test_deleteCondition_Revert_ConditionIsInUse() external {
         uint32 conditionId = 22;
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(conditionId, _condition);
 
         vm.prank(wallet);
@@ -73,7 +76,8 @@ contract BaseConditionTest is Test {
         vm.assume(_id > 0);
 
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(_id, _condition);
         _;
     }
@@ -174,7 +178,8 @@ contract BaseConditionTest is Test {
         // Add Condition
         uint32 conditionId = 22;
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(conditionId, _condition);
 
         //Add strategies to condition
@@ -199,7 +204,8 @@ contract BaseConditionTest is Test {
         // Add Condition
         uint32 conditionId = 22;
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(conditionId, _condition);
 
         vm.expectRevert(BaseCondition.ConditionNotInUseOfStrategy.selector);
@@ -217,7 +223,8 @@ contract BaseConditionTest is Test {
         // Add Condition
         uint32 conditionId = 22;
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(conditionId, _condition);
         //Add automations to condition
         for (uint256 i = 1; i <= automationNum; i++) {
@@ -241,7 +248,8 @@ contract BaseConditionTest is Test {
         // Add Condition
         uint32 conditionId = 22;
         vm.prank(wallet);
-        MockCondition.Condition memory _condition = MockCondition.Condition({result: true, active: true});
+        MockCondition.Condition memory _condition =
+            MockCondition.Condition({result: true, active: true, updateable: false});
         condition.addCondition(conditionId, _condition);
         vm.expectRevert(BaseCondition.ConditionNotInUseOfAutomation.selector);
         vm.prank(wallet);

@@ -51,7 +51,7 @@ export interface IFeeHandlerInterface extends Interface {
 
   encodeFunctionData(
     functionFragment: "activatePrimaryToken",
-    values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "handleFee",
@@ -335,6 +335,7 @@ export interface IFeeHandler extends BaseContract {
     [
       token: AddressLike,
       treasury: AddressLike,
+      primaryTokenDiscount: BigNumberish,
       primaryTokenBurn: BigNumberish,
       tokenBurn: BigNumberish
     ],
@@ -349,13 +350,13 @@ export interface IFeeHandler extends BaseContract {
       beneficiary: AddressLike,
       creator: AddressLike
     ],
-    [void],
+    [bigint],
     "nonpayable"
   >;
 
   handleFeeETH: TypedContractMethod<
     [beneficiary: AddressLike, creator: AddressLike],
-    [void],
+    [bigint],
     "payable"
   >;
 
@@ -393,6 +394,7 @@ export interface IFeeHandler extends BaseContract {
     [
       token: AddressLike,
       treasury: AddressLike,
+      primaryTokenDiscount: BigNumberish,
       primaryTokenBurn: BigNumberish,
       tokenBurn: BigNumberish
     ],
@@ -408,14 +410,14 @@ export interface IFeeHandler extends BaseContract {
       beneficiary: AddressLike,
       creator: AddressLike
     ],
-    [void],
+    [bigint],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "handleFeeETH"
   ): TypedContractMethod<
     [beneficiary: AddressLike, creator: AddressLike],
-    [void],
+    [bigint],
     "payable"
   >;
   getFunction(

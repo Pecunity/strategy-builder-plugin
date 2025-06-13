@@ -9,4 +9,7 @@ interface IAction is IERC165 {
         uint256 value;
         bytes data;
     }
+
+    /// @notice the identifier should be equal to strategy version. version 1 => bytes4(1)
+    function identifier() external pure returns (bytes4);
 }

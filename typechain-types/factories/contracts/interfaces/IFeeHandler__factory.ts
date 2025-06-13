@@ -276,6 +276,11 @@ const _abi = [
       },
       {
         internalType: "uint256",
+        name: "primaryTokenDiscount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
         name: "primaryTokenBurn",
         type: "uint256",
       },
@@ -314,7 +319,13 @@ const _abi = [
       },
     ],
     name: "handleFee",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -332,7 +343,13 @@ const _abi = [
       },
     ],
     name: "handleFeeETH",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "payable",
     type: "function",
   },

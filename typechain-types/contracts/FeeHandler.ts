@@ -38,6 +38,7 @@ export interface FeeHandlerInterface extends Interface {
       | "primaryToken"
       | "primaryTokenActive"
       | "primaryTokenBurn"
+      | "primaryTokenDiscount"
       | "reduction"
       | "renounceOwnership"
       | "tokenAllowed"
@@ -75,7 +76,7 @@ export interface FeeHandlerInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "activatePrimaryToken",
-    values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "beneficiaryPercentage",
@@ -108,6 +109,10 @@ export interface FeeHandlerInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "primaryTokenBurn",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "primaryTokenDiscount",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "reduction", values?: undefined): string;
@@ -190,6 +195,10 @@ export interface FeeHandlerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "primaryTokenBurn",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "primaryTokenDiscount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "reduction", data: BytesLike): Result;
@@ -464,6 +473,7 @@ export interface FeeHandler extends BaseContract {
     [
       _token: AddressLike,
       _burnerAddress: AddressLike,
+      _primaryTokenDiscount: BigNumberish,
       _primaryTokenBurn: BigNumberish,
       _tokenBurn: BigNumberish
     ],
@@ -484,13 +494,13 @@ export interface FeeHandler extends BaseContract {
       beneficiary: AddressLike,
       creator: AddressLike
     ],
-    [void],
+    [bigint],
     "nonpayable"
   >;
 
   handleFeeETH: TypedContractMethod<
     [beneficiary: AddressLike, creator: AddressLike],
-    [void],
+    [bigint],
     "payable"
   >;
 
@@ -501,6 +511,8 @@ export interface FeeHandler extends BaseContract {
   primaryTokenActive: TypedContractMethod<[], [boolean], "view">;
 
   primaryTokenBurn: TypedContractMethod<[], [bigint], "view">;
+
+  primaryTokenDiscount: TypedContractMethod<[], [bigint], "view">;
 
   reduction: TypedContractMethod<[], [string], "view">;
 
@@ -562,6 +574,7 @@ export interface FeeHandler extends BaseContract {
     [
       _token: AddressLike,
       _burnerAddress: AddressLike,
+      _primaryTokenDiscount: BigNumberish,
       _primaryTokenBurn: BigNumberish,
       _tokenBurn: BigNumberish
     ],
@@ -586,14 +599,14 @@ export interface FeeHandler extends BaseContract {
       beneficiary: AddressLike,
       creator: AddressLike
     ],
-    [void],
+    [bigint],
     "nonpayable"
   >;
   getFunction(
     nameOrSignature: "handleFeeETH"
   ): TypedContractMethod<
     [beneficiary: AddressLike, creator: AddressLike],
-    [void],
+    [bigint],
     "payable"
   >;
   getFunction(
@@ -607,6 +620,9 @@ export interface FeeHandler extends BaseContract {
   ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
     nameOrSignature: "primaryTokenBurn"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "primaryTokenDiscount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "reduction"

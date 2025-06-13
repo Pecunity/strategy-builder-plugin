@@ -44,6 +44,9 @@ contract FeeHandler is Ownable, IFeeHandler {
     /// @notice Percentage share for the vault.
     uint256 public vaultPercentage;
 
+    /// @notice Discount in percentage when pay with primary token
+    uint256 public primaryTokenDiscount;
+
     /// @notice Percentage of primary token burned.
     uint256 public primaryTokenBurn;
 
@@ -71,7 +74,10 @@ contract FeeHandler is Ownable, IFeeHandler {
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     /// @inheritdoc IFeeHandler
-    function handleFee(address token, uint256 amount, address beneficiary, address creator) external {
+    function handleFee(address token, uint256 amount, address beneficiary, address creator)
+        external
+        returns (uint256)
+    {
         _validateAmount(amount);
         _validateBeneficiary(beneficiary);
 
@@ -99,10 +105,12 @@ contract FeeHandler is Ownable, IFeeHandler {
         emit FeeHandled(
             token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
         );
+
+        return totalFee + burnAmount;
     }
 
     /// @inheritdoc IFeeHandler
-    function handleFeeETH(address beneficiary, address creator) external payable {
+    function handleFeeETH(address beneficiary, address creator) external payable returns (uint256) {
         if (!allowedTokens[address(0)]) {
             revert TokenNotAllowed();
         }
@@ -129,23 +137,31 @@ contract FeeHandler is Ownable, IFeeHandler {
         }
 
         emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
+
+        return totalFee + burnAmount;
     }
 
     /// @inheritdoc IFeeHandler
-    function activatePrimaryToken(address _token, address _burnerAddress, uint256 _primaryTokenBurn, uint256 _tokenBurn)
-        external
-        onlyOwner
-    {
+    function activatePrimaryToken(
+        address _token,
+        address _burnerAddress,
+        uint256 _primaryTokenDiscount,
+        uint256 _primaryTokenBurn,
+        uint256 _tokenBurn
+    ) external onlyOwner {
         if (primaryTokenActive()) revert PrimaryTokenAlreadyActivated();
         _validateAddress(_token);
         _validateAddress(_burnerAddress);
 
         _validatePercentage(_primaryTokenBurn);
         _validatePercentage(_tokenBurn);
+        _validatePercentage(_primaryTokenDiscount);
+        if (_primaryTokenDiscount > MAX_PRIMARY_TOKEN_DISCOUNT) revert InvalidPercentage();
 
         primaryToken = _token;
         burnerAddress = _burnerAddress;
 
+        primaryTokenDiscount = _primaryTokenDiscount;
         primaryTokenBurn = _primaryTokenBurn;
         tokenBurn = _tokenBurn;
 
@@ -223,6 +239,9 @@ contract FeeHandler is Ownable, IFeeHandler {
 
         //The amount of burn varies if the primary token is used or not. If no primary token is activated, no tokens will be burned.
         if (primaryTokenActive()) {
+            if (token == primaryToken) {
+                totalFee = totalFee - totalFee * primaryTokenDiscount / PERCENTAGE_DIVISOR;
+            }
             burnAmount = token == primaryToken
                 ? (totalFee * primaryTokenBurn) / PERCENTAGE_DIVISOR
                 : (totalFee * tokenBurn) / PERCENTAGE_DIVISOR;

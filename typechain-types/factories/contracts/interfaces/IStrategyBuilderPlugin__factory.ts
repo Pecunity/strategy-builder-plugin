@@ -77,6 +77,11 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "PluginExecutionFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "StrategyAlreadyExist",
     type: "error",
   },

@@ -24,12 +24,17 @@ import type {
 } from "../../../common";
 
 export declare namespace MockCondition {
-  export type ConditionStruct = { result: boolean; active: boolean };
-
-  export type ConditionStructOutput = [result: boolean, active: boolean] & {
+  export type ConditionStruct = {
     result: boolean;
     active: boolean;
+    updateable: boolean;
   };
+
+  export type ConditionStructOutput = [
+    result: boolean,
+    active: boolean,
+    updateable: boolean
+  ] & { result: boolean; active: boolean; updateable: boolean };
 }
 
 export interface MockConditionInterface extends Interface {
@@ -364,7 +369,7 @@ export interface MockCondition extends BaseContract {
   >;
 
   isUpdateable: TypedContractMethod<
-    [arg0: AddressLike, arg1: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish],
     [boolean],
     "view"
   >;
@@ -393,11 +398,7 @@ export interface MockCondition extends BaseContract {
     "view"
   >;
 
-  updateCondition: TypedContractMethod<
-    [id: BigNumberish],
-    [boolean],
-    "nonpayable"
-  >;
+  updateCondition: TypedContractMethod<[id: BigNumberish], [boolean], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -465,7 +466,7 @@ export interface MockCondition extends BaseContract {
   getFunction(
     nameOrSignature: "isUpdateable"
   ): TypedContractMethod<
-    [arg0: AddressLike, arg1: BigNumberish],
+    [wallet: AddressLike, id: BigNumberish],
     [boolean],
     "view"
   >;
@@ -495,7 +496,7 @@ export interface MockCondition extends BaseContract {
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
   getFunction(
     nameOrSignature: "updateCondition"
-  ): TypedContractMethod<[id: BigNumberish], [boolean], "nonpayable">;
+  ): TypedContractMethod<[id: BigNumberish], [boolean], "view">;
 
   getEvent(
     key: "AutomationAdded"

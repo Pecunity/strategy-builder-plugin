@@ -95,7 +95,7 @@ contract TimeConditionTest is Test {
 
         timeCondition.addCondition(conditionId, condition);
 
-        vm.expectRevert(ITimeCondition.ExecutionTimeNotValid.selector);
+        vm.expectRevert(ITimeCondition.ConditionsIsNotUpdateable.selector);
         timeCondition.updateCondition(conditionId);
     }
 

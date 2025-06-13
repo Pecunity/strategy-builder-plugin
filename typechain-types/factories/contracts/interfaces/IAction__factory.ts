@@ -10,6 +10,19 @@ import type {
 
 const _abi = [
   {
+    inputs: [],
+    name: "identifier",
+    outputs: [
+      {
+        internalType: "bytes4",
+        name: "",
+        type: "bytes4",
+      },
+    ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "bytes4",

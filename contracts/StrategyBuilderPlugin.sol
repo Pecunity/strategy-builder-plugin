@@ -34,7 +34,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
 
     // metadata used by the pluginMetadata() method down below
     string public constant NAME = "Strategy Builder Plugin";
-    string public constant VERSION = "1.0.0";
+    string public constant VERSION = "1.1.1";
     string public constant AUTHOR = "3Blocks";
 
     // this is a constant used in the manifest, to reference our only dependency: the single owner plugin
@@ -294,7 +294,15 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     }
 
     function _execute(address _wallet, Action memory _action) internal {
-        bytes memory data = abi.encodePacked(_action.selector, _action.parameter);
+        bytes memory data;
+
+        // If selector is zero, pass an empty bytes array
+        if (_action.selector == bytes4(0)) {
+            data = "";
+        } else {
+            data = abi.encodePacked(_action.selector, _action.parameter);
+        }
+
         if (_action.actionType == ActionType.EXTERNAL) {
             IPluginExecutor(_wallet).executeFromPluginExternal(_action.target, _action.value, data);
         } else {
@@ -410,11 +418,13 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
             ? abi.encodeCall(IFeeHandler.handleFee, (paymentToken, feeInToken, beneficiary, creator))
             : abi.encodeCall(IFeeHandler.handleFeeETH, (beneficiary, creator));
 
-        IPluginExecutor(wallet).executeFromPluginExternal(
+        bytes memory paymentResult = IPluginExecutor(wallet).executeFromPluginExternal(
             address(feeHandler), paymentToken == address(0) ? feeInToken : 0, _handleFeeData
         );
 
-        return feeInToken;
+        uint256 totalFee = abi.decode(paymentResult, (uint256));
+
+        return totalFee;
     }
 
     function _updateCondition(address _wallet, Condition memory _condition, uint32 automationId) internal {
@@ -463,7 +473,11 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
             if (!action.target.isContract()) {
                 revert InvalidActionTarget();
             }
-            if (!IERC165(action.target).supportsInterface(type(IAction).interfaceId)) {
+            try IERC165(action.target).supportsInterface(type(IAction).interfaceId) returns (bool valid) {
+                if (!valid) {
+                    revert InvalidActionTarget();
+                }
+            } catch {
                 revert InvalidActionTarget();
             }
         } else {
@@ -478,8 +492,12 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
             if (!condition.conditionAddress.isContract()) {
                 revert InvalidConditionAddress();
             }
-
-            if (!IERC165(condition.conditionAddress).supportsInterface(type(ICondition).interfaceId)) {
+            try IERC165(condition.conditionAddress).supportsInterface(type(ICondition).interfaceId) returns (bool valid)
+            {
+                if (!valid) {
+                    revert InvalidCondition();
+                }
+            } catch {
                 revert InvalidCondition();
             }
         }

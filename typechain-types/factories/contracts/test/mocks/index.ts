@@ -2,4 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as mockTokenSol from "./MockToken.sol";
+export { MockAction__factory } from "./MockAction__factory";
 export { MockCondition__factory } from "./MockCondition__factory";
+export { WrongInterfaceContract__factory } from "./WrongInterfaceContract__factory";

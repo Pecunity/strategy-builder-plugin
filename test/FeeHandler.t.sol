@@ -18,6 +18,7 @@ contract FeeHandlerTest is Test {
     uint256 BENEFICARY_PERCENTAGE = 2000;
     uint256 CREATOR_PERCENTAGE = 500;
     uint256 VAULT_PERCENTAGE = 7500;
+    uint256 PRIMARY_TOKEN_DISCOUNT = 2000;
 
     uint256 public constant BURN_PERCENTAGE = 1000;
     uint256 public constant PRIMARY_TOKEN_BURN_PERCENTAGE = 2000;
@@ -51,7 +52,9 @@ contract FeeHandlerTest is Test {
         vm.assume(token != address(0));
 
         vm.prank(OWNER);
-        handler.activatePrimaryToken(token, burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE);
+        handler.activatePrimaryToken(
+            token, burnerAddress, PRIMARY_TOKEN_DISCOUNT, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE
+        );
 
         assertTrue(handler.primaryTokenActive());
         assertEq(handler.burnerAddress(), burnerAddress);
@@ -64,11 +67,15 @@ contract FeeHandlerTest is Test {
         vm.assume(token != address(0));
 
         vm.prank(OWNER);
-        handler.activatePrimaryToken(token, burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE);
+        handler.activatePrimaryToken(
+            token, burnerAddress, PRIMARY_TOKEN_DISCOUNT, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE
+        );
 
         vm.prank(OWNER);
         vm.expectRevert(IFeeHandler.PrimaryTokenAlreadyActivated.selector);
-        handler.activatePrimaryToken(token, burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE);
+        handler.activatePrimaryToken(
+            token, burnerAddress, PRIMARY_TOKEN_DISCOUNT, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE
+        );
     }
 
     function test_updateVault_Success(address newVault) external {
@@ -197,7 +204,7 @@ contract FeeHandlerTest is Test {
         Token _token = new Token("test", "MT", _maxTokenSupply);
 
         vm.startPrank(OWNER);
-        handler.activatePrimaryToken(primaryToken, burnerAddress, 1000, 2000);
+        handler.activatePrimaryToken(primaryToken, burnerAddress, PRIMARY_TOKEN_DISCOUNT, 1000, 2000);
         handler.updateTokenAllowance(address(_token), true);
         vm.stopPrank();
 
@@ -224,7 +231,7 @@ contract FeeHandlerTest is Test {
 
         vm.startPrank(OWNER);
         handler.activatePrimaryToken(
-            address(primaryToken), burnerAddress, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE
+            address(primaryToken), burnerAddress, PRIMARY_TOKEN_DISCOUNT, PRIMARY_TOKEN_BURN_PERCENTAGE, BURN_PERCENTAGE
         );
         handler.updateTokenAllowance(address(primaryToken), true);
         vm.stopPrank();

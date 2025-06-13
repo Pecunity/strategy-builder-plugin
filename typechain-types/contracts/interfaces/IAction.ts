@@ -20,13 +20,20 @@ import type {
 } from "../../common";
 
 export interface IActionInterface extends Interface {
-  getFunction(nameOrSignature: "supportsInterface"): FunctionFragment;
+  getFunction(
+    nameOrSignature: "identifier" | "supportsInterface"
+  ): FunctionFragment;
 
+  encodeFunctionData(
+    functionFragment: "identifier",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
 
+  decodeFunctionResult(functionFragment: "identifier", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -76,6 +83,8 @@ export interface IAction extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  identifier: TypedContractMethod<[], [string], "view">;
+
   supportsInterface: TypedContractMethod<
     [interfaceId: BytesLike],
     [boolean],
@@ -86,6 +95,9 @@ export interface IAction extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "identifier"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
