@@ -5,6 +5,7 @@ import {IFeeController} from "./interfaces/IFeeController.sol";
 import {ITokenGetter} from "./interfaces/ITokenGetter.sol";
 import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /// @title FeeController
 /// @notice Manages fee configurations and calculations for various function selectors and fee types.
@@ -111,7 +112,7 @@ contract FeeController is Ownable, IFeeController {
         uint256 _tokenPrice = oracle.getTokenPrice(_token);
 
         uint256 _feeAmount = _volume * _config.feePercentage / PERCENTAGE_DIVISOR;
-        uint256 _feeInUSD = _feeAmount * _tokenPrice / 10 ** 18;
+        uint256 _feeInUSD = _feeAmount * _tokenPrice / (10 ** oracle.PRICE_DECIMALS());
 
         return _feeInUSD < _minFeeInUSD ? _minFeeInUSD : _feeInUSD;
     }
@@ -130,7 +131,9 @@ contract FeeController is Ownable, IFeeController {
             revert InvalidTokenWithPriceOfZero();
         }
 
-        return feeInUSD * 10 ** 18 / tokenPrice;
+        uint8 decimals = IERC20Metadata(token).decimals();
+
+        return (feeInUSD * (10 ** decimals)) / tokenPrice;
     }
 
     /// @inheritdoc IFeeController
