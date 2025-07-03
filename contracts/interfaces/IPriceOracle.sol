@@ -45,4 +45,9 @@ interface IPriceOracle {
     /// @param _token Address of the token.
     /// @return The latest price of the token.
     function getTokenPrice(address _token) external view returns (uint256);
+
+    /// @notice Returns the number of decimals used for the scaled price.
+    /// @dev This value is fixed to match the output of `_scalePythPrice`, which normalizes prices to 18 decimals.
+    /// @return The number of decimals (always 18).
+    function PRICE_DECIMALS() external view returns (uint8);
 }

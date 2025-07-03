@@ -6,6 +6,7 @@ import {FeeController} from "contracts/FeeController.sol";
 import {IFeeController} from "contracts/interfaces/IFeeController.sol";
 import {ITokenGetter} from "contracts/interfaces/ITokenGetter.sol";
 import {IPriceOracle} from "contracts/interfaces/IPriceOracle.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 contract FeeControllerTest is Test {
     FeeController controller;
@@ -218,16 +219,19 @@ contract FeeControllerTest is Test {
         assertEq(controller.calculateFee(_token, _selector, _volume), _expFee);
     }
 
-    function test_calculateTokenAmount_Success(address token, uint256 price) external {
+    function test_calculateTokenAmount_Success(address token, uint256 price, uint8 _decimals) external {
         vm.assume(price > 0);
+
+        uint8 decimals = uint8(bound(_decimals, 1, 20));
 
         uint256 feeInUSD = 200 * 1e18; //200 USD
 
         bytes32 _oralceID = getRandomBytes32();
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (token)), abi.encode(_oralceID));
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.getTokenPrice, (token)), abi.encode(price));
+        vm.mockCall(token, abi.encodeCall(IERC20Metadata.decimals, ()), abi.encode(decimals));
 
-        uint256 expAmount = feeInUSD * 1e18 / price;
+        uint256 expAmount = feeInUSD * (10 ** decimals) / price;
 
         assertEq(expAmount, controller.calculateTokenAmount(token, feeInUSD));
     }

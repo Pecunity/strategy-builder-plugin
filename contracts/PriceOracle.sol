@@ -7,6 +7,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
 
 contract PriceOracle is Ownable, IPriceOracle {
+    uint8 public constant PRICE_DECIMALS = 18;
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -52,11 +53,11 @@ contract PriceOracle is Ownable, IPriceOracle {
 
         uint256 _absExpo = uint32(-_expo);
 
-        if (_expo <= -18) {
-            return uint256(_price) * (10 ** (_absExpo - 18));
+        if (_expo <= -int32(uint32(PRICE_DECIMALS))) {
+            return uint256(_price) * (10 ** (_absExpo - PRICE_DECIMALS));
         }
 
-        return uint256(_price) * 10 ** (18 - _absExpo);
+        return uint256(_price) * 10 ** (PRICE_DECIMALS - _absExpo);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
