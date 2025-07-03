@@ -53,6 +53,20 @@ contract FeeControllerTest is Test {
         assertEq(uint8(config.feeType), uint8(_feeType));
     }
 
+    function test_setFunctionFeeConfig_Revert_NotTheOwner(address badActor) external {
+        vm.assume(badActor != OWNER);
+
+        uint256 _feePercentage = 100; //1%
+
+        IFeeController.FeeType _feeType = IFeeController.FeeType.Withdraw;
+
+        bytes4 _selector = bytes4(uint32(2222));
+
+        vm.prank(badActor);
+        vm.expectRevert("Ownable: caller is not the owner");
+        controller.setFunctionFeeConfig(_selector, _feeType, _feePercentage);
+    }
+
     function test_setFunctionFeeConfig_FeePercentageExceedMax(bytes4 _selector) external {
         IFeeController.FeeType _feeType = IFeeController.FeeType.Withdraw;
 
@@ -76,6 +90,18 @@ contract FeeControllerTest is Test {
         assertEq(controller.tokenGetter(_target, _selector), _tokenGetter);
     }
 
+    function test_setTokenGetter_NotTheOwner(address badActor) external {
+        address _tokenGetter = makeAddr("tokenGetter");
+        address _target = makeAddr("target");
+        bytes4 _selector = bytes4(uint32(222));
+
+        vm.assume(badActor != OWNER);
+
+        vm.prank(badActor);
+        vm.expectRevert("Ownable: caller is not the owner");
+        controller.setTokenGetter(_selector, _tokenGetter, _target);
+    }
+
     function test_setTokenGetter_ZeroAddress(bytes4 _selector, address _tokenGetter, address _target) external {
         address _modTarget = _target;
         if (_tokenGetter != address(0) && _target != address(0)) {
@@ -94,6 +120,17 @@ contract FeeControllerTest is Test {
         controller.setGlobalTokenGetter(_selector, _tokenGetter);
 
         assertEq(controller.tokenGetter(_target, _selector), _tokenGetter);
+    }
+
+    function test_setGlobalTokenGetter_NotTheOwner(address badActor) external {
+        vm.assume(badActor != OWNER);
+
+        address _tokenGetter = makeAddr("tokenGetter");
+        bytes4 _selector = bytes4(uint32(222));
+
+        vm.prank(badActor);
+        vm.expectRevert("Ownable: caller is not the owner");
+        controller.setGlobalTokenGetter(_selector, _tokenGetter);
     }
 
     function test_setGlobalTokenGetter_ZeroAddress(bytes4 _selector) external {

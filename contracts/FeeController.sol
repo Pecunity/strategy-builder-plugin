@@ -67,7 +67,7 @@ contract FeeController is Ownable, IFeeController {
     }
 
     /// @inheritdoc IFeeController
-    function setFunctionFeeConfig(bytes4 _selector, FeeType _feeType, uint256 _feePercentage) external {
+    function setFunctionFeeConfig(bytes4 _selector, FeeType _feeType, uint256 _feePercentage) external onlyOwner {
         if (_feePercentage > maxFeeLimits[_feeType]) {
             revert FeePercentageExceedLimit();
         }
@@ -78,7 +78,7 @@ contract FeeController is Ownable, IFeeController {
     }
 
     /// @inheritdoc IFeeController
-    function setTokenGetter(bytes4 _selector, address _tokenGetter, address _target) external {
+    function setTokenGetter(bytes4 _selector, address _tokenGetter, address _target) external onlyOwner {
         if (_target == address(0) || _tokenGetter == address(0)) {
             revert ZeroAddressNotValid();
         }
@@ -88,7 +88,7 @@ contract FeeController is Ownable, IFeeController {
     }
 
     /// @inheritdoc IFeeController
-    function setGlobalTokenGetter(bytes4 _selector, address _tokenGetter) external {
+    function setGlobalTokenGetter(bytes4 _selector, address _tokenGetter) external onlyOwner {
         if (_tokenGetter == address(0)) {
             revert ZeroAddressNotValid();
         }
