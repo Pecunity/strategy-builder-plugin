@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {FeeHandler} from "contracts/FeeHandler.sol";
 import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
 import {Token} from "contracts/test/mocks/MockToken.sol";
+import {IFeeReduction} from "contracts/interfaces/IFeeReduction.sol";
 
 contract FeeHandlerTest is Test {
     FeeHandler handler;
@@ -153,9 +154,9 @@ contract FeeHandlerTest is Test {
         _token.approve(address(handler), _amount);
         handler.handleFee(address(_token), _amount, beneficiary, creator);
 
-        assert(_token.balanceOf(beneficiary) > 0);
-        assert(_token.balanceOf(creator) > 0);
-        assert(_token.balanceOf(VAULT) > 0);
+        assert(handler.getWithdrawableBalance(beneficiary, address(_token)) > 0);
+        assert(handler.getWithdrawableBalance(creator, address(_token)) > 0);
+        assert(handler.getWithdrawableBalance(VAULT, address(_token)) > 0);
     }
 
     function test_handleFee_NoValidToken(address beneficiary, address creator, uint256 amount) external {
@@ -216,10 +217,10 @@ contract FeeHandlerTest is Test {
         _token.approve(address(handler), _amount);
         handler.handleFee(address(_token), _amount, beneficiary, creator);
 
-        assert(_token.balanceOf(beneficiary) > 0);
-        assert(_token.balanceOf(creator) > 0);
-        assert(_token.balanceOf(VAULT) > 0);
-        assert(_token.balanceOf(burnerAddress) > 0);
+        assert(handler.getWithdrawableBalance(beneficiary, address(_token)) > 0);
+        assert(handler.getWithdrawableBalance(creator, address(_token)) > 0);
+        assert(handler.getWithdrawableBalance(VAULT, address(_token)) > 0);
+        assert(handler.getWithdrawableBalance(burnerAddress, address(_token)) > 0);
     }
 
     function test_handleFee_PrimaryTokenPayment(uint256 amount, address beneficiary, address creator) external {
@@ -244,10 +245,10 @@ contract FeeHandlerTest is Test {
         primaryToken.approve(address(handler), _amount);
         handler.handleFee(address(primaryToken), _amount, beneficiary, creator);
 
-        assert(primaryToken.balanceOf(beneficiary) > 0);
-        assert(primaryToken.balanceOf(creator) > 0);
-        assert(primaryToken.balanceOf(VAULT) > 0);
-        assert(primaryToken.balanceOf(burnerAddress) > 0);
+        assert(handler.getWithdrawableBalance(beneficiary, address(primaryToken)) > 0);
+        assert(handler.getWithdrawableBalance(creator, address(primaryToken)) > 0);
+        assert(handler.getWithdrawableBalance(VAULT, address(primaryToken)) > 0);
+        assert(handler.getWithdrawableBalance(burnerAddress, address(primaryToken)) > 0);
     }
 
     function test_handleFeeETH_Success(uint256 amount) external {
@@ -265,9 +266,38 @@ contract FeeHandlerTest is Test {
 
         handler.handleFeeETH{value: _amount}(beneficiary, creator);
 
-        assert(beneficiary.balance > 0);
-        assert(creator.balance > 0);
-        assert(VAULT.balance > 0);
+        assert(handler.getWithdrawableBalance(beneficiary, address(0)) > 0);
+        assert(handler.getWithdrawableBalance(creator, address(0)) > 0);
+        assert(handler.getWithdrawableBalance(VAULT, address(0)) > 0);
+    }
+
+    function test_handleFeeETH_Success_WithReduction(uint256 amount) external {
+        uint256 maxAmountETH = 1000 * 1e18;
+        deal(FEE_PAYER, maxAmountETH);
+
+        vm.prank(OWNER);
+        handler.updateTokenAllowance(address(0), true);
+
+        address reduction = makeAddr("reduction");
+        vm.prank(OWNER);
+        handler.updateReduction(reduction);
+
+        uint256 reductionPercentage = 1000; //10%
+        vm.mockCall(
+            reduction, abi.encodeCall(IFeeReduction.getFeeReduction, (FEE_PAYER)), abi.encode(reductionPercentage)
+        );
+
+        uint256 _amount = bound(amount, 100, maxAmountETH);
+        address beneficiary = makeAddr("beneficiary");
+        address creator = makeAddr("creator");
+
+        vm.startPrank(FEE_PAYER);
+
+        handler.handleFeeETH{value: _amount}(beneficiary, creator);
+
+        assert(handler.getWithdrawableBalance(beneficiary, address(0)) > 0);
+        assert(handler.getWithdrawableBalance(creator, address(0)) > 0);
+        assert(handler.getWithdrawableBalance(VAULT, address(0)) > 0);
     }
 
     function test_handleFeeETH_ETHNotValid() external {
@@ -276,5 +306,83 @@ contract FeeHandlerTest is Test {
 
         vm.expectRevert(IFeeHandler.TokenNotAllowed.selector);
         handler.handleFeeETH(beneficiary, creator);
+    }
+
+    function test_withdraw_Success_ETH(uint256 amount) external {
+        uint256 maxAmountETH = 1000 * 1e18;
+        deal(FEE_PAYER, maxAmountETH);
+
+        vm.prank(OWNER);
+        handler.updateTokenAllowance(address(0), true);
+
+        uint256 _amount = bound(amount, 100, maxAmountETH);
+        address beneficiary = makeAddr("beneficiary");
+        address creator = makeAddr("creator");
+
+        vm.startPrank(FEE_PAYER);
+
+        handler.handleFeeETH{value: _amount}(beneficiary, creator);
+        vm.stopPrank();
+
+        uint256 withdrawableETH = handler.getWithdrawableBalance(beneficiary, address(0));
+        vm.prank(beneficiary);
+        handler.withdraw(address(0));
+
+        assert(beneficiary.balance == withdrawableETH);
+    }
+
+    function test_withdraw_Success_token(address beneficiary, address creator, uint256 amount) external {
+        uint256 _maxTokenSupply = 1000 * 1e18;
+
+        vm.assume(beneficiary != FEE_PAYER);
+        vm.assume(creator != FEE_PAYER);
+
+        vm.prank(FEE_PAYER);
+        Token _token = new Token("test", "MT", _maxTokenSupply);
+
+        uint256 _amount = bound(amount, 100, _maxTokenSupply);
+        vm.assume(beneficiary != address(0));
+        vm.assume(creator != address(0));
+
+        vm.prank(OWNER);
+        handler.updateTokenAllowance(address(_token), true);
+
+        vm.startPrank(FEE_PAYER);
+        _token.approve(address(handler), _amount);
+        handler.handleFee(address(_token), _amount, beneficiary, creator);
+
+        vm.stopPrank();
+
+        uint256 withdrawableToken = handler.getWithdrawableBalance(beneficiary, address(_token));
+        vm.prank(beneficiary);
+        handler.withdraw(address(_token));
+
+        assert(_token.balanceOf(beneficiary) == withdrawableToken);
+    }
+
+    function test_withdraw_NoWithdrawAmount(uint256 amount) external {
+        address beneficiary = makeAddr("beneficiary");
+        address creator = makeAddr("creator");
+
+        uint256 _maxTokenSupply = 1000 * 1e18;
+        vm.prank(FEE_PAYER);
+        Token _token = new Token("test", "MT", _maxTokenSupply);
+
+        uint256 _amount = bound(amount, 100, _maxTokenSupply);
+        vm.assume(beneficiary != address(0));
+        vm.assume(creator != address(0));
+
+        vm.prank(OWNER);
+        handler.updateTokenAllowance(address(_token), true);
+
+        vm.startPrank(FEE_PAYER);
+        _token.approve(address(handler), _amount);
+        handler.handleFee(address(_token), _amount, beneficiary, creator);
+
+        vm.stopPrank();
+
+        vm.startPrank(BAD_ACTOR);
+        vm.expectRevert(IFeeHandler.InvalidAmount.selector);
+        handler.withdraw(address(_token));
     }
 }
