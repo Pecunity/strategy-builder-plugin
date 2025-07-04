@@ -463,7 +463,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     }
 
     function _validateStep(StrategyStep memory step, uint256 maxStepIndex) internal pure {
-        if (step.condition.result0 > maxStepIndex || step.condition.result1 > maxStepIndex) {
+        if (step.condition.result0 >= maxStepIndex || step.condition.result1 >= maxStepIndex) {
             revert InvalidNextStepIndex();
         }
     }

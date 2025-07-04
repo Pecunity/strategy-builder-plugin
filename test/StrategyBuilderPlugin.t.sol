@@ -412,6 +412,34 @@ contract StrategyBuilderPluginTest is Test {
         assertTrue(token.balanceOf(receiver2) == value);
     }
 
+    function test_executeStrategy_OOB_RevertWithValidiationError() external {
+        uint256 numSteps = 2;
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        steps[0].condition.result0 = 2;
+        steps[0].condition.result1 = 2;
+        uint32 strategyID = 222;
+        deal(address(account1), 100 ether);
+        //Mocks
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
+            abi.encode(address(0), false)
+        );
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.functionFeeConfig.selector),
+            abi.encode(IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0}))
+        );
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(0));
+        //Act
+        vm.startPrank(address(account1));
+        vm.expectRevert(IStrategyBuilderPlugin.InvalidNextStepIndex.selector);
+
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+
+        vm.stopPrank();
+    }
+
     /////////////////////////////////
     ////// createAutomation /////////
     /////////////////////////////////
@@ -832,7 +860,7 @@ contract StrategyBuilderPluginTest is Test {
             IStrategyBuilderPlugin.Condition memory condition = IStrategyBuilderPlugin.Condition({
                 conditionAddress: address(0),
                 id: 0,
-                result0: i == numSteps - 1 ? 1 : uint8(i),
+                result0: i == numSteps - 1 ? 0 : uint8(i),
                 result1: i == numSteps - 1 ? 0 : uint8(i + 1)
             });
 
