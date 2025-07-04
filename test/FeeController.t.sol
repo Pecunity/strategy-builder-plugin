@@ -192,9 +192,12 @@ contract FeeControllerTest is Test {
 
         uint256 _volumeInUSD = (controller.PERCENTAGE_DIVISOR() * _minFee / _feePercentage) - uint256(1);
 
+        uint8 priceDecimals = 18;
+
         bytes32 _oralceID = getRandomBytes32();
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (_token)), abi.encode(_oralceID));
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.getTokenPrice, (_token)), abi.encode(1 ether));
+        vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.PRICE_DECIMALS, ()), abi.encode(priceDecimals));
 
         assertEq(controller.calculateFee(_token, _selector, _volumeInUSD), _minFee);
     }
@@ -211,11 +214,14 @@ contract FeeControllerTest is Test {
 
         uint256 _volume = (controller.PERCENTAGE_DIVISOR() * _minFee / _feePercentage) + uint256(2);
 
+        uint8 priceDecimals = 18;
+
         bytes32 _oralceID = getRandomBytes32();
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (_token)), abi.encode(_oralceID));
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.getTokenPrice, (_token)), abi.encode(2 ether));
+        vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.PRICE_DECIMALS, ()), abi.encode(priceDecimals));
 
-        uint256 _expFee = (_volume * 2 ether / 1e18) * _feePercentage / controller.PERCENTAGE_DIVISOR();
+        uint256 _expFee = (_volume * 2 ether / (10 ** priceDecimals)) * _feePercentage / controller.PERCENTAGE_DIVISOR();
         assertEq(controller.calculateFee(_token, _selector, _volume), _expFee);
     }
 

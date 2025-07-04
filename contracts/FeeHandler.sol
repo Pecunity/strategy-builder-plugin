@@ -4,13 +4,14 @@ pragma solidity ^0.8.26;
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IFeeReduction} from "./interfaces/IFeeReduction.sol";
 
 /// @title FeeHandler
 /// @notice Handles fee distribution logic between beneficiary, creator, vault, and treasury.
 /// @dev Supports both ERC20 tokens and native ETH fee handling with optional fee reduction and primary token discounts.
-contract FeeHandler is Ownable, IFeeHandler {
+contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
     using SafeERC20 for IERC20;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━┓
@@ -56,6 +57,9 @@ contract FeeHandler is Ownable, IFeeHandler {
     /// @notice Mapping of allowed tokens for fee payment.
     mapping(address token => bool) private allowedTokens;
 
+    /// @notice Tracks withdrawable balances for each receiver adress and token
+    mapping(address receiver => mapping(address token => uint256)) private withdrawableBalances;
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃              Constructor            ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -89,24 +93,28 @@ contract FeeHandler is Ownable, IFeeHandler {
 
         (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount) = _tokenDistribution(totalFee);
 
-        IERC20(token).safeTransferFrom(msg.sender, beneficiary, beneficiaryAmount);
+        withdrawableBalances[beneficiary][token] += beneficiaryAmount;
 
         if (creator != address(0)) {
-            IERC20(token).safeTransferFrom(msg.sender, creator, creatorAmount);
-            IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount);
+            withdrawableBalances[creator][token] += creatorAmount;
+            withdrawableBalances[vault][token] += vaultAmount;
         } else {
-            IERC20(token).safeTransferFrom(msg.sender, vault, vaultAmount + creatorAmount);
+            withdrawableBalances[vault][token] += vaultAmount + creatorAmount;
         }
 
         if (burnAmount > 0) {
-            IERC20(token).safeTransferFrom(msg.sender, burnerAddress, burnAmount);
+            withdrawableBalances[burnerAddress][token] += burnAmount;
         }
+
+        // Collect total funds from sender
+        uint256 requiredAmount = totalFee + burnAmount;
+        IERC20(token).safeTransferFrom(msg.sender, address(this), requiredAmount);
 
         emit FeeHandled(
             token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
         );
 
-        return totalFee + burnAmount;
+        return requiredAmount;
     }
 
     /// @inheritdoc IFeeHandler
@@ -123,22 +131,44 @@ contract FeeHandler is Ownable, IFeeHandler {
         (uint256 totalFee, uint256 burnAmount) = _feeCalculation(amount, address(0));
         (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount) = _tokenDistribution(totalFee);
 
-        payable(beneficiary).transfer(beneficiaryAmount);
+        withdrawableBalances[beneficiary][address(0)] += beneficiaryAmount;
 
         if (creator != address(0)) {
-            payable(creator).transfer(creatorAmount);
-            payable(vault).transfer(vaultAmount);
+            withdrawableBalances[creator][address(0)] += creatorAmount;
+            withdrawableBalances[vault][address(0)] += vaultAmount;
         } else {
-            payable(vault).transfer(vaultAmount + creatorAmount);
+            withdrawableBalances[vault][address(0)] += vaultAmount + creatorAmount;
         }
 
         if (burnAmount > 0) {
-            payable(burnerAddress).transfer(burnAmount);
+            withdrawableBalances[burnerAddress][address(0)] += burnAmount;
+        }
+
+        uint256 requiredAmount = totalFee + burnAmount;
+        uint256 excess = msg.value > requiredAmount ? msg.value - requiredAmount : 0;
+
+        if (excess > 0) {
+            payable(msg.sender).transfer(excess);
         }
 
         emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
 
-        return totalFee + burnAmount;
+        return requiredAmount;
+    }
+
+    /// @inheritdoc IFeeHandler
+    function withdraw(address token) external nonReentrant {
+        uint256 amount = withdrawableBalances[msg.sender][token];
+        if (amount == 0) revert InvalidAmount();
+        withdrawableBalances[msg.sender][token] = 0;
+
+        if (token == address(0)) {
+            payable(msg.sender).transfer(amount);
+        } else {
+            IERC20(token).safeTransfer(msg.sender, amount);
+        }
+
+        emit Withdrawn(msg.sender, token, amount);
     }
 
     /// @inheritdoc IFeeHandler
@@ -281,5 +311,10 @@ contract FeeHandler is Ownable, IFeeHandler {
     /// @inheritdoc IFeeHandler
     function tokenAllowed(address token) external view returns (bool) {
         return allowedTokens[token];
+    }
+
+    /// @inheritdoc IFeeHandler
+    function getWithdrawableBalance(address user, address token) external view returns (uint256 balance) {
+        return withdrawableBalances[user][token];
     }
 }

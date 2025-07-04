@@ -43,22 +43,27 @@ interface IFeeHandler {
     event UpdatedPercentages(uint256 beneficiary, uint256 creator, uint256 vault);
     event UpdatedTokenAllowance(address token, bool allowed);
     event UpdatedReduction(address reduction);
+    event Withdrawn(address indexed receiver, address indexed token, uint256 amount);
 
-    /// @notice Handles fee distribution for ERC20 tokens.
-    /// @param token Address of the ERC20 token used for payment.
-    /// @param amount Total fee amount.
-    /// @param beneficiary Address receiving the beneficiary share.
-    /// @param creator Address receiving the creator share.
-    /// @return totalFee Total fee amount.
+    /// @notice Handles ERC20 fee payment. Stores receivable amounts for beneficiary, creator, and vault.
+    /// @param token The token address used for payment.
+    /// @param amount The total fee amount sent by the user.
+    /// @param beneficiary The fee beneficiary address.
+    /// @param creator Optional creator address to receive part of the fee.
+    /// @return totalAmount Total fee + burn amount recorded.
     function handleFee(address token, uint256 amount, address beneficiary, address creator)
         external
         returns (uint256);
 
-    /// @notice Handles fee distribution for native ETH payments.
-    /// @param beneficiary Address receiving the beneficiary share.
-    /// @param creator Address receiving the creator share.
-    /// @return totalFee Total fee amount.
+    /// @notice Handles native ETH fee payment. Stores receivable ETH for withdrawal.
+    /// @param beneficiary The fee beneficiary address.
+    /// @param creator Optional creator address.
+    /// @return totalAmount Total fee + burn amount recorded.
     function handleFeeETH(address beneficiary, address creator) external payable returns (uint256);
+
+    /// @notice Allows a user to withdraw their accumulated fee balance for a given token.
+    /// @param token The token address to withdraw (use address(0) for ETH).
+    function withdraw(address token) external;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃            Admin Functions          ┃
@@ -109,4 +114,10 @@ interface IFeeHandler {
     /// @param token Token address.
     /// @return allowed Boolean indicating if token is allowed.
     function tokenAllowed(address token) external view returns (bool);
+
+    /// @notice Returns the withdrawable balance for a given user and token.
+    /// @param user The address of the user.
+    /// @param token The token address (use address(0) for ETH).
+    /// @return balance The amount the user can withdraw.
+    function getWithdrawableBalance(address user, address token) external view returns (uint256 balance);
 }
