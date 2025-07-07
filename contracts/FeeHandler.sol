@@ -253,7 +253,7 @@ contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
     function _tokenDistribution(uint256 amount) internal view returns (uint256, uint256, uint256) {
         uint256 beneficiaryAmount = (amount * beneficiaryPercentage) / PERCENTAGE_DIVISOR;
         uint256 creatorAmount = (amount * creatorPercentage) / PERCENTAGE_DIVISOR;
-        uint256 vaultAmount = (amount * vaultPercentage) / PERCENTAGE_DIVISOR;
+        uint256 vaultAmount = amount - beneficiaryAmount - creatorAmount;
 
         return (beneficiaryAmount, creatorAmount, vaultAmount);
     }
