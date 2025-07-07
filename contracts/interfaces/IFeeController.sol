@@ -34,9 +34,6 @@ interface IFeeController {
     /// @notice Thrown when no oracle exists for the specified token.
     error NoOracleExist();
 
-    /// @notice Thrown when the oracle returns a price of zero for a token.
-    error InvalidTokenWithPriceOfZero();
-
     /// @notice Thrown when an array length is invalid or does not match the expected length.
     error InvalidArrayLength();
 
