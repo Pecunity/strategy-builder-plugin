@@ -127,10 +127,6 @@ contract FeeController is Ownable, IFeeController {
 
         uint256 tokenPrice = oracle.getTokenPrice(token);
 
-        if (tokenPrice == 0) {
-            revert InvalidTokenWithPriceOfZero();
-        }
-
         uint8 decimals = IERC20Metadata(token).decimals();
 
         return (feeInUSD * (10 ** decimals)) / tokenPrice;

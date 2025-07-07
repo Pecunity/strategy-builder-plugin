@@ -47,7 +47,7 @@ contract PriceOracle is Ownable, IPriceOracle {
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     function _scalePythPrice(int256 _price, int32 _expo) internal pure returns (uint256) {
-        if (_price < 0) {
+        if (_price <= 0) {
             revert NegativePriceNotAllowed();
         }
 
