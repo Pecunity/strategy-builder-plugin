@@ -336,6 +336,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
         );
 
         delete automations[automationSID];
+        delete automationsToIndex[automationSID];
 
         emit AutomationDeleted(wallet, id);
     }
