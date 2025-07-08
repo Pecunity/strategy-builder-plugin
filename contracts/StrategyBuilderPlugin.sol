@@ -184,7 +184,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
         _changeAutomationInCondition(msg.sender, condition.conditionAddress, condition.id, id, true);
 
         bytes32 automationSID = getStorageId(msg.sender, id);
-        Automation storage _newAutomation = automations[getStorageId(msg.sender, id)];
+        Automation storage _newAutomation = automations[automationSID];
 
         _newAutomation.condition = condition;
         _newAutomation.strategyId = strategyId;
