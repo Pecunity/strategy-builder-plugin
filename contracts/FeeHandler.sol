@@ -250,17 +250,22 @@ contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
         emit UpdatedPercentages(_beneficiary, _creator, _vault);
     }
 
-    function _tokenDistribution(uint256 amount) internal view returns (uint256, uint256, uint256) {
-        uint256 beneficiaryAmount = (amount * beneficiaryPercentage) / PERCENTAGE_DIVISOR;
-        uint256 creatorAmount = (amount * creatorPercentage) / PERCENTAGE_DIVISOR;
-        uint256 vaultAmount = amount - beneficiaryAmount - creatorAmount;
-
-        return (beneficiaryAmount, creatorAmount, vaultAmount);
+    function _tokenDistribution(uint256 amount)
+        internal
+        view
+        returns (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount)
+    {
+        beneficiaryAmount = (amount * beneficiaryPercentage) / PERCENTAGE_DIVISOR;
+        creatorAmount = (amount * creatorPercentage) / PERCENTAGE_DIVISOR;
+        vaultAmount = amount - beneficiaryAmount - creatorAmount;
     }
 
-    function _feeCalculation(uint256 amount, address token) internal view returns (uint256, uint256) {
-        uint256 totalFee = amount;
-        uint256 burnAmount = 0;
+    function _feeCalculation(uint256 amount, address token)
+        internal
+        view
+        returns (uint256 totalFee, uint256 burnAmount)
+    {
+        totalFee = amount;
 
         if (reduction != address(0)) {
             uint256 reductionPercentage = IFeeReduction(reduction).getFeeReduction(msg.sender);
@@ -277,8 +282,6 @@ contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
                 : (totalFee * tokenBurn) / PERCENTAGE_DIVISOR;
             totalFee -= burnAmount;
         }
-
-        return (totalFee, burnAmount);
     }
 
     function _validateAddress(address _addr) internal pure {
