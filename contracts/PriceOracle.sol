@@ -51,13 +51,18 @@ contract PriceOracle is Ownable, IPriceOracle {
             revert NegativePriceNotAllowed();
         }
 
-        uint256 _absExpo = uint32(-_expo);
-
-        if (_expo <= -int32(uint32(PRICE_DECIMALS))) {
-            return uint256(_price) * (10 ** (_absExpo - PRICE_DECIMALS));
+        if (_expo > 0) {
+            // _expo is positive
+            uint256 posExpo = uint32(_expo);
+            return uint256(_price) / (10 ** (PRICE_DECIMALS + posExpo));
+        } else {
+            uint256 _absExpo = uint32(-_expo);
+            if (_expo <= -int32(uint32(PRICE_DECIMALS))) {
+                return uint256(_price) * (10 ** (_absExpo - PRICE_DECIMALS));
+            } else {
+                return uint256(_price) * 10 ** (PRICE_DECIMALS - _absExpo);
+            }
         }
-
-        return uint256(_price) * 10 ** (PRICE_DECIMALS - _absExpo);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
