@@ -258,6 +258,26 @@ contract StrategyBuilderPluginTest is Test {
         strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
     }
 
+    function test_createStrategy_Empty() external {
+        uint256 numSteps;
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderPlugin.InvalidStepArrayLength.selector);
+
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_EmptyNonZeroLength() external {
+        uint256 numSteps = 2;
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = new IStrategyBuilderPlugin.StrategyStep[](numSteps);
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(abi.encodeWithSelector(IStrategyBuilderPlugin.NoConditionOrActions.selector, 0));
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+    }
+
     /////////////////////////////////
     ////// deleteStrategy ///////////
     /////////////////////////////////
