@@ -225,12 +225,14 @@ contract FeeControllerTest is Test {
         assertEq(controller.calculateFee(_token, _selector, _volume), _expFee);
     }
 
-    function test_calculateTokenAmount_Success(address token, uint256 price, uint8 _decimals) external {
+    function test_calculateTokenAmount_Success(uint256 price, uint8 _decimals) external {
         vm.assume(price > 0);
 
         uint8 decimals = uint8(bound(_decimals, 1, 20));
 
         uint256 feeInUSD = 200 * 1e18; //200 USD
+
+        address token = makeAddr("token");
 
         bytes32 _oralceID = getRandomBytes32();
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (token)), abi.encode(_oralceID));
