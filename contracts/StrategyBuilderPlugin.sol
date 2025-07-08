@@ -458,14 +458,21 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     }
 
     function _validateSteps(StrategyStep[] memory steps) internal pure {
+        if (steps.length == 0) {
+            revert InvalidStepArrayLength();
+        }
         for (uint256 i = 0; i < steps.length; i++) {
-            _validateStep(steps[i], steps.length);
+            _validateStep(steps[i], steps.length, i);
         }
     }
 
-    function _validateStep(StrategyStep memory step, uint256 maxStepIndex) internal pure {
+    function _validateStep(StrategyStep memory step, uint256 maxStepIndex, uint256 stepIndex) internal pure {
         if (step.condition.result0 >= maxStepIndex || step.condition.result1 >= maxStepIndex) {
             revert InvalidNextStepIndex();
+        }
+
+        if (step.condition.conditionAddress == address(0) && step.actions.length == 0) {
+            revert NoConditionOrActions(stepIndex);
         }
     }
 

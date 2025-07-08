@@ -77,10 +77,12 @@ interface IStrategyBuilderPlugin {
     error UpdateConditionFailed(address condition, uint32 id);
     error PaymentTokenNotAllowed();
     error InvalidNextStepIndex();
+    error InvalidStepArrayLength();
     error InvalidActionTarget();
     error InvalidConditionAddress();
     error InvalidCondition();
     error PluginExecutionFailed();
+    error NoConditionOrActions(uint256 stepIndex);
 
     // ┏━━━━━━━━━━━━━━━━━━┓
     // ┃     Events       ┃
