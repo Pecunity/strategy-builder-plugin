@@ -458,11 +458,12 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     }
 
     function _validateSteps(StrategyStep[] memory steps) internal pure {
-        if (steps.length == 0) {
+        uint256 stepsLength = steps.length;
+        if (stepsLength == 0) {
             revert InvalidStepArrayLength();
         }
-        for (uint256 i = 0; i < steps.length; i++) {
-            _validateStep(steps[i], steps.length, i);
+        for (uint256 i = 0; i < stepsLength; i++) {
+            _validateStep(steps[i], stepsLength, i);
         }
     }
 
