@@ -17,6 +17,7 @@ import {IStrategyBuilderPlugin} from "contracts/interfaces/IStrategyBuilderPlugi
 
 import {IFeeController} from "contracts/interfaces/IFeeController.sol";
 import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
+import {IActionRegistry} from "contracts/interfaces/IActionRegistry.sol";
 import {BaseCondition} from "contracts/condition/BaseCondition.sol";
 
 import {MockCondition} from "contracts/test/mocks/MockCondition.sol";
@@ -39,6 +40,7 @@ contract StrategyBuilderPluginTest is Test {
 
     address feeHandler = makeAddr("feeHandler");
     address feeController = makeAddr("feeController");
+    address actionRegistry = makeAddr("actionRegistry");
     address automationExecutor = makeAddr("automationExecutor");
     address beneficiary = makeAddr("beneficiary");
     address creator = makeAddr("creator");
@@ -63,7 +65,7 @@ contract StrategyBuilderPluginTest is Test {
         account1 = UpgradeableModularAccount(payable(factory.createAccount(owner1, 0)));
         vm.deal(address(account1), 100 ether);
 
-        strategyBuilderPlugin = new StrategyBuilderPlugin(feeController, feeHandler);
+        strategyBuilderPlugin = new StrategyBuilderPlugin(feeController, feeHandler, actionRegistry);
         bytes32 manifestHash = keccak256(abi.encode(strategyBuilderPlugin.pluginManifest()));
 
         // we will have a single function dependency for our counter contract: the single owner user op validation
@@ -170,6 +172,8 @@ contract StrategyBuilderPluginTest is Test {
         steps[0].actions[0].target = invalidAction;
         steps[0].actions[0].actionType = IStrategyBuilderPlugin.ActionType.INTERNAL_ACTION;
 
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
         uint32 strategyID = 222;
         vm.prank(address(account1));
         vm.expectRevert(IStrategyBuilderPlugin.InvalidActionTarget.selector);
@@ -184,6 +188,8 @@ contract StrategyBuilderPluginTest is Test {
         address invalidAction = address(invalidActionContract);
         steps[0].actions[0].target = invalidAction;
         steps[0].actions[0].actionType = IStrategyBuilderPlugin.ActionType.INTERNAL_ACTION;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
 
         uint32 strategyID = 222;
         vm.prank(address(account1));
@@ -200,6 +206,8 @@ contract StrategyBuilderPluginTest is Test {
         steps[0].actions[0].target = invalidAction;
         steps[0].actions[0].actionType = IStrategyBuilderPlugin.ActionType.INTERNAL_ACTION;
 
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
         uint32 strategyID = 222;
         vm.prank(address(account1));
         vm.expectRevert(IStrategyBuilderPlugin.InvalidActionTarget.selector);
@@ -213,6 +221,24 @@ contract StrategyBuilderPluginTest is Test {
         address invalidAction = address(0);
         steps[0].actions[0].target = invalidAction;
         steps[0].actions[0].actionType = IStrategyBuilderPlugin.ActionType.EXTERNAL;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderPlugin.InvalidActionTarget.selector);
+        strategyBuilderPlugin.createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidAction_NotRegistered(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderPlugin.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        address invalidAction = makeAddr("not-regisstered");
+        steps[0].actions[0].target = invalidAction;
+        steps[0].actions[0].actionType = IStrategyBuilderPlugin.ActionType.INTERNAL_ACTION;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(false));
 
         uint32 strategyID = 222;
         vm.prank(address(account1));
@@ -419,6 +445,7 @@ contract StrategyBuilderPluginTest is Test {
             abi.encode(IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0}))
         );
         vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(0));
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
 
         //Act
         vm.startPrank(address(account1));
