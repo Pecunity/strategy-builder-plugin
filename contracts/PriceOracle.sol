@@ -9,7 +9,7 @@ import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
 contract PriceOracle is Ownable, IPriceOracle {
     uint8 public constant PRICE_DECIMALS = 18;
 
-    uint8 public constant MAX_ORACLE_DELAY = 120;
+    uint8 public constant MAX_ORACLE_DELAY = 60;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
