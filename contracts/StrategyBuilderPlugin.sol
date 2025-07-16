@@ -16,6 +16,7 @@ import {IStrategyBuilderPlugin} from "./interfaces/IStrategyBuilderPlugin.sol";
 import {ICondition} from "./interfaces/ICondition.sol";
 import {IFeeController} from "./interfaces/IFeeController.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
+import {IActionRegistry} from "./interfaces/IActionRegistry.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -47,6 +48,8 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     IFeeController public immutable feeController;
     /// @notice Fee handler contract
     IFeeHandler public immutable feeHandler;
+    /// @notice Action Registry contract
+    IActionRegistry public immutable actionRegistry;
 
     /// @notice Maps strategy IDs to strategy data
     mapping(bytes32 => Strategy) private strategies;
@@ -97,9 +100,11 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     /// @dev Sets the addresses for fee management contracts.
     /// @param _feeController Address of the contract responsible for fee configuration and validation.
     /// @param _feeHandler Address of the contract responsible for fee distribution and handling.
-    constructor(address _feeController, address _feeHandler) {
+    /// @param _actionRegistry The address of the ActionRegistry contract used to validate allowed action contracts.
+    constructor(address _feeController, address _feeHandler, address _actionRegistry) {
         feeController = IFeeController(_feeController);
         feeHandler = IFeeHandler(_feeHandler);
+        actionRegistry = IActionRegistry(_actionRegistry);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -479,6 +484,10 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
 
     function _validateAction(Action memory action) internal view {
         if (action.actionType == ActionType.INTERNAL_ACTION) {
+            if (!actionRegistry.isAllowed(action.target)) {
+                revert InvalidActionTarget();
+            }
+
             if (!action.target.isContract()) {
                 revert InvalidActionTarget();
             }

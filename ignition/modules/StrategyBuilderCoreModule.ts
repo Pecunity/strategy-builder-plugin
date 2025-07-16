@@ -42,13 +42,22 @@ const StrategBuilderCoreModule = buildModule(
       true,
     ]);
 
+    const actionRegistry = m.contract("ActionRegistry");
+
     // Strategy Builder Plugin
     const strategyBuilderPlugin = m.contract("StrategyBuilderPlugin", [
       feeController,
       feeHandler,
+      actionRegistry,
     ]);
 
-    return { priceOracle, feeController, feeHandler, strategyBuilderPlugin };
+    return {
+      priceOracle,
+      feeController,
+      feeHandler,
+      actionRegistry,
+      strategyBuilderPlugin,
+    };
   }
 );
 
