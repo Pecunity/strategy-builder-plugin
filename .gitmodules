@@ -25,3 +25,6 @@
 [submodule "lib/modular-account"]
 	path = lib/modular-account
 	url = https://github.com/alchemyplatform/modular-account
+[submodule "lib/solady"]
+	path = lib/solady
+	url = https://github.com/vectorized/solady
