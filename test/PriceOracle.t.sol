@@ -6,6 +6,7 @@ import {PriceOracle} from "contracts/PriceOracle.sol";
 import {IPriceOracle} from "contracts/interfaces/IPriceOracle.sol";
 import {PythStructs} from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import {IPyth} from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
+import {MockPythReverting} from "contracts/test/mocks/MockPythReverting.sol";
 
 contract PriceOracleTest is Test {
     PriceOracle oracle;
@@ -48,7 +49,7 @@ contract PriceOracleTest is Test {
             PythStructs.Price({price: _price, expo: _bndExp, conf: 10, publishTime: block.timestamp});
 
         console.log("test");
-        vm.mockCall(PYTH_ORACLE, abi.encodeWithSelector(IPyth.getPriceUnsafe.selector), abi.encode(_priceReturn));
+        vm.mockCall(PYTH_ORACLE, abi.encodeWithSelector(IPyth.getPriceNoOlderThan.selector), abi.encode(_priceReturn));
 
         address _token = makeAddr("random-token");
         bytes32 _id = getRandomBytes32();
@@ -73,7 +74,7 @@ contract PriceOracleTest is Test {
         PythStructs.Price memory _priceReturn =
             PythStructs.Price({price: _price, expo: _bndExp, conf: 10, publishTime: block.timestamp});
 
-        vm.mockCall(PYTH_ORACLE, abi.encodeWithSelector(IPyth.getPriceUnsafe.selector), abi.encode(_priceReturn));
+        vm.mockCall(PYTH_ORACLE, abi.encodeWithSelector(IPyth.getPriceNoOlderThan.selector), abi.encode(_priceReturn));
 
         address _token = makeAddr("random-token");
         bytes32 _id = getRandomBytes32();
@@ -105,7 +106,7 @@ contract PriceOracleTest is Test {
         PythStructs.Price memory _priceReturn =
             PythStructs.Price({price: _price, expo: _bndExp, conf: 10, publishTime: block.timestamp});
 
-        vm.mockCall(PYTH_ORACLE, abi.encodeWithSelector(IPyth.getPriceUnsafe.selector), abi.encode(_priceReturn));
+        vm.mockCall(PYTH_ORACLE, abi.encodeWithSelector(IPyth.getPriceNoOlderThan.selector), abi.encode(_priceReturn));
 
         address _token = makeAddr("random-token");
         bytes32 _id = getRandomBytes32();
@@ -115,6 +116,27 @@ contract PriceOracleTest is Test {
 
         vm.expectRevert(abi.encodeWithSelector(IPriceOracle.NegativePriceNotAllowed.selector));
         oracle.getTokenPrice(_token);
+    }
+
+    function test_getTokenPrice_OracleWithNoStalePrice() external {
+        MockPythReverting revertOracle = new MockPythReverting();
+        vm.prank(OWNER);
+        oracle = new PriceOracle(address(revertOracle));
+
+        int64 _price = 1;
+
+        PythStructs.Price memory _priceReturn =
+            PythStructs.Price({price: _price, expo: -18, conf: 10, publishTime: block.timestamp});
+
+        address _token = makeAddr("random-token");
+        bytes32 _id = getRandomBytes32();
+
+        vm.prank(OWNER);
+        oracle.setOracleID(_token, _id);
+
+        uint256 priecReturn = oracle.getTokenPrice(_token);
+
+        assertEq(priecReturn, 0);
     }
 
     function getRandomBytes32() public view returns (bytes32) {
