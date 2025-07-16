@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IFeeReduction} from "./interfaces/IFeeReduction.sol";
+import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 /// @title FeeHandler
 /// @notice Handles fee distribution logic between beneficiary, creator, vault, and treasury.
 /// @dev Supports both ERC20 tokens and native ETH fee handling with optional fee reduction and primary token discounts.
-contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
-    using SafeERC20 for IERC20;
+contract FeeHandler is Ownable, IFeeHandler {
+    using SafeTransferLib for address;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃   State Variables    ┃
@@ -108,7 +107,7 @@ contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
 
         // Collect total funds from sender
         uint256 requiredAmount = totalFee + burnAmount;
-        IERC20(token).safeTransferFrom(msg.sender, address(this), requiredAmount);
+        token.safeTransferFrom(msg.sender, address(this), requiredAmount);
 
         emit FeeHandled(
             token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
@@ -148,7 +147,7 @@ contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
         uint256 excess = msg.value > requiredAmount ? msg.value - requiredAmount : 0;
 
         if (excess > 0) {
-            payable(msg.sender).transfer(excess);
+            msg.sender.safeTransferETH(excess);
         }
 
         emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
@@ -157,15 +156,15 @@ contract FeeHandler is Ownable, ReentrancyGuard, IFeeHandler {
     }
 
     /// @inheritdoc IFeeHandler
-    function withdraw(address token) external nonReentrant {
+    function withdraw(address token) external {
         uint256 amount = withdrawableBalances[msg.sender][token];
         if (amount == 0) revert InvalidAmount();
         withdrawableBalances[msg.sender][token] = 0;
 
         if (token == address(0)) {
-            payable(msg.sender).transfer(amount);
+            msg.sender.safeTransferETH(amount);
         } else {
-            IERC20(token).safeTransfer(msg.sender, amount);
+            token.safeTransfer(msg.sender, amount);
         }
 
         emit Withdrawn(msg.sender, token, amount);
