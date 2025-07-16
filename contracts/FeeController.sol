@@ -98,7 +98,17 @@ contract FeeController is Ownable, IFeeController {
         emit GlobalTokenGetterSet(_selector, _tokenGetter);
     }
 
-    /// @inheritdoc IFeeController
+    function _getTokenDecimals(address token) internal view returns (uint8) {
+        (bool success, bytes memory data) = token.staticcall(abi.encodeWithSelector(IERC20Metadata.decimals.selector));
+
+        if (success && data.length >= 32) {
+            return abi.decode(data, (uint8));
+        }
+
+        // fallback default
+        return 18;
+    }
+
     function calculateFee(address _token, bytes4 _selector, uint256 _volume) external view returns (uint256) {
         bytes32 _oracleID = oracle.oracleID(_token);
         FeeConfig memory _config = functionFeeConfigs[_selector];
@@ -112,7 +122,20 @@ contract FeeController is Ownable, IFeeController {
         uint256 _tokenPrice = oracle.getTokenPrice(_token);
 
         uint256 _feeAmount = _volume * _config.feePercentage / PERCENTAGE_DIVISOR;
-        uint256 _feeInUSD = _feeAmount * _tokenPrice / (10 ** oracle.PRICE_DECIMALS());
+
+        uint8 _tokenDecimals = _getTokenDecimals(_token);
+
+        // Normalize fee amount to 18 decimals
+        uint256 _normalizedFee;
+        if (_tokenDecimals == 18) {
+            _normalizedFee = _feeAmount;
+        } else if (_tokenDecimals < 18) {
+            _normalizedFee = _feeAmount * (10 ** (18 - _tokenDecimals));
+        } else {
+            _normalizedFee = _feeAmount / (10 ** (_tokenDecimals - 18));
+        }
+
+        uint256 _feeInUSD = _normalizedFee * _tokenPrice / (10 ** oracle.PRICE_DECIMALS());
 
         return _feeInUSD < _minFeeInUSD ? _minFeeInUSD : _feeInUSD;
     }
@@ -127,9 +150,9 @@ contract FeeController is Ownable, IFeeController {
 
         uint256 tokenPrice = oracle.getTokenPrice(token);
 
-        uint8 decimals = IERC20Metadata(token).decimals();
+        uint8 decimals = _getTokenDecimals(token);
 
-        return (feeInUSD * (10 ** decimals)) / tokenPrice;
+        return tokenPrice == 0 ? 0 : (feeInUSD * (10 ** decimals)) / tokenPrice;
     }
 
     /// @inheritdoc IFeeController
