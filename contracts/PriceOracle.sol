@@ -8,6 +8,9 @@ import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
 
 contract PriceOracle is Ownable, IPriceOracle {
     uint8 public constant PRICE_DECIMALS = 18;
+
+    uint8 public constant MAX_ORACLE_DELAY = 120;
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -77,9 +80,14 @@ contract PriceOracle is Ownable, IPriceOracle {
             revert OracleNotExist(_token);
         }
 
-        PythStructs.Price memory price = pythOracle.getPriceUnsafe(_oracleID);
+        // PythStructs.Price memory price = pythOracle.getPriceUnsafe(_oracleID);
+        // PythStructs.Price memory price = pythOracle.getPriceNoOlderThan(_oracleID, MAX_ORACLE_DELAY);
 
-        return _scalePythPrice(price.price, price.expo);
+        try pythOracle.getPriceNoOlderThan(_oracleID, MAX_ORACLE_DELAY) returns (PythStructs.Price memory price) {
+            return _scalePythPrice(price.price, price.expo);
+        } catch {
+            return 0;
+        }
     }
 
     /// @inheritdoc IPriceOracle
