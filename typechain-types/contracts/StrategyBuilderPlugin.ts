@@ -286,6 +286,7 @@ export interface StrategyBuilderPluginInterface extends Interface {
       | "AUTHOR"
       | "NAME"
       | "VERSION"
+      | "actionRegistry"
       | "automation"
       | "createAutomation"
       | "createStrategy"
@@ -325,6 +326,10 @@ export interface StrategyBuilderPluginInterface extends Interface {
   encodeFunctionData(functionFragment: "AUTHOR", values?: undefined): string;
   encodeFunctionData(functionFragment: "NAME", values?: undefined): string;
   encodeFunctionData(functionFragment: "VERSION", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "actionRegistry",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "automation",
     values: [AddressLike, BigNumberish]
@@ -427,6 +432,10 @@ export interface StrategyBuilderPluginInterface extends Interface {
   decodeFunctionResult(functionFragment: "AUTHOR", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "NAME", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "VERSION", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "actionRegistry",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "automation", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createAutomation",
@@ -721,6 +730,8 @@ export interface StrategyBuilderPlugin extends BaseContract {
 
   VERSION: TypedContractMethod<[], [string], "view">;
 
+  actionRegistry: TypedContractMethod<[], [string], "view">;
+
   automation: TypedContractMethod<
     [wallet: AddressLike, id: BigNumberish],
     [IStrategyBuilderPlugin.AutomationStructOutput],
@@ -870,6 +881,9 @@ export interface StrategyBuilderPlugin extends BaseContract {
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "VERSION"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "actionRegistry"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "automation"

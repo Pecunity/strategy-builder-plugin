@@ -3,6 +3,8 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@nomicfoundation/hardhat-foundry";
 import { Network } from "./config/networks";
 
+import "./tasks";
+
 const ALCHEMY_API_KEY = vars.get("ALCHEMY_API_KEY");
 const PRIVATE_KEY = vars.get("PRIVATE_KEY");
 const ARBISCAN_API_KEY = vars.get("ARBISCAN_API_KEY");

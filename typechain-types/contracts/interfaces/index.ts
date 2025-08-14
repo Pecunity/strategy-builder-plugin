@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { IAction } from "./IAction";
+export type { IActionRegistry } from "./IActionRegistry";
 export type { ICondition } from "./ICondition";
 export type { IFeeController } from "./IFeeController";
 export type { IFeeHandler } from "./IFeeHandler";

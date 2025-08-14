@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export { IAction__factory } from "./IAction__factory";
+export { IActionRegistry__factory } from "./IActionRegistry__factory";
 export { ICondition__factory } from "./ICondition__factory";
 export { IFeeController__factory } from "./IFeeController__factory";
 export { IFeeHandler__factory } from "./IFeeHandler__factory";

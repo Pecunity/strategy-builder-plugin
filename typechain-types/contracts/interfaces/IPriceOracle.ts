@@ -24,11 +24,19 @@ import type {
 
 export interface IPriceOracleInterface extends Interface {
   getFunction(
-    nameOrSignature: "getTokenPrice" | "oracleID" | "setOracleID"
+    nameOrSignature:
+      | "PRICE_DECIMALS"
+      | "getTokenPrice"
+      | "oracleID"
+      | "setOracleID"
   ): FunctionFragment;
 
   getEvent(nameOrSignatureOrTopic: "OracleSet"): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "PRICE_DECIMALS",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "getTokenPrice",
     values: [AddressLike]
@@ -42,6 +50,10 @@ export interface IPriceOracleInterface extends Interface {
     values: [AddressLike, BytesLike]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "PRICE_DECIMALS",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getTokenPrice",
     data: BytesLike
@@ -109,6 +121,8 @@ export interface IPriceOracle extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  PRICE_DECIMALS: TypedContractMethod<[], [bigint], "view">;
+
   getTokenPrice: TypedContractMethod<[_token: AddressLike], [bigint], "view">;
 
   oracleID: TypedContractMethod<[_token: AddressLike], [string], "view">;
@@ -123,6 +137,9 @@ export interface IPriceOracle extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "PRICE_DECIMALS"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getTokenPrice"
   ): TypedContractMethod<[_token: AddressLike], [bigint], "view">;

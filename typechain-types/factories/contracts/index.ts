@@ -4,6 +4,7 @@
 export * as condition from "./condition";
 export * as interfaces from "./interfaces";
 export * as test from "./test";
+export { ActionRegistry__factory } from "./ActionRegistry__factory";
 export { FeeController__factory } from "./FeeController__factory";
 export { FeeHandler__factory } from "./FeeHandler__factory";
 export { PriceOracle__factory } from "./PriceOracle__factory";

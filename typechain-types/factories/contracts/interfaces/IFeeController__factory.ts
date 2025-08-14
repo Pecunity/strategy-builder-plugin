@@ -21,11 +21,6 @@ const _abi = [
   },
   {
     inputs: [],
-    name: "InvalidTokenWithPriceOfZero",
-    type: "error",
-  },
-  {
-    inputs: [],
     name: "NoOracleExist",
     type: "error",
   },

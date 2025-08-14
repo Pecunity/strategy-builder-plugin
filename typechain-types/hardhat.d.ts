@@ -26,10 +26,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20Metadata__factory>;
     getContractFactory(
-      name: "IERC20Permit",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC20Permit__factory>;
-    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
@@ -45,6 +41,10 @@ declare module "hardhat/types/runtime" {
       name: "IPythEvents",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPythEvents__factory>;
+    getContractFactory(
+      name: "ActionRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ActionRegistry__factory>;
     getContractFactory(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -77,6 +77,10 @@ declare module "hardhat/types/runtime" {
       name: "IAction",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IAction__factory>;
+    getContractFactory(
+      name: "IActionRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IActionRegistry__factory>;
     getContractFactory(
       name: "ICondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -122,6 +126,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MockCondition__factory>;
     getContractFactory(
+      name: "MockPythReverting",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockPythReverting__factory>;
+    getContractFactory(
       name: "Token",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Token__factory>;
@@ -149,6 +157,10 @@ declare module "hardhat/types/runtime" {
       name: "ERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC165__factory>;
+    getContractFactory(
+      name: "SafeTransferLib",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SafeTransferLib__factory>;
 
     getContractAt(
       name: "Ownable",
@@ -165,11 +177,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20Metadata>;
-    getContractAt(
-      name: "IERC20Permit",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC20Permit>;
     getContractAt(
       name: "IERC20",
       address: string | ethers.Addressable,
@@ -190,6 +197,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IPythEvents>;
+    getContractAt(
+      name: "ActionRegistry",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ActionRegistry>;
     getContractAt(
       name: "BaseCondition",
       address: string | ethers.Addressable,
@@ -230,6 +242,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IAction>;
+    getContractAt(
+      name: "IActionRegistry",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IActionRegistry>;
     getContractAt(
       name: "ICondition",
       address: string | ethers.Addressable,
@@ -286,6 +303,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.MockCondition>;
     getContractAt(
+      name: "MockPythReverting",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockPythReverting>;
+    getContractAt(
       name: "Token",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -320,6 +342,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.ERC165>;
+    getContractAt(
+      name: "SafeTransferLib",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SafeTransferLib>;
 
     deployContract(
       name: "Ownable",
@@ -333,10 +360,6 @@ declare module "hardhat/types/runtime" {
       name: "IERC20Metadata",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20Metadata>;
-    deployContract(
-      name: "IERC20Permit",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC20Permit>;
     deployContract(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -353,6 +376,10 @@ declare module "hardhat/types/runtime" {
       name: "IPythEvents",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
+    deployContract(
+      name: "ActionRegistry",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ActionRegistry>;
     deployContract(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -385,6 +412,10 @@ declare module "hardhat/types/runtime" {
       name: "IAction",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IAction>;
+    deployContract(
+      name: "IActionRegistry",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IActionRegistry>;
     deployContract(
       name: "ICondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -430,6 +461,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockCondition>;
     deployContract(
+      name: "MockPythReverting",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockPythReverting>;
+    deployContract(
       name: "Token",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Token>;
@@ -457,6 +492,10 @@ declare module "hardhat/types/runtime" {
       name: "ERC165",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ERC165>;
+    deployContract(
+      name: "SafeTransferLib",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SafeTransferLib>;
 
     deployContract(
       name: "Ownable",
@@ -473,11 +512,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC20Metadata>;
-    deployContract(
-      name: "IERC20Permit",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC20Permit>;
     deployContract(
       name: "IERC20",
       args: any[],
@@ -498,6 +532,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
+    deployContract(
+      name: "ActionRegistry",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ActionRegistry>;
     deployContract(
       name: "BaseCondition",
       args: any[],
@@ -538,6 +577,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IAction>;
+    deployContract(
+      name: "IActionRegistry",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IActionRegistry>;
     deployContract(
       name: "ICondition",
       args: any[],
@@ -594,6 +638,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockCondition>;
     deployContract(
+      name: "MockPythReverting",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockPythReverting>;
+    deployContract(
       name: "Token",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -628,6 +677,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ERC165>;
+    deployContract(
+      name: "SafeTransferLib",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SafeTransferLib>;
 
     // default types
     getContractFactory(

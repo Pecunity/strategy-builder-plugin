@@ -27,6 +27,7 @@ export interface IFeeHandlerInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "activatePrimaryToken"
+      | "getWithdrawableBalance"
       | "handleFee"
       | "handleFeeETH"
       | "primaryTokenActive"
@@ -35,6 +36,7 @@ export interface IFeeHandlerInterface extends Interface {
       | "updateReduction"
       | "updateTokenAllowance"
       | "updateVault"
+      | "withdraw"
   ): FunctionFragment;
 
   getEvent(
@@ -47,11 +49,16 @@ export interface IFeeHandlerInterface extends Interface {
       | "UpdatedReduction"
       | "UpdatedTokenAllowance"
       | "UpdatedVault"
+      | "Withdrawn"
   ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "activatePrimaryToken",
     values: [AddressLike, AddressLike, BigNumberish, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getWithdrawableBalance",
+    values: [AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "handleFee",
@@ -85,9 +92,17 @@ export interface IFeeHandlerInterface extends Interface {
     functionFragment: "updateVault",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdraw",
+    values: [AddressLike]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "activatePrimaryToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getWithdrawableBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "handleFee", data: BytesLike): Result;
@@ -119,6 +134,7 @@ export interface IFeeHandlerInterface extends Interface {
     functionFragment: "updateVault",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 }
 
 export namespace FeeHandledEvent {
@@ -288,6 +304,24 @@ export namespace UpdatedVaultEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace WithdrawnEvent {
+  export type InputTuple = [
+    receiver: AddressLike,
+    token: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [receiver: string, token: string, amount: bigint];
+  export interface OutputObject {
+    receiver: string;
+    token: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export interface IFeeHandler extends BaseContract {
   connect(runner?: ContractRunner | null): IFeeHandler;
   waitForDeployment(): Promise<this>;
@@ -343,6 +377,12 @@ export interface IFeeHandler extends BaseContract {
     "nonpayable"
   >;
 
+  getWithdrawableBalance: TypedContractMethod<
+    [user: AddressLike, token: AddressLike],
+    [bigint],
+    "view"
+  >;
+
   handleFee: TypedContractMethod<
     [
       token: AddressLike,
@@ -384,6 +424,8 @@ export interface IFeeHandler extends BaseContract {
 
   updateVault: TypedContractMethod<[vault: AddressLike], [void], "nonpayable">;
 
+  withdraw: TypedContractMethod<[token: AddressLike], [void], "nonpayable">;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -400,6 +442,13 @@ export interface IFeeHandler extends BaseContract {
     ],
     [void],
     "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getWithdrawableBalance"
+  ): TypedContractMethod<
+    [user: AddressLike, token: AddressLike],
+    [bigint],
+    "view"
   >;
   getFunction(
     nameOrSignature: "handleFee"
@@ -446,6 +495,9 @@ export interface IFeeHandler extends BaseContract {
   getFunction(
     nameOrSignature: "updateVault"
   ): TypedContractMethod<[vault: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "withdraw"
+  ): TypedContractMethod<[token: AddressLike], [void], "nonpayable">;
 
   getEvent(
     key: "FeeHandled"
@@ -502,6 +554,13 @@ export interface IFeeHandler extends BaseContract {
     UpdatedVaultEvent.InputTuple,
     UpdatedVaultEvent.OutputTuple,
     UpdatedVaultEvent.OutputObject
+  >;
+  getEvent(
+    key: "Withdrawn"
+  ): TypedContractEvent<
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
   >;
 
   filters: {
@@ -591,6 +650,17 @@ export interface IFeeHandler extends BaseContract {
       UpdatedVaultEvent.InputTuple,
       UpdatedVaultEvent.OutputTuple,
       UpdatedVaultEvent.OutputObject
+    >;
+
+    "Withdrawn(address,address,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
     >;
   };
 }

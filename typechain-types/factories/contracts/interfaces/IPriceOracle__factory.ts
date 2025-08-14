@@ -45,6 +45,19 @@ const _abi = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "PRICE_DECIMALS",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",

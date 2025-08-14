@@ -3,3 +3,4 @@ export * from "./set-oracle";
 export * from "./allow-payment-token";
 export * from "./execute-automation";
 export * from "./deploy-token";
+export * from "./register-action";

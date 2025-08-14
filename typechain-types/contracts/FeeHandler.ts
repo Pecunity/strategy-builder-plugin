@@ -32,6 +32,7 @@ export interface FeeHandlerInterface extends Interface {
       | "beneficiaryPercentage"
       | "burnerAddress"
       | "creatorPercentage"
+      | "getWithdrawableBalance"
       | "handleFee"
       | "handleFeeETH"
       | "owner"
@@ -51,6 +52,7 @@ export interface FeeHandlerInterface extends Interface {
       | "updateVault"
       | "vault"
       | "vaultPercentage"
+      | "withdraw"
   ): FunctionFragment;
 
   getEvent(
@@ -64,6 +66,7 @@ export interface FeeHandlerInterface extends Interface {
       | "UpdatedReduction"
       | "UpdatedTokenAllowance"
       | "UpdatedVault"
+      | "Withdrawn"
   ): EventFragment;
 
   encodeFunctionData(
@@ -89,6 +92,10 @@ export interface FeeHandlerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "creatorPercentage",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getWithdrawableBalance",
+    values: [AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "handleFee",
@@ -154,6 +161,10 @@ export interface FeeHandlerInterface extends Interface {
     functionFragment: "vaultPercentage",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdraw",
+    values: [AddressLike]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "MAX_PRIMARY_TOKEN_DISCOUNT",
@@ -177,6 +188,10 @@ export interface FeeHandlerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "creatorPercentage",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getWithdrawableBalance",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "handleFee", data: BytesLike): Result;
@@ -240,6 +255,7 @@ export interface FeeHandlerInterface extends Interface {
     functionFragment: "vaultPercentage",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 }
 
 export namespace FeeHandledEvent {
@@ -422,6 +438,24 @@ export namespace UpdatedVaultEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace WithdrawnEvent {
+  export type InputTuple = [
+    receiver: AddressLike,
+    token: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [receiver: string, token: string, amount: bigint];
+  export interface OutputObject {
+    receiver: string;
+    token: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export interface FeeHandler extends BaseContract {
   connect(runner?: ContractRunner | null): FeeHandler;
   waitForDeployment(): Promise<this>;
@@ -486,6 +520,12 @@ export interface FeeHandler extends BaseContract {
   burnerAddress: TypedContractMethod<[], [string], "view">;
 
   creatorPercentage: TypedContractMethod<[], [bigint], "view">;
+
+  getWithdrawableBalance: TypedContractMethod<
+    [user: AddressLike, token: AddressLike],
+    [bigint],
+    "view"
+  >;
 
   handleFee: TypedContractMethod<
     [
@@ -558,6 +598,8 @@ export interface FeeHandler extends BaseContract {
 
   vaultPercentage: TypedContractMethod<[], [bigint], "view">;
 
+  withdraw: TypedContractMethod<[token: AddressLike], [void], "nonpayable">;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -590,6 +632,13 @@ export interface FeeHandler extends BaseContract {
   getFunction(
     nameOrSignature: "creatorPercentage"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getWithdrawableBalance"
+  ): TypedContractMethod<
+    [user: AddressLike, token: AddressLike],
+    [bigint],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "handleFee"
   ): TypedContractMethod<
@@ -668,6 +717,9 @@ export interface FeeHandler extends BaseContract {
   getFunction(
     nameOrSignature: "vaultPercentage"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "withdraw"
+  ): TypedContractMethod<[token: AddressLike], [void], "nonpayable">;
 
   getEvent(
     key: "FeeHandled"
@@ -731,6 +783,13 @@ export interface FeeHandler extends BaseContract {
     UpdatedVaultEvent.InputTuple,
     UpdatedVaultEvent.OutputTuple,
     UpdatedVaultEvent.OutputObject
+  >;
+  getEvent(
+    key: "Withdrawn"
+  ): TypedContractEvent<
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
   >;
 
   filters: {
@@ -831,6 +890,17 @@ export interface FeeHandler extends BaseContract {
       UpdatedVaultEvent.InputTuple,
       UpdatedVaultEvent.OutputTuple,
       UpdatedVaultEvent.OutputObject
+    >;
+
+    "Withdrawn(address,address,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
+    >;
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
     >;
   };
 }

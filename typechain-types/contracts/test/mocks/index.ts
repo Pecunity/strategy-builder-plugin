@@ -5,4 +5,5 @@ import type * as mockTokenSol from "./MockToken.sol";
 export type { mockTokenSol };
 export type { MockAction } from "./MockAction";
 export type { MockCondition } from "./MockCondition";
+export type { MockPythReverting } from "./MockPythReverting";
 export type { WrongInterfaceContract } from "./WrongInterfaceContract";

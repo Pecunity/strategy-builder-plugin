@@ -15,7 +15,7 @@
     "test": "forge test",
     "compile": "hardhat compile && forge build",
     "coverage": "forge coverage --report lcov && genhtml lcov.info  --output-dir coverage",
-    "verify": "npx hardhat ignition verify chain-$CHAIN_ID",
+    "verify": "npx hardhat ignition verify chain-$CHAIN_ID --include-unrelated-contracts",
     "deploy:core": "hardhat compile && hardhat run scripts/deploy-core.ts --network $NETWORK",
     "deploy:conditions": "hardhat compile &&  hardhat run scripts/deploy-conditions.ts --network $NETWORK"
   },

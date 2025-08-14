@@ -25,6 +25,8 @@ import type {
 export interface PriceOracleInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "MAX_ORACLE_DELAY"
+      | "PRICE_DECIMALS"
       | "getTokenPrice"
       | "oracleID"
       | "owner"
@@ -37,6 +39,14 @@ export interface PriceOracleInterface extends Interface {
     nameOrSignatureOrTopic: "OracleSet" | "OwnershipTransferred"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "MAX_ORACLE_DELAY",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "PRICE_DECIMALS",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "getTokenPrice",
     values: [AddressLike]
@@ -59,6 +69,14 @@ export interface PriceOracleInterface extends Interface {
     values: [AddressLike]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "MAX_ORACLE_DELAY",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "PRICE_DECIMALS",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getTokenPrice",
     data: BytesLike
@@ -148,6 +166,10 @@ export interface PriceOracle extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  MAX_ORACLE_DELAY: TypedContractMethod<[], [bigint], "view">;
+
+  PRICE_DECIMALS: TypedContractMethod<[], [bigint], "view">;
+
   getTokenPrice: TypedContractMethod<[_token: AddressLike], [bigint], "view">;
 
   oracleID: TypedContractMethod<[_token: AddressLike], [string], "view">;
@@ -172,6 +194,12 @@ export interface PriceOracle extends BaseContract {
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "MAX_ORACLE_DELAY"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "PRICE_DECIMALS"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getTokenPrice"
   ): TypedContractMethod<[_token: AddressLike], [bigint], "view">;

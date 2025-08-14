@@ -72,6 +72,22 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "InvalidStepArrayLength",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "stepIndex",
+        type: "uint256",
+      },
+    ],
+    name: "NoConditionOrActions",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "PaymentTokenNotAllowed",
     type: "error",
   },
