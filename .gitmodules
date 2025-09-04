@@ -1,30 +1,12 @@
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "lib/account-abstraction"]
-	path = lib/account-abstraction
-	url = https://github.com/eth-infinitism/account-abstraction
-[submodule "lib/openzeppelin-contracts"]
-	path = lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
-[submodule "lib/reference-implementation"]
-	path = lib/reference-implementation
-	url = https://github.com/erc6900/reference-implementation
-[submodule "lib/modular-account-libs"]
-	path = lib/modular-account-libs
-	url = https://github.com/erc6900/modular-account-libs
-[submodule "lib/v2-core"]
-	path = lib/v2-core
-	url = https://github.com/Uniswap/v2-core
-[submodule "lib/v2-periphery"]
-	path = lib/v2-periphery
-	url = https://github.com/Uniswap/v2-periphery
-[submodule "lib/aave-v3-core"]
-	path = lib/aave-v3-core
-	url = https://github.com/aave/aave-v3-core
-[submodule "lib/modular-account"]
-	path = lib/modular-account
-	url = https://github.com/alchemyplatform/modular-account
 [submodule "lib/solady"]
 	path = lib/solady
 	url = https://github.com/vectorized/solady
+[submodule "lib/modular-account"]
+	path = lib/modular-account
+	url = https://github.com/alchemyplatform/modular-account
+[submodule "lib/openzeppelin-contracts"]
+	path = lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
