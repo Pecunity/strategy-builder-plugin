@@ -1,48 +1,30 @@
 // SPDX-License-Identifier:MIT
 pragma solidity ^0.8.28;
 
-import {BasePlugin} from "modular-account-libs/plugins/BasePlugin.sol";
-import {IPluginExecutor} from "modular-account-libs/interfaces/IPluginExecutor.sol";
 import {
-    ManifestFunction,
-    ManifestAssociatedFunctionType,
-    ManifestAssociatedFunction,
-    PluginManifest,
-    PluginMetadata,
-    IPlugin
-} from "modular-account-libs/interfaces/IPlugin.sol";
+    IExecutionModule,
+    ExecutionManifest,
+    ManifestExecutionFunction
+} from "@erc6900/reference-implementation/interfaces/IExecutionModule.sol";
+import {IModularAccount} from "@erc6900/reference-implementation/interfaces/IModularAccount.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IStrategyBuilderPlugin} from "./interfaces/IStrategyBuilderPlugin.sol";
+import {IStrategyBuilderModule} from "./interfaces/IStrategyBuilderModule.sol";
 import {ICondition} from "./interfaces/ICondition.sol";
 import {IFeeController} from "./interfaces/IFeeController.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IActionRegistry} from "./interfaces/IActionRegistry.sol";
 import {IAction} from "./interfaces/IAction.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
 /**
- * @title StrategyBuilderPlugin
- * @dev A plugin for creating, executing, and managing automated strategies based on predefined conditions and actions.
+ * @title StrategyBuilderModule
+ * @dev A moodule for creating, executing, and managing automated strategies based on predefined conditions and actions.
  */
-contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderPlugin {
-    using Address for address;
-
+contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExecutionModule {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-    // metadata used by the pluginMetadata() method down below
-    string public constant NAME = "Strategy Builder Plugin";
-    string public constant VERSION = "1.1.1";
-    string public constant AUTHOR = "3Blocks";
-
-    // this is a constant used in the manifest, to reference our only dependency: the single owner plugin
-    // since it is the first, and only, plugin the index 0 will reference the single owner plugin
-    // we can use this to tell the modular account that we should use the single owner plugin to validate our user op
-    // in other words, we'll say "make sure the person calling increment is an owner of the account using our single plugin"
-    uint256 internal constant _MANIFEST_DEPENDENCY_INDEX_OWNER_USER_OP_VALIDATION = 0;
 
     /// @notice Fee controller contract
     IFeeController public immutable feeController;
@@ -111,7 +93,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     // ┃    Execution functions    ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function createStrategy(uint32 id, address creator, StrategyStep[] calldata steps)
         external
         strategyDoesNotExist(msg.sender, id)
@@ -146,7 +128,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
         emit StrategyCreated(msg.sender, id, creator, newStrategy);
     }
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function deleteStrategy(uint32 id) external strategyExist(msg.sender, id) {
         bytes32 storageId = getStorageId(msg.sender, id);
 
@@ -168,12 +150,12 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
         emit StrategyDeleted(msg.sender, id);
     }
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function executeStrategy(uint32 id) external strategyExist(msg.sender, id) nonReentrant {
         _executeStrategy(msg.sender, id);
     }
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function createAutomation(
         uint32 id,
         uint32 strategyId,
@@ -204,12 +186,12 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
         emit AutomationCreated(msg.sender, id, strategyId, condition, paymentToken, maxFeeInUSD);
     }
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function deleteAutomation(uint32 id) external automationExist(msg.sender, id) {
         _deleteAutomation(msg.sender, id);
     }
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function executeAutomation(uint32 id, address wallet, address beneficary)
         external
         automationExist(wallet, id)
@@ -299,24 +281,16 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     }
 
     function _execute(address _wallet, Action memory _action) internal {
-        bytes memory data;
-
-        // If selector is zero, pass an empty bytes array
-        if (_action.selector == bytes4(0)) {
-            data = "";
-        } else {
-            data = abi.encodePacked(_action.selector, _action.parameter);
-        }
+        bytes memory data =
+            _action.selector == bytes4(0) ? bytes("") : abi.encodePacked(_action.selector, _action.parameter);
 
         if (_action.actionType == ActionType.EXTERNAL) {
-            IPluginExecutor(_wallet).executeFromPluginExternal(_action.target, _action.value, data);
+            IModularAccount(_wallet).execute(_action.target, _action.value, data);
         } else {
             (, bytes memory _result) = _action.target.call(data);
             IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
             for (uint256 i = 0; i < executions.length; i++) {
-                IPluginExecutor(_wallet).executeFromPluginExternal(
-                    executions[i].target, executions[i].value, executions[i].data
-                );
+                IModularAccount(_wallet).execute(executions[i].target, executions[i].value, executions[i].data);
             }
         }
     }
@@ -376,11 +350,9 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
                 ? abi.encodeCall(ICondition.addAutomationToCondition, (_conditionId, automationId))
                 : abi.encodeCall(ICondition.removeAutomationFromCondition, (_conditionId, automationId));
 
-            bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
+            bytes memory result = IModularAccount(_wallet).execute(_condition, 0, data);
             bool _success = abi.decode(result, (bool));
-            if (!_success) {
-                revert changeAutomationInConditionFailed();
-            }
+            if (!_success) revert changeAutomationInConditionFailed();
         }
     }
 
@@ -396,11 +368,9 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
                 ? abi.encodeCall(ICondition.addStrategyToCondition, (_conditionId, _strategy))
                 : abi.encodeCall(ICondition.removeStrategyFromCondition, (_conditionId, _strategy));
 
-            bytes memory result = IPluginExecutor(_wallet).executeFromPluginExternal(_condition, 0, data);
+            bytes memory result = IModularAccount(_wallet).execute(_condition, 0, data);
             bool _success = abi.decode(result, (bool));
-            if (!_success) {
-                revert ChangeStrategyInConditionFailed();
-            }
+            if (!_success) revert ChangeStrategyInConditionFailed();
         }
     }
 
@@ -411,37 +381,31 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
         address beneficiary,
         address creator
     ) internal returns (uint256) {
-        //calculate the token amount
         uint256 feeInToken = feeController.calculateTokenAmount(paymentToken, feeInUSD);
 
-        //If payment with ERC20 token approve first
         if (paymentToken != address(0)) {
             bytes memory _approveData = abi.encodeCall(IERC20.approve, (address(feeHandler), feeInToken));
-            IPluginExecutor(wallet).executeFromPluginExternal(paymentToken, 0, _approveData);
+            IModularAccount(wallet).execute(paymentToken, 0, _approveData);
         }
 
         bytes memory _handleFeeData = paymentToken != address(0)
             ? abi.encodeCall(IFeeHandler.handleFee, (paymentToken, feeInToken, beneficiary, creator))
             : abi.encodeCall(IFeeHandler.handleFeeETH, (beneficiary, creator));
 
-        bytes memory paymentResult = IPluginExecutor(wallet).executeFromPluginExternal(
+        bytes memory paymentResult = IModularAccount(wallet).execute(
             address(feeHandler), paymentToken == address(0) ? feeInToken : 0, _handleFeeData
         );
 
         uint256 totalFee = abi.decode(paymentResult, (uint256));
-
         return totalFee;
     }
 
     function _updateCondition(address _wallet, Condition memory _condition, uint32 automationId) internal {
         if (ICondition(_condition.conditionAddress).isUpdateable(_wallet, _condition.id)) {
             bytes memory _data = abi.encodeCall(ICondition.updateCondition, (_condition.id));
-            bytes memory _result =
-                IPluginExecutor(_wallet).executeFromPluginExternal(_condition.conditionAddress, 0, _data);
+            bytes memory _result = IModularAccount(_wallet).execute(_condition.conditionAddress, 0, _data);
             bool _success = abi.decode(_result, (bool));
-            if (!_success) {
-                revert UpdateConditionFailed(_condition.conditionAddress, _condition.id);
-            }
+            if (!_success) revert UpdateConditionFailed(_condition.conditionAddress, _condition.id);
         } else {
             _deleteAutomation(_wallet, automationId);
         }
@@ -488,7 +452,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
                 revert InvalidActionTarget();
             }
 
-            if (!action.target.isContract()) {
+            if (action.target.code.length == 0) {
                 revert InvalidActionTarget();
             }
             try IERC165(action.target).supportsInterface(type(IAction).interfaceId) returns (bool valid) {
@@ -507,7 +471,7 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
 
     function _validateCondition(Condition memory condition) internal view {
         if (condition.conditionAddress != address(0)) {
-            if (!condition.conditionAddress.isContract()) {
+            if (condition.conditionAddress.code.length == 0) {
                 revert InvalidConditionAddress();
             }
             try IERC165(condition.conditionAddress).supportsInterface(type(ICondition).interfaceId) returns (bool valid)
@@ -533,148 +497,75 @@ contract StrategyBuilderPlugin is BasePlugin, ReentrancyGuard, IStrategyBuilderP
     // ┃    Plugin interface functions    ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    /// @inheritdoc BasePlugin
     function onInstall(bytes calldata) external pure override {}
 
-    /// @inheritdoc BasePlugin
     function onUninstall(bytes calldata) external pure override {}
 
-    /// @inheritdoc BasePlugin
-    function pluginManifest() external pure override returns (PluginManifest memory) {
-        PluginManifest memory manifest;
-
-        // since we are using the modular account, we will specify one depedency
-        // which will handle the user op validation for ownership
-        // you can find this depedency specified in the installPlugin call in the tests
-        manifest.dependencyInterfaceIds = new bytes4[](1);
-        manifest.dependencyInterfaceIds[0] = type(IPlugin).interfaceId;
-
-        manifest.executionFunctions = new bytes4[](5);
-        manifest.executionFunctions[0] = this.createStrategy.selector;
-        manifest.executionFunctions[1] = this.executeStrategy.selector;
-        manifest.executionFunctions[2] = this.createAutomation.selector;
-        manifest.executionFunctions[3] = this.deleteStrategy.selector;
-        manifest.executionFunctions[4] = this.deleteAutomation.selector;
-
-        // you can think of ManifestFunction as a reference to a function somewhere,
-        // we want to say "use this function" for some purpose - in this case,
-        // we'll be using the user op validation function from the single owner dependency
-        // and this is specified by the depdendency index
-        ManifestFunction memory ownerUserOpValidationFunction = ManifestFunction({
-            functionType: ManifestAssociatedFunctionType.DEPENDENCY,
-            functionId: 0, // unused since it's a dependency
-            dependencyIndex: _MANIFEST_DEPENDENCY_INDEX_OWNER_USER_OP_VALIDATION
-        });
-
-        // here we will link together the increment function with the single owner user op validation
-        // this basically says "use this user op validation function and make sure everythings okay before calling increment"
-        // this will ensure that only an owner of the account can call increment
-        manifest.userOpValidationFunctions = new ManifestAssociatedFunction[](5);
-        manifest.userOpValidationFunctions[0] = ManifestAssociatedFunction({
-            executionSelector: this.createStrategy.selector,
-            associatedFunction: ownerUserOpValidationFunction
-        });
-
-        manifest.userOpValidationFunctions[1] = ManifestAssociatedFunction({
-            executionSelector: this.executeStrategy.selector,
-            associatedFunction: ownerUserOpValidationFunction
-        });
-
-        manifest.userOpValidationFunctions[2] = ManifestAssociatedFunction({
-            executionSelector: this.createAutomation.selector,
-            associatedFunction: ownerUserOpValidationFunction
-        });
-
-        manifest.userOpValidationFunctions[3] = ManifestAssociatedFunction({
-            executionSelector: this.deleteStrategy.selector,
-            associatedFunction: ownerUserOpValidationFunction
-        });
-
-        manifest.userOpValidationFunctions[4] = ManifestAssociatedFunction({
-            executionSelector: this.deleteAutomation.selector,
-            associatedFunction: ownerUserOpValidationFunction
-        });
-
-        // finally here we will always deny runtime calls to the increment function as we will only call it through user ops
-        // this avoids a potential issue where a future plugin may define
-        // a runtime validation function for it and unauthorized calls may occur due to that
-        manifest.preRuntimeValidationHooks = new ManifestAssociatedFunction[](5);
-        manifest.preRuntimeValidationHooks[0] = ManifestAssociatedFunction({
-            executionSelector: this.createStrategy.selector,
-            associatedFunction: ManifestFunction({
-                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
-                functionId: 0,
-                dependencyIndex: 0
-            })
-        });
-
-        manifest.preRuntimeValidationHooks[1] = ManifestAssociatedFunction({
-            executionSelector: this.executeStrategy.selector,
-            associatedFunction: ManifestFunction({
-                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
-                functionId: 0,
-                dependencyIndex: 0
-            })
-        });
-
-        manifest.preRuntimeValidationHooks[2] = ManifestAssociatedFunction({
-            executionSelector: this.createAutomation.selector,
-            associatedFunction: ManifestFunction({
-                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
-                functionId: 0,
-                dependencyIndex: 0
-            })
-        });
-
-        manifest.preRuntimeValidationHooks[3] = ManifestAssociatedFunction({
-            executionSelector: this.deleteAutomation.selector,
-            associatedFunction: ManifestFunction({
-                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
-                functionId: 0,
-                dependencyIndex: 0
-            })
-        });
-
-        manifest.preRuntimeValidationHooks[4] = ManifestAssociatedFunction({
-            executionSelector: this.deleteStrategy.selector,
-            associatedFunction: ManifestFunction({
-                functionType: ManifestAssociatedFunctionType.PRE_HOOK_ALWAYS_DENY,
-                functionId: 0,
-                dependencyIndex: 0
-            })
-        });
-
-        manifest.permitAnyExternalAddress = true;
-        manifest.canSpendNativeToken = true;
-
-        return manifest;
+    function moduleId() external pure returns (string memory) {
+        return "pecunity.strategy-builder-module";
     }
 
-    /// @inheritdoc BasePlugin
-    function pluginMetadata() external pure virtual override returns (PluginMetadata memory) {
-        PluginMetadata memory metadata;
-        metadata.name = NAME;
-        metadata.version = VERSION;
-        metadata.author = AUTHOR;
-        return metadata;
+    function executionManifest() external pure returns (ExecutionManifest memory) {
+        ExecutionManifest memory manifest;
+
+        ManifestExecutionFunction[] memory executionFunctions = new ManifestExecutionFunction[](5);
+        // 1. Publicly callable
+        executionFunctions[0] = ManifestExecutionFunction({
+            executionSelector: this.executeAutomation.selector,
+            skipRuntimeValidation: true, // account owner can call
+            allowGlobalValidation: false // no plugin-only validation
+        });
+
+        // 2. Internal-only functions
+        executionFunctions[1] = ManifestExecutionFunction({
+            executionSelector: this.createStrategy.selector,
+            skipRuntimeValidation: false, // account owner can call
+            allowGlobalValidation: true // no plugin-only validation
+        });
+
+        executionFunctions[2] = ManifestExecutionFunction({
+            executionSelector: this.deleteStrategy.selector,
+            skipRuntimeValidation: false, // account owner can call
+            allowGlobalValidation: true // no plugin-only validation
+        });
+
+        executionFunctions[3] = ManifestExecutionFunction({
+            executionSelector: this.createAutomation.selector,
+            skipRuntimeValidation: false, // account owner can call
+            allowGlobalValidation: true // no plugin-only validation
+        });
+
+        executionFunctions[4] = ManifestExecutionFunction({
+            executionSelector: this.deleteAutomation.selector,
+            skipRuntimeValidation: false, // account owner can call
+            allowGlobalValidation: true // no plugin-only validation
+        });
+
+        manifest.executionFunctions = executionFunctions;
+
+        return manifest;
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    External View Functions       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function strategy(address wallet, uint32 id) external view returns (Strategy memory) {
         return strategies[getStorageId(wallet, id)];
     }
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function automation(address wallet, uint32 id) external view returns (Automation memory) {
         return automations[getStorageId(wallet, id)];
     }
 
-    /// @inheritdoc IStrategyBuilderPlugin
+    /// @inheritdoc IStrategyBuilderModule
     function getStorageId(address wallet, uint32 id) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(wallet, id));
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+        return interfaceId == type(IStrategyBuilderModule).interfaceId;
     }
 }

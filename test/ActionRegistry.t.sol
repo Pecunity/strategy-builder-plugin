@@ -14,7 +14,7 @@ contract ActionRegistryTest is Test {
 
     function setUp() public {
         vm.prank(owner);
-        registry = new ActionRegistry();
+        registry = new ActionRegistry(owner);
     }
 
     function test_allowAction_Success() public {

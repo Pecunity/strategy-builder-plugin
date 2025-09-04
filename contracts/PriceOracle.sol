@@ -30,7 +30,7 @@ contract PriceOracle is Ownable, IPriceOracle {
     /// @notice Deploys the contract and sets the Pyth Oracle and contract owner.
     /// @dev Initializes the oracle contract and transfers ownership to the given owner address.
     /// @param _pythOracle Address of the deployed Pyth Oracle contract.
-    constructor(address _pythOracle) {
+    constructor(address initialOwner, address _pythOracle) Ownable(initialOwner) {
         pythOracle = IPyth(_pythOracle);
     }
 

@@ -11,6 +11,8 @@ contract ActionRegistry is Ownable, IActionRegistry {
 
     mapping(address => bool) private isAllowedAction;
 
+    constructor(address initialOwner) Ownable(initialOwner) {}
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃     Public Functions      ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
