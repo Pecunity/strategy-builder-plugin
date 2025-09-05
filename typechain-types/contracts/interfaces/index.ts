@@ -8,5 +8,6 @@ export type { IFeeController } from "./IFeeController";
 export type { IFeeHandler } from "./IFeeHandler";
 export type { IFeeReduction } from "./IFeeReduction";
 export type { IPriceOracle } from "./IPriceOracle";
+export type { IStrategyBuilderModule } from "./IStrategyBuilderModule";
 export type { IStrategyBuilderPlugin } from "./IStrategyBuilderPlugin";
 export type { ITokenGetter } from "./ITokenGetter";

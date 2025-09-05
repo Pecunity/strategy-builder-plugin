@@ -8,4 +8,5 @@ export { ActionRegistry__factory } from "./ActionRegistry__factory";
 export { FeeController__factory } from "./FeeController__factory";
 export { FeeHandler__factory } from "./FeeHandler__factory";
 export { PriceOracle__factory } from "./PriceOracle__factory";
+export { StrategyBuilderModule__factory } from "./StrategyBuilderModule__factory";
 export { StrategyBuilderPlugin__factory } from "./StrategyBuilderPlugin__factory";

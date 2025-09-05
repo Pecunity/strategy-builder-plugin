@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as introspection from "./introspection";
+export { ReentrancyGuard__factory } from "./ReentrancyGuard__factory";

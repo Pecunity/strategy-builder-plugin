@@ -11,4 +11,5 @@ export type { ActionRegistry } from "./ActionRegistry";
 export type { FeeController } from "./FeeController";
 export type { FeeHandler } from "./FeeHandler";
 export type { PriceOracle } from "./PriceOracle";
+export type { StrategyBuilderModule } from "./StrategyBuilderModule";
 export type { StrategyBuilderPlugin } from "./StrategyBuilderPlugin";
