@@ -26,10 +26,10 @@ import {IModularAccount} from "@erc6900/reference-implementation/interfaces/IMod
 import {DIRECT_CALL_VALIDATION_ENTITY_ID} from "@erc6900/reference-implementation/helpers/Constants.sol";
 import {ValidationConfigLib} from "@erc6900/reference-implementation/libraries/ValidationConfigLib.sol";
 
-// import {IFeeController} from "contracts/interfaces/IFeeController.sol";
-// import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
+import {IFeeController} from "contracts/interfaces/IFeeController.sol";
+import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
 import {IActionRegistry} from "contracts/interfaces/IActionRegistry.sol";
-// import {BaseCondition} from "contracts/condition/BaseCondition.sol";
+import {BaseCondition} from "contracts/condition/BaseCondition.sol";
 
 import {MockCondition} from "contracts/test/mocks/MockCondition.sol";
 import {Token} from "contracts/test/mocks/MockToken.sol";
@@ -317,6 +317,286 @@ contract StrategyBuilderModuleTest is Test {
         vm.prank(address(account1));
         vm.expectRevert(abi.encodeWithSelector(IStrategyBuilderModule.NoConditionOrActions.selector, 0));
         IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    //     /////////////////////////////////
+    //     ////// deleteStrategy ///////////
+    //     /////////////////////////////////
+
+    function test_deleteStrategy_Success(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        //Act
+        vm.startPrank(address(account1));
+        IStrategyBuilderModule(address(account1)).deleteStrategy(strategyID);
+        vm.stopPrank();
+
+        //Assert
+        assertTrue(strategyBuilderModule.strategy(address(account1), strategyID).creator == address(0));
+        assertTrue(strategyBuilderModule.strategy(address(account1), strategyID).steps.length == 0);
+    }
+
+    function test_deleteStrategy_Success_StrategyWithConditions(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategyStepsWithCondition(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+        //Act
+        vm.startPrank(address(account1));
+        IStrategyBuilderModule(address(account1)).deleteStrategy(strategyID);
+        vm.stopPrank();
+        //Assert
+        assertTrue(strategyBuilderModule.strategy(address(account1), strategyID).creator == address(0));
+        assertTrue(strategyBuilderModule.strategy(address(account1), strategyID).steps.length == 0);
+    }
+
+    function test_deleteStrategy_Revert_StrategyInUse(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        //Mock FeeController and FeeHandler
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
+        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
+
+        vm.startPrank(address(account1));
+        uint32 conditionId = 2222;
+        mockCondition.addCondition(conditionId, MockCondition.Condition({result: true, active: true, updateable: true}));
+        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+            conditionAddress: address(mockCondition),
+            id: 2222,
+            result0: 0,
+            result1: 0
+        });
+        IStrategyBuilderModule(address(account1)).createAutomation(
+            1, strategyID, address(0), type(uint256).max, condition
+        );
+        vm.stopPrank();
+
+        //Act
+
+        vm.expectRevert(IStrategyBuilderModule.StrategyIsInUse.selector);
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).deleteStrategy(strategyID);
+    }
+
+    function test_deleteStrategy_Revert_StrategyDoesNotExist(uint32 strategyId) external {
+        vm.expectRevert(IStrategyBuilderModule.StrategyDoesNotExist.selector);
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).deleteStrategy(strategyId); // Strategy ID doesn't exist
+    }
+
+    /////////////////////////////////
+    ////// executeStrategy //////////
+    /////////////////////////////////
+
+    function test_executeStrategy_Success(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+
+        deal(address(account1), 100 ether);
+
+        //Mocks
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
+            abi.encode(address(0), false)
+        );
+
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.functionFeeConfig.selector),
+            abi.encode(IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0}))
+        );
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(0));
+
+        //Act
+        vm.startPrank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        IStrategyBuilderModule(address(account1)).executeStrategy(strategyID);
+        vm.stopPrank();
+
+        //Assert
+        assertEq(tokenReceiver.balance, numSteps * 2 * TOKEN_SEND_AMOUNT);
+    }
+
+    function test_executeStrategy_Success_StrategyWithMultiExecutionAction(uint256 _value) external {
+        uint256 value = bound(_value, 1 ether, 10 ether);
+        address[] memory receivers = new address[](2);
+        address receiver1 = makeAddr("receiver1");
+        address receiver2 = makeAddr("receiver2");
+        receivers[0] = receiver1;
+        receivers[1] = receiver2;
+        vm.prank(address(account1));
+        Token token = new Token("TestToken", "TT", 100 ether);
+        IStrategyBuilderModule.StrategyStep[] memory steps =
+            _createStrategyStepWithMultiExecutionAction(1, receivers, value, address(token));
+        uint32 strategyID = 222;
+
+        deal(address(account1), 100 ether);
+
+        //Mocks
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
+            abi.encode(address(token), true)
+        );
+
+        uint256 feePerTarget = 10 * value / 100;
+        vm.mockCall(
+            feeController, abi.encodeWithSelector(IFeeController.calculateFee.selector), abi.encode(feePerTarget)
+        );
+
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.functionFeeConfig.selector),
+            abi.encode(IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0}))
+        );
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(0));
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
+        //Act
+        vm.startPrank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        IStrategyBuilderModule(address(account1)).executeStrategy(strategyID);
+        vm.stopPrank();
+
+        //Assert
+        assertTrue(token.balanceOf(receiver1) == value);
+        assertTrue(token.balanceOf(receiver2) == value);
+    }
+
+    function test_executeStrategy_OOB_RevertWithValidiationError() external {
+        uint256 numSteps = 2;
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        steps[0].condition.result0 = 2;
+        steps[0].condition.result1 = 2;
+        uint32 strategyID = 222;
+        deal(address(account1), 100 ether);
+        //Mocks
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.getTokenForAction.selector),
+            abi.encode(address(0), false)
+        );
+        vm.mockCall(
+            feeController,
+            abi.encodeWithSelector(IFeeController.functionFeeConfig.selector),
+            abi.encode(IFeeController.FeeConfig({feeType: IFeeController.FeeType.Deposit, feePercentage: 0}))
+        );
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.minFeeInUSD.selector), abi.encode(0));
+        //Act
+        vm.startPrank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidNextStepIndex.selector);
+
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        vm.stopPrank();
+    }
+
+    /////////////////////////////////
+    ////// createAutomation /////////
+    /////////////////////////////////
+
+    function test_createAutomation_Success(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        //Mock FeeController and FeeHandler
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
+        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
+
+        vm.startPrank(address(account1));
+        uint32 conditionId = 2222;
+        mockCondition.addCondition(conditionId, MockCondition.Condition({result: true, active: true, updateable: true}));
+        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+            conditionAddress: address(mockCondition),
+            id: 2222,
+            result0: 0,
+            result1: 0
+        });
+        IStrategyBuilderModule(address(account1)).createAutomation(
+            1, strategyID, address(0), type(uint256).max, condition
+        );
+        vm.stopPrank();
+
+        //assert
+
+        IStrategyBuilderModule.Automation memory automation = strategyBuilderModule.automation(address(account1), 1);
+        assertEq(automation.strategyId, strategyID);
+        assertEq(automation.condition.conditionAddress, address(mockCondition));
+        assertEq(automation.condition.id, conditionId);
+    }
+
+    function test_createAutomation_Revert_InvalidPaymentToken_NotAllowed(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        //Mock FeeController and FeeHandler
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(true));
+        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(false));
+
+        address paymentToken = makeAddr("invalid-token");
+
+        vm.startPrank(address(account1));
+        uint32 conditionId = 2222;
+        mockCondition.addCondition(conditionId, MockCondition.Condition({result: true, active: true, updateable: true}));
+        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+            conditionAddress: address(mockCondition),
+            id: 2222,
+            result0: 0,
+            result1: 0
+        });
+        vm.expectRevert(IStrategyBuilderModule.PaymentTokenNotAllowed.selector);
+        IStrategyBuilderModule(address(account1)).createAutomation(
+            1, strategyID, paymentToken, type(uint256).max, condition
+        );
+        vm.stopPrank();
+    }
+
+    function test_createAutomation_Revert_InvalidPaymentToken_NotOracle(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        //Mock FeeController and FeeHandler
+        vm.mockCall(feeController, abi.encodeWithSelector(IFeeController.hasOracle.selector), abi.encode(false));
+        vm.mockCall(feeHandler, abi.encodeWithSelector(IFeeHandler.tokenAllowed.selector), abi.encode(true));
+
+        address paymentToken = makeAddr("invalid-token");
+
+        vm.startPrank(address(account1));
+        uint32 conditionId = 2222;
+        mockCondition.addCondition(conditionId, MockCondition.Condition({result: true, active: true, updateable: true}));
+        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+            conditionAddress: address(mockCondition),
+            id: 2222,
+            result0: 0,
+            result1: 0
+        });
+        vm.expectRevert(IStrategyBuilderModule.PaymentTokenNotAllowed.selector);
+        IStrategyBuilderModule(address(account1)).createAutomation(
+            1, strategyID, paymentToken, type(uint256).max, condition
+        );
+        vm.stopPrank();
     }
 
     function _createStrategySteps(uint256 numSteps)
