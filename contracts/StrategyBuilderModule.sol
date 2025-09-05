@@ -512,33 +512,33 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         // 1. Publicly callable
         executionFunctions[0] = ManifestExecutionFunction({
             executionSelector: this.executeAutomation.selector,
-            skipRuntimeValidation: true, // account owner can call
-            allowGlobalValidation: false // no plugin-only validation
+            skipRuntimeValidation: true,
+            allowGlobalValidation: false
         });
 
         // 2. Internal-only functions
         executionFunctions[1] = ManifestExecutionFunction({
             executionSelector: this.createStrategy.selector,
-            skipRuntimeValidation: false, // account owner can call
-            allowGlobalValidation: true // no plugin-only validation
+            skipRuntimeValidation: false,
+            allowGlobalValidation: true
         });
 
         executionFunctions[2] = ManifestExecutionFunction({
             executionSelector: this.deleteStrategy.selector,
-            skipRuntimeValidation: false, // account owner can call
-            allowGlobalValidation: true // no plugin-only validation
+            skipRuntimeValidation: false,
+            allowGlobalValidation: true
         });
 
         executionFunctions[3] = ManifestExecutionFunction({
             executionSelector: this.createAutomation.selector,
-            skipRuntimeValidation: false, // account owner can call
-            allowGlobalValidation: true // no plugin-only validation
+            skipRuntimeValidation: false,
+            allowGlobalValidation: true
         });
 
         executionFunctions[4] = ManifestExecutionFunction({
             executionSelector: this.deleteAutomation.selector,
-            skipRuntimeValidation: false, // account owner can call
-            allowGlobalValidation: true // no plugin-only validation
+            skipRuntimeValidation: false,
+            allowGlobalValidation: true
         });
 
         manifest.executionFunctions = executionFunctions;

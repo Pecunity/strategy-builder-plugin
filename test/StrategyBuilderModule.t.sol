@@ -9,6 +9,7 @@ import {Test, console} from "forge-std/Test.sol";
 // import {MSCAFactoryFixture} from "erc6900/reference-implementation/test/mocks/MSCAFactoryFixture.sol";
 import {IEntryPoint} from "@eth-infinitism/account-abstraction/interfaces/IEntryPoint.sol";
 import {EntryPoint} from "@eth-infinitism/account-abstraction/core/EntryPoint.sol";
+
 // import {FunctionReference} from "erc6900/reference-implementation/src/interfaces/IPluginManager.sol";
 // import {FunctionReferenceLib} from "erc6900/reference-implementation/src/helpers/FunctionReferenceLib.sol";
 
@@ -21,15 +22,19 @@ import {SingleSignerValidationModule} from "modular-account/src/modules/validati
 
 import {AccountFactoryTest} from "./utils/AccountFactoryTest.sol";
 
+import {IModularAccount} from "@erc6900/reference-implementation/interfaces/IModularAccount.sol";
+import {DIRECT_CALL_VALIDATION_ENTITY_ID} from "@erc6900/reference-implementation/helpers/Constants.sol";
+import {ValidationConfigLib} from "@erc6900/reference-implementation/libraries/ValidationConfigLib.sol";
+
 // import {IFeeController} from "contracts/interfaces/IFeeController.sol";
 // import {IFeeHandler} from "contracts/interfaces/IFeeHandler.sol";
-// import {IActionRegistry} from "contracts/interfaces/IActionRegistry.sol";
+import {IActionRegistry} from "contracts/interfaces/IActionRegistry.sol";
 // import {BaseCondition} from "contracts/condition/BaseCondition.sol";
 
-// import {MockCondition} from "contracts/test/mocks/MockCondition.sol";
-// import {Token} from "contracts/test/mocks/MockToken.sol";
-// import {WrongInterfaceContract} from "contracts/test/mocks/WrongInterfaceContract.sol";
-// import {MockAction} from "contracts/test/mocks/MockAction.sol";
+import {MockCondition} from "contracts/test/mocks/MockCondition.sol";
+import {Token} from "contracts/test/mocks/MockToken.sol";
+import {WrongInterfaceContract} from "contracts/test/mocks/WrongInterfaceContract.sol";
+import {MockAction} from "contracts/test/mocks/MockAction.sol";
 
 contract StrategyBuilderModuleTest is Test {
     //Modular Account
@@ -46,6 +51,9 @@ contract StrategyBuilderModuleTest is Test {
     ModularAccount public account1;
 
     StrategyBuilderModule strategyBuilderModule;
+
+    //Mocks
+    MockCondition mockCondition = new MockCondition();
 
     address feeHandler = makeAddr("feeHandler");
     address feeController = makeAddr("feeController");
@@ -74,9 +82,20 @@ contract StrategyBuilderModuleTest is Test {
 
         deal(address(account1), 100 ether);
 
-        vm.prank(address(entryPoint));
+        vm.startPrank(address(account1));
         account1.installExecution(address(strategyBuilderModule), strategyBuilderModule.executionManifest(), "");
 
+        bytes4[] memory selectors = new bytes4[](1);
+        selectors[0] = IModularAccount.execute.selector;
+        account1.installValidation(
+            ValidationConfigLib.pack(
+                address(strategyBuilderModule), DIRECT_CALL_VALIDATION_ENTITY_ID, false, false, false
+            ),
+            selectors,
+            "",
+            new bytes[](0)
+        );
+        vm.stopPrank();
         // account1.execute(tokenReceiver, 1 ether, "");
     }
 
@@ -90,13 +109,214 @@ contract StrategyBuilderModuleTest is Test {
 
         uint32 strategyID = 222;
         vm.prank(address(account1));
-        strategyBuilderModule.createStrategy(strategyID, creator, steps);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
 
         //Assert
         StrategyBuilderModule.Strategy memory strategy = strategyBuilderModule.strategy(address(account1), strategyID);
 
         assertEq(strategy.creator, creator);
         assertEq(strategy.steps.length, numSteps);
+    }
+
+    function test_createStrategy_Revert_AlreadyExists(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        StrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        vm.expectRevert(IStrategyBuilderModule.StrategyAlreadyExist.selector);
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Success_StepsWithCondition(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        StrategyBuilderModule.StrategyStep[] memory steps = _createStrategyStepsWithCondition(numSteps);
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        //Assert
+        IStrategyBuilderModule.Strategy memory strategy = strategyBuilderModule.strategy(address(account1), strategyID);
+
+        assertEq(strategy.creator, creator);
+        assertEq(strategy.steps.length, numSteps);
+
+        assertTrue(mockCondition.strategies(address(account1), uint32(1)).length > 0);
+    }
+
+    function test_createStrategy_Success_SameConditionMultipleTimesInStrategy(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+
+        uint32 conditionId = 22;
+        IStrategyBuilderModule.StrategyStep[] memory steps =
+            _createStrategyStepsWithSameCondition(numSteps, conditionId);
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+
+        //Assert
+        IStrategyBuilderModule.Strategy memory strategy = strategyBuilderModule.strategy(address(account1), strategyID);
+        assertEq(strategy.creator, creator);
+        assertEq(strategy.steps.length, numSteps);
+        assertTrue(mockCondition.strategies(address(account1), conditionId).length > 0);
+        assertTrue(mockCondition.conditionInStrategy(address(account1), conditionId, strategyID));
+    }
+
+    function test_createStrategy_Revert_InvalidNextStepId(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategyStepsWithCondition(numSteps);
+
+        steps[steps.length - 1].condition.result1 = 100; // Invalid next step ID
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidNextStepIndex.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidAction_NoContract(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        address invalidAction = makeAddr("invalid-address");
+        steps[0].actions[0].target = invalidAction;
+        steps[0].actions[0].actionType = IStrategyBuilderModule.ActionType.INTERNAL_ACTION;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidActionTarget.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidAction_NoInterface(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        Token invalidActionContract = new Token("Test", "TST", 1 ether);
+        address invalidAction = address(invalidActionContract);
+        steps[0].actions[0].target = invalidAction;
+        steps[0].actions[0].actionType = IStrategyBuilderModule.ActionType.INTERNAL_ACTION;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidActionTarget.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidAction_IncorrectInterface(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        WrongInterfaceContract invalidActionContract = new WrongInterfaceContract();
+        address invalidAction = address(invalidActionContract);
+        steps[0].actions[0].target = invalidAction;
+        steps[0].actions[0].actionType = IStrategyBuilderModule.ActionType.INTERNAL_ACTION;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidActionTarget.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidAction_ZeroAddress(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        address invalidAction = address(0);
+        steps[0].actions[0].target = invalidAction;
+        steps[0].actions[0].actionType = IStrategyBuilderModule.ActionType.EXTERNAL;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(true));
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidActionTarget.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidAction_NotRegistered(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        address invalidAction = makeAddr("not-regisstered");
+        steps[0].actions[0].target = invalidAction;
+        steps[0].actions[0].actionType = IStrategyBuilderModule.ActionType.INTERNAL_ACTION;
+
+        vm.mockCall(actionRegistry, abi.encodeWithSelector(IActionRegistry.isAllowed.selector), abi.encode(false));
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidActionTarget.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidCondition_NoInterface(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        Token invalidConditionContract = new Token("test", "TST", 1 ether);
+        steps[0].condition.conditionAddress = address(invalidConditionContract);
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidCondition.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidCondition_IncorrectInterface(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        WrongInterfaceContract invalidConditionContract = new WrongInterfaceContract();
+        steps[0].condition.conditionAddress = address(invalidConditionContract);
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidCondition.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_Revert_InvalidCondition_NoContract(uint8 _numSteps) external {
+        uint256 numSteps = bound(_numSteps, 1, 10);
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+
+        steps[0].condition.conditionAddress = makeAddr("no-contract-address");
+
+        uint32 strategyID = 222;
+        vm.startPrank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidCondition.selector);
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+        vm.stopPrank();
+    }
+
+    function test_createStrategy_Empty() external {
+        uint256 numSteps;
+        IStrategyBuilderModule.StrategyStep[] memory steps = _createStrategySteps(numSteps);
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(IStrategyBuilderModule.InvalidStepArrayLength.selector);
+
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
+    }
+
+    function test_createStrategy_EmptyNonZeroLength() external {
+        uint256 numSteps = 2;
+        IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](numSteps);
+
+        uint32 strategyID = 222;
+        vm.prank(address(account1));
+        vm.expectRevert(abi.encodeWithSelector(IStrategyBuilderModule.NoConditionOrActions.selector, 0));
+        IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
     }
 
     function _createStrategySteps(uint256 numSteps)
@@ -134,6 +354,127 @@ contract StrategyBuilderModuleTest is Test {
 
             steps[i] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
         }
+
+        return steps;
+    }
+
+    function _createStrategyStepsWithCondition(uint256 numSteps)
+        internal
+        returns (IStrategyBuilderModule.StrategyStep[] memory)
+    {
+        IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](numSteps);
+        for (uint256 i = 0; i < numSteps; i++) {
+            IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+                conditionAddress: address(mockCondition),
+                id: uint32(i + 1),
+                result0: 0,
+                result1: i == numSteps - 1 ? 0 : uint8(i + 1)
+            });
+
+            vm.prank(address(account1));
+            MockCondition.Condition memory _mockCondition =
+                MockCondition.Condition({result: true, active: true, updateable: true});
+            mockCondition.addCondition(uint32(i + 1), _mockCondition);
+
+            IStrategyBuilderModule.Action[] memory actions = new IStrategyBuilderModule.Action[](2);
+
+            actions[0] = IStrategyBuilderModule.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+            });
+
+            actions[1] = IStrategyBuilderModule.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+            });
+
+            steps[i] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
+        }
+
+        return steps;
+    }
+
+    function _createStrategyStepsWithSameCondition(uint256 numSteps, uint32 conditionId)
+        internal
+        returns (IStrategyBuilderModule.StrategyStep[] memory)
+    {
+        vm.prank(address(account1));
+        MockCondition.Condition memory _mockCondition =
+            MockCondition.Condition({result: true, active: true, updateable: true});
+        mockCondition.addCondition(conditionId, _mockCondition);
+
+        IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](numSteps);
+        for (uint256 i = 0; i < numSteps; i++) {
+            IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+                conditionAddress: address(mockCondition),
+                id: conditionId,
+                result0: 0,
+                result1: i == numSteps - 1 ? 0 : uint8(i + 1)
+            });
+
+            IStrategyBuilderModule.Action[] memory actions = new IStrategyBuilderModule.Action[](2);
+
+            actions[0] = IStrategyBuilderModule.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+            });
+
+            actions[1] = IStrategyBuilderModule.Action({
+                target: tokenReceiver,
+                parameter: "",
+                value: TOKEN_SEND_AMOUNT,
+                selector: bytes4(0),
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+            });
+
+            steps[i] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
+        }
+
+        return steps;
+    }
+
+    function _createStrategyStepWithMultiExecutionAction(
+        uint32 conditionId,
+        address[] memory receivers,
+        uint256 value,
+        address token
+    ) internal returns (IStrategyBuilderModule.StrategyStep[] memory) {
+        vm.prank(address(account1));
+        MockCondition.Condition memory _mockCondition =
+            MockCondition.Condition({result: true, active: true, updateable: true});
+        mockCondition.addCondition(conditionId, _mockCondition);
+
+        IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](1);
+
+        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+            conditionAddress: address(mockCondition),
+            id: conditionId,
+            result0: 0,
+            result1: 0
+        });
+
+        IStrategyBuilderModule.Action[] memory actions = new IStrategyBuilderModule.Action[](1);
+
+        MockAction actionContract = new MockAction();
+
+        actions[0] = IStrategyBuilderModule.Action({
+            target: address(actionContract),
+            parameter: abi.encode(receivers, address(token), value),
+            value: 0,
+            selector: MockAction.execute.selector,
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION
+        });
+
+        steps[0] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
 
         return steps;
     }
