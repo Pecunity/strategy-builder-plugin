@@ -5,5 +5,4 @@ export * as erc6900 from "./@erc6900";
 export * as openzeppelin from "./@openzeppelin";
 export * as pythnetwork from "./@pythnetwork";
 export * as contracts from "./contracts";
-export * as modularAccountLibs from "./modular-account-libs";
 export * as solady from "./solady";

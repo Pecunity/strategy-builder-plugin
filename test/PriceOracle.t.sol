@@ -17,7 +17,7 @@ contract PriceOracleTest is Test {
 
     function setUp() external {
         vm.prank(OWNER);
-        oracle = new PriceOracle(OWNER, PYTH_ORACLE);
+        oracle = new PriceOracle(OWNER, PYTH_ORACLE, 60);
     }
 
     function test_setOracleID_Success(bytes32 id) external {
@@ -121,7 +121,7 @@ contract PriceOracleTest is Test {
     function test_getTokenPrice_OracleWithNoStalePrice() external {
         MockPythReverting revertOracle = new MockPythReverting();
         vm.prank(OWNER);
-        oracle = new PriceOracle(OWNER, address(revertOracle));
+        oracle = new PriceOracle(OWNER, address(revertOracle), 60);
 
         int64 _price = 1;
 

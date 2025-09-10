@@ -134,10 +134,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IStrategyBuilderModule__factory>;
     getContractFactory(
-      name: "IStrategyBuilderPlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IStrategyBuilderPlugin__factory>;
-    getContractFactory(
       name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ITokenGetter__factory>;
@@ -149,10 +145,6 @@ declare module "hardhat/types/runtime" {
       name: "StrategyBuilderModule",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.StrategyBuilderModule__factory>;
-    getContractFactory(
-      name: "StrategyBuilderPlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.StrategyBuilderPlugin__factory>;
     getContractFactory(
       name: "MockAction",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -173,26 +165,6 @@ declare module "hardhat/types/runtime" {
       name: "WrongInterfaceContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WrongInterfaceContract__factory>;
-    getContractFactory(
-      name: "IERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC165__factory>;
-    getContractFactory(
-      name: "IPlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPlugin__factory>;
-    getContractFactory(
-      name: "IPluginExecutor",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPluginExecutor__factory>;
-    getContractFactory(
-      name: "BasePlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BasePlugin__factory>;
-    getContractFactory(
-      name: "ERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ERC165__factory>;
     getContractFactory(
       name: "SafeTransferLib",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -349,11 +321,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IStrategyBuilderModule>;
     getContractAt(
-      name: "IStrategyBuilderPlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IStrategyBuilderPlugin>;
-    getContractAt(
       name: "ITokenGetter",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -368,11 +335,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.StrategyBuilderModule>;
-    getContractAt(
-      name: "StrategyBuilderPlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.StrategyBuilderPlugin>;
     getContractAt(
       name: "MockAction",
       address: string | ethers.Addressable,
@@ -398,31 +360,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.WrongInterfaceContract>;
-    getContractAt(
-      name: "IERC165",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC165>;
-    getContractAt(
-      name: "IPlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPlugin>;
-    getContractAt(
-      name: "IPluginExecutor",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPluginExecutor>;
-    getContractAt(
-      name: "BasePlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BasePlugin>;
-    getContractAt(
-      name: "ERC165",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ERC165>;
     getContractAt(
       name: "SafeTransferLib",
       address: string | ethers.Addressable,
@@ -550,10 +487,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyBuilderModule>;
     deployContract(
-      name: "IStrategyBuilderPlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IStrategyBuilderPlugin>;
-    deployContract(
       name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ITokenGetter>;
@@ -565,10 +498,6 @@ declare module "hardhat/types/runtime" {
       name: "StrategyBuilderModule",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderModule>;
-    deployContract(
-      name: "StrategyBuilderPlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StrategyBuilderPlugin>;
     deployContract(
       name: "MockAction",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -589,26 +518,6 @@ declare module "hardhat/types/runtime" {
       name: "WrongInterfaceContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WrongInterfaceContract>;
-    deployContract(
-      name: "IERC165",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC165>;
-    deployContract(
-      name: "IPlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPlugin>;
-    deployContract(
-      name: "IPluginExecutor",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPluginExecutor>;
-    deployContract(
-      name: "BasePlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePlugin>;
-    deployContract(
-      name: "ERC165",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC165>;
     deployContract(
       name: "SafeTransferLib",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -765,11 +674,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyBuilderModule>;
     deployContract(
-      name: "IStrategyBuilderPlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IStrategyBuilderPlugin>;
-    deployContract(
       name: "ITokenGetter",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -784,11 +688,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StrategyBuilderModule>;
-    deployContract(
-      name: "StrategyBuilderPlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StrategyBuilderPlugin>;
     deployContract(
       name: "MockAction",
       args: any[],
@@ -814,31 +713,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WrongInterfaceContract>;
-    deployContract(
-      name: "IERC165",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC165>;
-    deployContract(
-      name: "IPlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPlugin>;
-    deployContract(
-      name: "IPluginExecutor",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPluginExecutor>;
-    deployContract(
-      name: "BasePlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePlugin>;
-    deployContract(
-      name: "ERC165",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC165>;
     deployContract(
       name: "SafeTransferLib",
       args: any[],

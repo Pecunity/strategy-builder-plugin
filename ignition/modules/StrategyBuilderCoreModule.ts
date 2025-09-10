@@ -7,8 +7,14 @@ const StrategBuilderCoreModule = buildModule(
     const pythOracle = m.getParameter("pythOracle");
     const ethOracleID = m.getParameter("ethOracleID");
 
+    const maxOracleDelay = m.getParameter("maxOracleDelay");
+
     // Price Oracle
-    const priceOracle = m.contract("PriceOracle", [owner, pythOracle]);
+    const priceOracle = m.contract("PriceOracle", [
+      owner,
+      pythOracle,
+      maxOracleDelay,
+    ]);
     m.call(priceOracle, "setOracleID", [
       "0x0000000000000000000000000000000000000000",
       ethOracleID,
