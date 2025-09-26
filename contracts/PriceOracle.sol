@@ -9,7 +9,7 @@ import {IPriceOracle} from "./interfaces/IPriceOracle.sol";
 contract PriceOracle is Ownable, IPriceOracle {
     uint8 public constant PRICE_DECIMALS = 18;
 
-    uint8 public constant MAX_ORACLE_DELAY = 60;
+    uint16 public immutable maxOracleDelay;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
@@ -30,7 +30,8 @@ contract PriceOracle is Ownable, IPriceOracle {
     /// @notice Deploys the contract and sets the Pyth Oracle and contract owner.
     /// @dev Initializes the oracle contract and transfers ownership to the given owner address.
     /// @param _pythOracle Address of the deployed Pyth Oracle contract.
-    constructor(address _pythOracle) {
+    constructor(address initialOwner, address _pythOracle, uint16 _maxOracleDelay) Ownable(initialOwner) {
+        maxOracleDelay = _maxOracleDelay;
         pythOracle = IPyth(_pythOracle);
     }
 
@@ -83,7 +84,7 @@ contract PriceOracle is Ownable, IPriceOracle {
         // PythStructs.Price memory price = pythOracle.getPriceUnsafe(_oracleID);
         // PythStructs.Price memory price = pythOracle.getPriceNoOlderThan(_oracleID, MAX_ORACLE_DELAY);
 
-        try pythOracle.getPriceNoOlderThan(_oracleID, MAX_ORACLE_DELAY) returns (PythStructs.Price memory price) {
+        try pythOracle.getPriceNoOlderThan(_oracleID, maxOracleDelay) returns (PythStructs.Price memory price) {
             return _scalePythPrice(price.price, price.expo);
         } catch {
             return 0;

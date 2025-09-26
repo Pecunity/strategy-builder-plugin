@@ -14,9 +14,33 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
+      name: "IExecutionModule",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IExecutionModule__factory>;
+    getContractFactory(
+      name: "IModularAccount",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IModularAccount__factory>;
+    getContractFactory(
+      name: "IModule",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IModule__factory>;
+    getContractFactory(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
+      name: "IERC1155Errors",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC1155Errors__factory>;
+    getContractFactory(
+      name: "IERC20Errors",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Errors__factory>;
+    getContractFactory(
+      name: "IERC721Errors",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC721Errors__factory>;
     getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -33,6 +57,10 @@ declare module "hardhat/types/runtime" {
       name: "IERC165",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
+    getContractFactory(
+      name: "ReentrancyGuard",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ReentrancyGuard__factory>;
     getContractFactory(
       name: "IPyth",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -102,9 +130,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPriceOracle__factory>;
     getContractFactory(
-      name: "IStrategyBuilderPlugin",
+      name: "IStrategyBuilderModule",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IStrategyBuilderPlugin__factory>;
+    ): Promise<Contracts.IStrategyBuilderModule__factory>;
     getContractFactory(
       name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -114,9 +142,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PriceOracle__factory>;
     getContractFactory(
-      name: "StrategyBuilderPlugin",
+      name: "StrategyBuilderModule",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.StrategyBuilderPlugin__factory>;
+    ): Promise<Contracts.StrategyBuilderModule__factory>;
     getContractFactory(
       name: "MockAction",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -138,35 +166,45 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WrongInterfaceContract__factory>;
     getContractFactory(
-      name: "IERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC165__factory>;
-    getContractFactory(
-      name: "IPlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPlugin__factory>;
-    getContractFactory(
-      name: "IPluginExecutor",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IPluginExecutor__factory>;
-    getContractFactory(
-      name: "BasePlugin",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.BasePlugin__factory>;
-    getContractFactory(
-      name: "ERC165",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.ERC165__factory>;
-    getContractFactory(
       name: "SafeTransferLib",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SafeTransferLib__factory>;
 
     getContractAt(
+      name: "IExecutionModule",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IExecutionModule>;
+    getContractAt(
+      name: "IModularAccount",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IModularAccount>;
+    getContractAt(
+      name: "IModule",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IModule>;
+    getContractAt(
       name: "Ownable",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
+    getContractAt(
+      name: "IERC1155Errors",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC1155Errors>;
+    getContractAt(
+      name: "IERC20Errors",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Errors>;
+    getContractAt(
+      name: "IERC721Errors",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC721Errors>;
     getContractAt(
       name: "ERC20",
       address: string | ethers.Addressable,
@@ -187,6 +225,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
+    getContractAt(
+      name: "ReentrancyGuard",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ReentrancyGuard>;
     getContractAt(
       name: "IPyth",
       address: string | ethers.Addressable,
@@ -273,10 +316,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IPriceOracle>;
     getContractAt(
-      name: "IStrategyBuilderPlugin",
+      name: "IStrategyBuilderModule",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.IStrategyBuilderPlugin>;
+    ): Promise<Contracts.IStrategyBuilderModule>;
     getContractAt(
       name: "ITokenGetter",
       address: string | ethers.Addressable,
@@ -288,10 +331,10 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.PriceOracle>;
     getContractAt(
-      name: "StrategyBuilderPlugin",
+      name: "StrategyBuilderModule",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.StrategyBuilderPlugin>;
+    ): Promise<Contracts.StrategyBuilderModule>;
     getContractAt(
       name: "MockAction",
       address: string | ethers.Addressable,
@@ -317,31 +360,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.WrongInterfaceContract>;
-    getContractAt(
-      name: "IERC165",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IERC165>;
-    getContractAt(
-      name: "IPlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPlugin>;
-    getContractAt(
-      name: "IPluginExecutor",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IPluginExecutor>;
-    getContractAt(
-      name: "BasePlugin",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.BasePlugin>;
-    getContractAt(
-      name: "ERC165",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.ERC165>;
     getContractAt(
       name: "SafeTransferLib",
       address: string | ethers.Addressable,
@@ -349,9 +367,33 @@ declare module "hardhat/types/runtime" {
     ): Promise<Contracts.SafeTransferLib>;
 
     deployContract(
+      name: "IExecutionModule",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IExecutionModule>;
+    deployContract(
+      name: "IModularAccount",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IModularAccount>;
+    deployContract(
+      name: "IModule",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IModule>;
+    deployContract(
       name: "Ownable",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
+    deployContract(
+      name: "IERC1155Errors",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC1155Errors>;
+    deployContract(
+      name: "IERC20Errors",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Errors>;
+    deployContract(
+      name: "IERC721Errors",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC721Errors>;
     deployContract(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -368,6 +410,10 @@ declare module "hardhat/types/runtime" {
       name: "IERC165",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC165>;
+    deployContract(
+      name: "ReentrancyGuard",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ReentrancyGuard>;
     deployContract(
       name: "IPyth",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -437,9 +483,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPriceOracle>;
     deployContract(
-      name: "IStrategyBuilderPlugin",
+      name: "IStrategyBuilderModule",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IStrategyBuilderPlugin>;
+    ): Promise<Contracts.IStrategyBuilderModule>;
     deployContract(
       name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -449,9 +495,9 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.PriceOracle>;
     deployContract(
-      name: "StrategyBuilderPlugin",
+      name: "StrategyBuilderModule",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StrategyBuilderPlugin>;
+    ): Promise<Contracts.StrategyBuilderModule>;
     deployContract(
       name: "MockAction",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -472,36 +518,46 @@ declare module "hardhat/types/runtime" {
       name: "WrongInterfaceContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WrongInterfaceContract>;
-    deployContract(
-      name: "IERC165",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC165>;
-    deployContract(
-      name: "IPlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPlugin>;
-    deployContract(
-      name: "IPluginExecutor",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPluginExecutor>;
-    deployContract(
-      name: "BasePlugin",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePlugin>;
-    deployContract(
-      name: "ERC165",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC165>;
     deployContract(
       name: "SafeTransferLib",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SafeTransferLib>;
 
     deployContract(
+      name: "IExecutionModule",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IExecutionModule>;
+    deployContract(
+      name: "IModularAccount",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IModularAccount>;
+    deployContract(
+      name: "IModule",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IModule>;
+    deployContract(
       name: "Ownable",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
+    deployContract(
+      name: "IERC1155Errors",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC1155Errors>;
+    deployContract(
+      name: "IERC20Errors",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Errors>;
+    deployContract(
+      name: "IERC721Errors",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC721Errors>;
     deployContract(
       name: "ERC20",
       args: any[],
@@ -522,6 +578,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IERC165>;
+    deployContract(
+      name: "ReentrancyGuard",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ReentrancyGuard>;
     deployContract(
       name: "IPyth",
       args: any[],
@@ -608,10 +669,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPriceOracle>;
     deployContract(
-      name: "IStrategyBuilderPlugin",
+      name: "IStrategyBuilderModule",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IStrategyBuilderPlugin>;
+    ): Promise<Contracts.IStrategyBuilderModule>;
     deployContract(
       name: "ITokenGetter",
       args: any[],
@@ -623,10 +684,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.PriceOracle>;
     deployContract(
-      name: "StrategyBuilderPlugin",
+      name: "StrategyBuilderModule",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.StrategyBuilderPlugin>;
+    ): Promise<Contracts.StrategyBuilderModule>;
     deployContract(
       name: "MockAction",
       args: any[],
@@ -652,31 +713,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WrongInterfaceContract>;
-    deployContract(
-      name: "IERC165",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IERC165>;
-    deployContract(
-      name: "IPlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPlugin>;
-    deployContract(
-      name: "IPluginExecutor",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.IPluginExecutor>;
-    deployContract(
-      name: "BasePlugin",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.BasePlugin>;
-    deployContract(
-      name: "ERC165",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.ERC165>;
     deployContract(
       name: "SafeTransferLib",
       args: any[],

@@ -3,11 +3,18 @@ import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 const StrategBuilderCoreModule = buildModule(
   "StrategyBuilderCoreModule",
   (m) => {
+    const owner = m.getParameter("owner");
     const pythOracle = m.getParameter("pythOracle");
     const ethOracleID = m.getParameter("ethOracleID");
 
+    const maxOracleDelay = m.getParameter("maxOracleDelay");
+
     // Price Oracle
-    const priceOracle = m.contract("PriceOracle", [pythOracle]);
+    const priceOracle = m.contract("PriceOracle", [
+      owner,
+      pythOracle,
+      maxOracleDelay,
+    ]);
     m.call(priceOracle, "setOracleID", [
       "0x0000000000000000000000000000000000000000",
       ethOracleID,
@@ -18,6 +25,7 @@ const StrategBuilderCoreModule = buildModule(
     const minFeesInUSD = m.getParameter("minFeesInUSD");
 
     const feeController = m.contract("FeeController", [
+      owner,
       priceOracle,
       maxFeeLimits,
       minFeesInUSD,
@@ -30,6 +38,7 @@ const StrategBuilderCoreModule = buildModule(
     const vaultPercentage = m.getParameter("vaultPercentage");
 
     const feeHandler = m.contract("FeeHandler", [
+      owner,
       vault,
       beneficiaryPercentage,
       creatorPercentage,
@@ -42,10 +51,10 @@ const StrategBuilderCoreModule = buildModule(
       true,
     ]);
 
-    const actionRegistry = m.contract("ActionRegistry");
+    const actionRegistry = m.contract("ActionRegistry", [owner]);
 
     // Strategy Builder Plugin
-    const strategyBuilderPlugin = m.contract("StrategyBuilderPlugin", [
+    const strategyBuilderModule = m.contract("StrategyBuilderModule", [
       feeController,
       feeHandler,
       actionRegistry,
@@ -56,7 +65,7 @@ const StrategBuilderCoreModule = buildModule(
       feeController,
       feeHandler,
       actionRegistry,
-      strategyBuilderPlugin,
+      strategyBuilderModule,
     };
   }
 );

@@ -12,5 +12,8 @@ ignored_error_codes = []
 via_ir = true
 evm_version = 'shanghai'
 
-
+remappings = [
+  "@erc6900/reference-implementation/=lib/reference-implementation/src/",
+  "ds-test/=lib/forge-std/lib/ds-test/src/"
+]
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

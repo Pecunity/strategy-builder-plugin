@@ -67,7 +67,13 @@ contract FeeHandler is Ownable, IFeeHandler {
     /// @param _beneficaryPercentage Percentage share for the beneficiary.
     /// @param _creatorPercentage Percentage share for the creator.
     /// @param _vaultPercentage Percentage share for the vault.
-    constructor(address _vault, uint256 _beneficaryPercentage, uint256 _creatorPercentage, uint256 _vaultPercentage) {
+    constructor(
+        address _initialOwner,
+        address _vault,
+        uint256 _beneficaryPercentage,
+        uint256 _creatorPercentage,
+        uint256 _vaultPercentage
+    ) Ownable(_initialOwner) {
         _updateVault(_vault);
         _updatePercentages(_beneficaryPercentage, _creatorPercentage, _vaultPercentage); // Default percentages: 30% beneficiary, 20% creator, 50% vault
     }

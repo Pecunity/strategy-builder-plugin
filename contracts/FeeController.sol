@@ -45,7 +45,9 @@ contract FeeController is Ownable, IFeeController {
     /// @param _oracle Address of the price oracle contract.
     /// @param _maxFeeLimits Array of maximum fee percentages for Deposit, Withdraw, and Reward types.
     /// @param _minFeesInUSD Array of minimum fee amounts in USD for Deposit, Withdraw, and Reward types.
-    constructor(address _oracle, uint256[] memory _maxFeeLimits, uint256[] memory _minFeesInUSD) {
+    constructor(address initialOwner, address _oracle, uint256[] memory _maxFeeLimits, uint256[] memory _minFeesInUSD)
+        Ownable(initialOwner)
+    {
         if (_oracle == address(0)) {
             revert ZeroAddressNotValid();
         }

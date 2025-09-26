@@ -25,9 +25,9 @@ import type {
 export interface PriceOracleInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "MAX_ORACLE_DELAY"
       | "PRICE_DECIMALS"
       | "getTokenPrice"
+      | "maxOracleDelay"
       | "oracleID"
       | "owner"
       | "renounceOwnership"
@@ -40,16 +40,16 @@ export interface PriceOracleInterface extends Interface {
   ): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "MAX_ORACLE_DELAY",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "PRICE_DECIMALS",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getTokenPrice",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "maxOracleDelay",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "oracleID",
@@ -70,15 +70,15 @@ export interface PriceOracleInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "MAX_ORACLE_DELAY",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "PRICE_DECIMALS",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "getTokenPrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "maxOracleDelay",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "oracleID", data: BytesLike): Result;
@@ -166,11 +166,11 @@ export interface PriceOracle extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  MAX_ORACLE_DELAY: TypedContractMethod<[], [bigint], "view">;
-
   PRICE_DECIMALS: TypedContractMethod<[], [bigint], "view">;
 
   getTokenPrice: TypedContractMethod<[_token: AddressLike], [bigint], "view">;
+
+  maxOracleDelay: TypedContractMethod<[], [bigint], "view">;
 
   oracleID: TypedContractMethod<[_token: AddressLike], [string], "view">;
 
@@ -195,14 +195,14 @@ export interface PriceOracle extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "MAX_ORACLE_DELAY"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "PRICE_DECIMALS"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getTokenPrice"
   ): TypedContractMethod<[_token: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "maxOracleDelay"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "oracleID"
   ): TypedContractMethod<[_token: AddressLike], [string], "view">;

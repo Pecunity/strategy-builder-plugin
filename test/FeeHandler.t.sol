@@ -26,7 +26,7 @@ contract FeeHandlerTest is Test {
 
     function setUp() external {
         vm.prank(OWNER);
-        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE);
+        handler = new FeeHandler(OWNER, VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE);
     }
 
     function test_deployment_Success() external {
@@ -39,13 +39,13 @@ contract FeeHandlerTest is Test {
 
     function test_deployment_VaultZeroAddress() external {
         vm.expectRevert(IFeeHandler.ZeroAddressNotValid.selector);
-        handler = new FeeHandler(address(0), BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE);
+        handler = new FeeHandler(OWNER, address(0), BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE);
     }
 
     function test_deployment_SumPercentageNotCorrect() external {
         vm.expectRevert(IFeeHandler.InvalidPercentageDistribution.selector);
 
-        handler = new FeeHandler(VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE + 1);
+        handler = new FeeHandler(OWNER, VAULT, BENEFICARY_PERCENTAGE, CREATOR_PERCENTAGE, VAULT_PERCENTAGE + 1);
     }
 
     function test_activatePrimaryToken_Success(address token, address burnerAddress) external {

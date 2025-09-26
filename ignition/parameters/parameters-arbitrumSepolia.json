@@ -2,6 +2,8 @@
   "StrategyBuilderCoreModule": {
     "vault": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123",
     "pythOracle": "0x4374e5a8b9C22271E9EB878A2AA31DE97DF15DAF",
+    "owner": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123",
+    "maxOracleDelay": 6000,
     "maxFeeLimits": [500, 1000, 200],
     "minFeesInUSD": [
       "1000000000000000000n",
