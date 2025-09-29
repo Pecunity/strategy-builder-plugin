@@ -367,9 +367,25 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
             // Loop through the actions and add them to the step
             for (uint256 j = 0; j < step.actions.length; j++) {
                 _validateAction(step.actions[j]);
-                newStep.actions.push(step.actions[j]);
 
-                //TODO: save the input keys via for loop
+                Action memory _currAction = step.actions[j];
+                Action storage newAction = newStep.actions.push();
+
+                newAction.target = _currAction.target;
+                newAction.parameter = _currAction.parameter;
+                newAction.value = _currAction.value;
+                newAction.selector = _currAction.selector;
+                newAction.actionType = _currAction.actionType;
+
+                newAction.output = _currAction.output;
+                newAction.result = _currAction.result;
+
+                // Save the input keys for this action into the new step's actions
+                // Create a copy of the input keys array
+                uint256 inputCount = step.actions[j].inputs.length;
+                for (uint256 k = 0; k < inputCount; k++) {
+                    newAction.inputs.push(step.actions[j].inputs[k]);
+                }
             }
         }
 

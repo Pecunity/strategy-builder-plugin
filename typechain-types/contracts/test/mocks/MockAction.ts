@@ -106,7 +106,7 @@ export interface MockAction extends BaseContract {
 
   execute: TypedContractMethod<
     [targets: AddressLike[], token: AddressLike, val: BigNumberish],
-    [IAction.PluginExecutionStructOutput[]],
+    [[IAction.PluginExecutionStructOutput[], string] & { callResult: string }],
     "view"
   >;
 
@@ -126,7 +126,7 @@ export interface MockAction extends BaseContract {
     nameOrSignature: "execute"
   ): TypedContractMethod<
     [targets: AddressLike[], token: AddressLike, val: BigNumberish],
-    [IAction.PluginExecutionStructOutput[]],
+    [[IAction.PluginExecutionStructOutput[], string] & { callResult: string }],
     "view"
   >;
   getFunction(

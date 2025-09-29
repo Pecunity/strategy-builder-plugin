@@ -1,7 +1,7 @@
 {
-  "StrategyBuilderCoreModule#ActionRegistry": "0x693a5B6CDbeC08cBF1D368e31D75B06CD5e9e3aA",
-  "StrategyBuilderCoreModule#FeeHandler": "0x797E58E5431aE90095A562087f81C742B5065788",
-  "StrategyBuilderCoreModule#PriceOracle": "0x237cB860178452130298a527aC7D74Dc7B5755B7",
-  "StrategyBuilderCoreModule#FeeController": "0x2519c858D98c550a9dd8801bD3553F74369c557E",
-  "StrategyBuilderCoreModule#StrategyBuilderModule": "0x94F1Cf7958fe5Af38Bf852730621989f772BeD9A"
+  "StrategyBuilderCoreModule#ActionRegistry": "0xF3B1242d818B42522a99e6466dE8944e6fF2c2F3",
+  "StrategyBuilderCoreModule#FeeHandler": "0x4417AD95B274bFDaA902Cc51017B2dD814e28718",
+  "StrategyBuilderCoreModule#PriceOracle": "0x07F8E1bB4915dD1498A2159381dF925269455F63",
+  "StrategyBuilderCoreModule#FeeController": "0x2debF2ce82383e0c243fE4540423e14C7e1fC5aF",
+  "StrategyBuilderCoreModule#StrategyBuilderModule": "0xC0b5056E8FB08D8F351f4213584faC8D058563a2"
 }
