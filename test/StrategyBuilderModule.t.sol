@@ -472,8 +472,8 @@ contract StrategyBuilderModuleTest is Test {
         vm.stopPrank();
 
         //Assert
-        assertTrue(token.balanceOf(receiver1) == value);
-        assertTrue(token.balanceOf(receiver2) == value);
+        assertTrue(token.balanceOf(receiver1) == 2 * value);
+        assertTrue(token.balanceOf(receiver2) == 2 * value);
     }
 
     function test_executeStrategy_OOB_RevertWithValidiationError() external {
@@ -802,7 +802,7 @@ contract StrategyBuilderModuleTest is Test {
             result1: 0
         });
 
-        IStrategyBuilderModule.Action[] memory actions = new IStrategyBuilderModule.Action[](1);
+        IStrategyBuilderModule.Action[] memory actions = new IStrategyBuilderModule.Action[](2);
 
         MockAction actionContract = new MockAction();
 
@@ -813,6 +813,33 @@ contract StrategyBuilderModuleTest is Test {
             selector: MockAction.execute.selector,
             actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
             inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: "REPLACEMENT_VALUE",
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 32,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 0
+        });
+
+        IStrategyBuilderModule.ContextKey[] memory inputs = new IStrategyBuilderModule.ContextKey[](1);
+        inputs[0] = IStrategyBuilderModule.ContextKey({
+            key: "REPLACEMENT_VALUE",
+            parameterReplacement: IStrategyBuilderModule.Parameter({
+                offset: 64, // This is where 'value' is located
+                length: 32, // uint256 is 32 bytes
+                paramType: IStrategyBuilderModule.ParamType.UINT256
+            })
+        });
+        actions[1] = IStrategyBuilderModule.Action({
+            target: address(actionContract),
+            parameter: abi.encode(receivers, address(token), uint256(0)),
+            value: 0,
+            selector: MockAction.execute.selector,
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
+            inputs: inputs,
             output: IStrategyBuilderModule.ContextKey({ // Empty struct
                 key: "",
                 parameterReplacement: IStrategyBuilderModule.Parameter({

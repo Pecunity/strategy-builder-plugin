@@ -8,13 +8,13 @@ contract MockAction is IAction {
     function execute(address[] memory targets, address token, uint256 val)
         external
         pure
-        returns (PluginExecution[] memory)
+        returns (PluginExecution[] memory, bytes memory callResult)
     {
         PluginExecution[] memory executions = new PluginExecution[](targets.length);
         for (uint256 i; i < targets.length; i++) {
             executions[i] = PluginExecution(token, 0, abi.encodeCall(IERC20.transfer, (targets[i], val)));
         }
-        return executions;
+        return (executions, abi.encode(val));
     }
 
     function identifier() external pure returns (bytes4) {

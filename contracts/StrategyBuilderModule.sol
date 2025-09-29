@@ -427,19 +427,63 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
             executionResult = IModularAccount(_wallet).execute(_action.target, _action.value, data);
         } else {
             (, bytes memory _result) = _action.target.call(data);
-            IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
-            for (uint256 i = 0; i < executions.length; i++) {
-                bytes memory _executionResult =
-                    IModularAccount(_wallet).execute(executions[i].target, executions[i].value, executions[i].data);
-                if (_action.result == i) {
-                    executionResult = _executionResult;
-                }
+
+            bool hasStoreResult = _hasStoreResult(_result);
+
+            if (hasStoreResult) {
+                (IAction.PluginExecution[] memory executions, bytes memory actionCallResult) =
+                    abi.decode(_result, (IAction.PluginExecution[], bytes));
+
+                executionResult = _executePluginsAndGetResult(_wallet, executions, _action.result, actionCallResult);
+            } else {
+                IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
+
+                executionResult = _executePluginsAndGetResult(_wallet, executions, _action.result, "");
             }
         }
 
         if (bytes(_action.output.key).length > 0) {
             _storeToGlobalContext(_wallet, contextId, _action.output, executionResult);
         }
+    }
+
+    function _hasStoreResult(bytes memory data) internal pure returns (bool) {
+        // Check if the data starts with a tuple containing 2 elements
+        // This is a simplified check - you might want more robust detection
+        if (data.length < 64) return false;
+
+        // Try to peek at the structure
+        uint256 firstOffset;
+        uint256 secondOffset;
+
+        assembly {
+            firstOffset := mload(add(data, 0x20)) // First element offset
+            secondOffset := mload(add(data, 0x40)) // Second element offset
+        }
+
+        // If we have two valid offsets, it's likely a tuple with 2 elements
+        return firstOffset > 0 && secondOffset > firstOffset;
+    }
+
+    function _executePluginsAndGetResult(
+        address _wallet,
+        IAction.PluginExecution[] memory executions,
+        uint256 resultIndex,
+        bytes memory actionCallResult
+    ) internal returns (bytes memory) {
+        require(resultIndex <= executions.length, "Invalid execution index");
+
+        bytes memory result;
+        for (uint256 i = 0; i < executions.length; i++) {
+            bytes memory _executionResult =
+                IModularAccount(_wallet).execute(executions[i].target, executions[i].value, executions[i].data);
+
+            if (resultIndex == i + 1) {
+                result = _executionResult;
+            }
+        }
+
+        return resultIndex == 0 ? actionCallResult : result;
     }
 
     function _deleteAutomation(address wallet, uint32 id) internal {
