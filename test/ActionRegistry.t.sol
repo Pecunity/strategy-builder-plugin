@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import {Test, console} from "forge-std/Test.sol";
 import {ActionRegistry} from "contracts/ActionRegistry.sol";
 import {IActionRegistry} from "contracts/interfaces/IActionRegistry.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ActionRegistryTest is Test {
     ActionRegistry registry;
@@ -47,7 +48,7 @@ contract ActionRegistryTest is Test {
     }
 
     function test_allowAction_OnlyOwnerCanAllow() public {
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, nonOwner));
         vm.prank(nonOwner);
         registry.allowAction(action1);
     }
@@ -58,7 +59,7 @@ contract ActionRegistryTest is Test {
         vm.stopPrank();
 
         vm.prank(nonOwner);
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, nonOwner));
         registry.revokeAction(action1);
     }
 }

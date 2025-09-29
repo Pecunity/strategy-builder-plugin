@@ -294,7 +294,7 @@ contract StrategyBuilderModuleTest is Test {
 
         uint32 strategyID = 222;
         vm.startPrank(address(account1));
-        vm.expectRevert(IStrategyBuilderModule.InvalidCondition.selector);
+        vm.expectRevert(IStrategyBuilderModule.InvalidConditionAddress.selector);
         IStrategyBuilderModule(address(account1)).createStrategy(strategyID, creator, steps);
         vm.stopPrank();
     }
@@ -621,7 +621,17 @@ contract StrategyBuilderModuleTest is Test {
                 parameter: "",
                 value: TOKEN_SEND_AMOUNT,
                 selector: bytes4(0),
-                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+                inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+                output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                    key: "",
+                    parameterReplacement: IStrategyBuilderModule.Parameter({
+                        offset: 0,
+                        length: 0,
+                        paramType: IStrategyBuilderModule.ParamType.UINT256
+                    })
+                }),
+                result: 0
             });
 
             actions[1] = IStrategyBuilderModule.Action({
@@ -629,7 +639,17 @@ contract StrategyBuilderModuleTest is Test {
                 parameter: "",
                 value: TOKEN_SEND_AMOUNT,
                 selector: bytes4(0),
-                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+                inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+                output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                    key: "",
+                    parameterReplacement: IStrategyBuilderModule.Parameter({
+                        offset: 0,
+                        length: 0,
+                        paramType: IStrategyBuilderModule.ParamType.UINT256
+                    })
+                }),
+                result: 0
             });
 
             steps[i] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
@@ -663,7 +683,17 @@ contract StrategyBuilderModuleTest is Test {
                 parameter: "",
                 value: TOKEN_SEND_AMOUNT,
                 selector: bytes4(0),
-                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+                inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+                output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                    key: "",
+                    parameterReplacement: IStrategyBuilderModule.Parameter({
+                        offset: 0,
+                        length: 0,
+                        paramType: IStrategyBuilderModule.ParamType.UINT256
+                    })
+                }),
+                result: 0
             });
 
             actions[1] = IStrategyBuilderModule.Action({
@@ -671,7 +701,17 @@ contract StrategyBuilderModuleTest is Test {
                 parameter: "",
                 value: TOKEN_SEND_AMOUNT,
                 selector: bytes4(0),
-                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+                inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+                output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                    key: "",
+                    parameterReplacement: IStrategyBuilderModule.Parameter({
+                        offset: 0,
+                        length: 0,
+                        paramType: IStrategyBuilderModule.ParamType.UINT256
+                    })
+                }),
+                result: 0
             });
 
             steps[i] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
@@ -705,7 +745,17 @@ contract StrategyBuilderModuleTest is Test {
                 parameter: "",
                 value: TOKEN_SEND_AMOUNT,
                 selector: bytes4(0),
-                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+                inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+                output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                    key: "",
+                    parameterReplacement: IStrategyBuilderModule.Parameter({
+                        offset: 0,
+                        length: 0,
+                        paramType: IStrategyBuilderModule.ParamType.UINT256
+                    })
+                }),
+                result: 0
             });
 
             actions[1] = IStrategyBuilderModule.Action({
@@ -713,7 +763,17 @@ contract StrategyBuilderModuleTest is Test {
                 parameter: "",
                 value: TOKEN_SEND_AMOUNT,
                 selector: bytes4(0),
-                actionType: IStrategyBuilderModule.ActionType.EXTERNAL
+                actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+                inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+                output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                    key: "",
+                    parameterReplacement: IStrategyBuilderModule.Parameter({
+                        offset: 0,
+                        length: 0,
+                        paramType: IStrategyBuilderModule.ParamType.UINT256
+                    })
+                }),
+                result: 0
             });
 
             steps[i] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
@@ -751,7 +811,17 @@ contract StrategyBuilderModuleTest is Test {
             parameter: abi.encode(receivers, address(token), value),
             value: 0,
             selector: MockAction.execute.selector,
-            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: "",
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 0,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 0
         });
 
         steps[0] = IStrategyBuilderModule.StrategyStep({condition: condition, actions: actions});
