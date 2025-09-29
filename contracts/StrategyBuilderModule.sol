@@ -100,36 +100,16 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         external
         strategyDoesNotExist(msg.sender, id)
     {
-        _validateSteps(steps);
+        _createStrategy(id, creator, steps, bytes32(0));
+    }
 
-        Strategy storage newStrategy = strategies[getStorageId(msg.sender, id)];
-
-        newStrategy.creator = creator;
-
-        for (uint256 i = 0; i < steps.length; i++) {
-            StrategyStep memory step = steps[i];
-
-            if (step.condition.conditionAddress != address(0)) {
-                // Validate the condition
-                _validateCondition(step.condition);
-
-                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, id, true);
-            }
-
-            // Create a new step in storage
-            StrategyStep storage newStep = newStrategy.steps.push();
-            newStep.condition = step.condition;
-
-            // Loop through the actions and add them to the step
-            for (uint256 j = 0; j < step.actions.length; j++) {
-                _validateAction(step.actions[j]);
-                newStep.actions.push(step.actions[j]);
-
-                //TODO: save the input keys via for loop
-            }
-        }
-
-        emit StrategyCreated(msg.sender, id, creator, newStrategy);
+    function createStrategyWithExistingContext(
+        uint32 id,
+        address creator,
+        StrategyStep[] calldata steps,
+        bytes32 contextId
+    ) external strategyDoesNotExist(msg.sender, id) {
+        _createStrategy(id, creator, steps, contextId);
     }
 
     /// @inheritdoc IStrategyBuilderModule
@@ -355,6 +335,46 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Internal functions         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function _createStrategy(uint32 id, address creator, StrategyStep[] calldata steps, bytes32 contextId)
+        internal
+        strategyDoesNotExist(msg.sender, id)
+    {
+        _validateSteps(steps);
+
+        Strategy storage newStrategy = strategies[getStorageId(msg.sender, id)];
+
+        newStrategy.creator = creator;
+
+        newStrategy.contextId = contextId == bytes32(0)
+            ? keccak256(abi.encodePacked(msg.sender, id, block.timestamp, block.number))
+            : contextId;
+
+        for (uint256 i = 0; i < steps.length; i++) {
+            StrategyStep memory step = steps[i];
+
+            if (step.condition.conditionAddress != address(0)) {
+                // Validate the condition
+                _validateCondition(step.condition);
+
+                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, id, true);
+            }
+
+            // Create a new step in storage
+            StrategyStep storage newStep = newStrategy.steps.push();
+            newStep.condition = step.condition;
+
+            // Loop through the actions and add them to the step
+            for (uint256 j = 0; j < step.actions.length; j++) {
+                _validateAction(step.actions[j]);
+                newStep.actions.push(step.actions[j]);
+
+                //TODO: save the input keys via for loop
+            }
+        }
+
+        emit StrategyCreated(msg.sender, id, creator, newStrategy.contextId, newStrategy);
+    }
 
     function _executeStrategy(address wallet, uint32 id) internal returns (uint256 fee) {
         fee = _executeStep(wallet, id, 0, getStorageId(wallet, id));

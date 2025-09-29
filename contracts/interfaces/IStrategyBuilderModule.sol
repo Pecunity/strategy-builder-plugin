@@ -122,7 +122,10 @@ interface IStrategyBuilderModule {
     /// @param strategyId The unique ID of the created strategy.
     /// @param creator The address of the strategy creator.
     /// @param strategy The details of the created strategy.
-    event StrategyCreated(address indexed wallet, uint32 strategyId, address creator, Strategy strategy);
+    /// @param contextId The used context for the strategy
+    event StrategyCreated(
+        address indexed wallet, uint32 strategyId, address creator, bytes32 contextId, Strategy strategy
+    );
 
     /// @notice Event emitted when a strategy is executed.
     /// @param wallet The address of the wallet executing the strategy.
