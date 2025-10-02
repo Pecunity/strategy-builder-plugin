@@ -7,6 +7,7 @@ import {IFeeController} from "contracts/interfaces/IFeeController.sol";
 import {ITokenGetter} from "contracts/interfaces/ITokenGetter.sol";
 import {IPriceOracle} from "contracts/interfaces/IPriceOracle.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract FeeControllerTest is Test {
     FeeController controller;
@@ -64,7 +65,7 @@ contract FeeControllerTest is Test {
         bytes4 _selector = bytes4(uint32(2222));
 
         vm.prank(badActor);
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, badActor));
         controller.setFunctionFeeConfig(_selector, _feeType, _feePercentage);
     }
 
@@ -99,7 +100,7 @@ contract FeeControllerTest is Test {
         vm.assume(badActor != OWNER);
 
         vm.prank(badActor);
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, badActor));
         controller.setTokenGetter(_selector, _tokenGetter, _target);
     }
 
@@ -130,7 +131,7 @@ contract FeeControllerTest is Test {
         bytes4 _selector = bytes4(uint32(222));
 
         vm.prank(badActor);
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, badActor));
         controller.setGlobalTokenGetter(_selector, _tokenGetter);
     }
 
@@ -181,6 +182,7 @@ contract FeeControllerTest is Test {
     }
 
     function test_calculateFee_FeeLowerMinFee(address _token, bytes4 _selector) external {
+        vm.assume(_token > address(10));
         uint256 _feePercentage = 100; //1%
 
         IFeeController.FeeType _feeType = IFeeController.FeeType.Withdraw;
@@ -203,6 +205,7 @@ contract FeeControllerTest is Test {
     }
 
     function test_calculateFee_FeeHigherMinFee(address _token, bytes4 _selector) external {
+        vm.assume(_token > address(10));
         uint256 _feePercentage = 100; //1%
 
         IFeeController.FeeType _feeType = IFeeController.FeeType.Withdraw;

@@ -31,22 +31,26 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
-    arbitrumSepolia: getNetwork(Network.ARBITRUM_SEPOLIA),
+    arbitrumSepolia: {
+      ...getNetwork(Network.ARBITRUM_SEPOLIA),
+      chainId: 421614,
+    },
   },
   etherscan: {
-    apiKey: {
-      arbitrumSepolia: ARBISCAN_API_KEY,
-    },
-    customChains: [
-      {
-        network: "arbitrumSepolia",
-        chainId: 421614,
-        urls: {
-          apiURL: "https://api-sepolia.arbiscan.io/api",
-          browserURL: "https://sepolia.arbiscan.io/",
-        },
-      },
-    ],
+    apiKey: ARBISCAN_API_KEY,
+    // apiKey: {
+    //   arbitrumSepolia: ARBISCAN_API_KEY,
+    // },
+    // customChains: [
+    //   {
+    //     network: "arbitrumSepolia",
+    //     chainid: "421614",
+    //     urls: {
+    //       apiURL: "https://api.etherscan.io/v2/api?chainid=421614",
+    //       browserURL: "https://sepolia.arbiscan.io/",
+    //     },
+    //   },
+    // ],
   },
 };
 

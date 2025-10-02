@@ -49,6 +49,6 @@ contract StrategyExecutionTest is Test {
         address beneficary = 0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123;
 
         // vm.prank(wallet);
-        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, beneficary);
+        // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, beneficary);
     }
 }

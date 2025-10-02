@@ -21,7 +21,9 @@ import type {
 } from "../../common";
 
 export interface IPythEventsInterface extends Interface {
-  getEvent(nameOrSignatureOrTopic: "PriceFeedUpdate"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "PriceFeedUpdate" | "TwapPriceFeedUpdate"
+  ): EventFragment;
 }
 
 export namespace PriceFeedUpdateEvent {
@@ -42,6 +44,37 @@ export namespace PriceFeedUpdateEvent {
     publishTime: bigint;
     price: bigint;
     conf: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace TwapPriceFeedUpdateEvent {
+  export type InputTuple = [
+    id: BytesLike,
+    startTime: BigNumberish,
+    endTime: BigNumberish,
+    twapPrice: BigNumberish,
+    twapConf: BigNumberish,
+    downSlotsRatio: BigNumberish
+  ];
+  export type OutputTuple = [
+    id: string,
+    startTime: bigint,
+    endTime: bigint,
+    twapPrice: bigint,
+    twapConf: bigint,
+    downSlotsRatio: bigint
+  ];
+  export interface OutputObject {
+    id: string;
+    startTime: bigint;
+    endTime: bigint;
+    twapPrice: bigint;
+    twapConf: bigint;
+    downSlotsRatio: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -103,6 +136,13 @@ export interface IPythEvents extends BaseContract {
     PriceFeedUpdateEvent.OutputTuple,
     PriceFeedUpdateEvent.OutputObject
   >;
+  getEvent(
+    key: "TwapPriceFeedUpdate"
+  ): TypedContractEvent<
+    TwapPriceFeedUpdateEvent.InputTuple,
+    TwapPriceFeedUpdateEvent.OutputTuple,
+    TwapPriceFeedUpdateEvent.OutputObject
+  >;
 
   filters: {
     "PriceFeedUpdate(bytes32,uint64,int64,uint64)": TypedContractEvent<
@@ -114,6 +154,17 @@ export interface IPythEvents extends BaseContract {
       PriceFeedUpdateEvent.InputTuple,
       PriceFeedUpdateEvent.OutputTuple,
       PriceFeedUpdateEvent.OutputObject
+    >;
+
+    "TwapPriceFeedUpdate(bytes32,uint64,uint64,int64,uint64,uint32)": TypedContractEvent<
+      TwapPriceFeedUpdateEvent.InputTuple,
+      TwapPriceFeedUpdateEvent.OutputTuple,
+      TwapPriceFeedUpdateEvent.OutputObject
+    >;
+    TwapPriceFeedUpdate: TypedContractEvent<
+      TwapPriceFeedUpdateEvent.InputTuple,
+      TwapPriceFeedUpdateEvent.OutputTuple,
+      TwapPriceFeedUpdateEvent.OutputObject
     >;
   };
 }

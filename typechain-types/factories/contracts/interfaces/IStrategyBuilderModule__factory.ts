@@ -168,6 +168,79 @@ const _abi = [
             name: "actionType",
             type: "uint8",
           },
+          {
+            components: [
+              {
+                internalType: "string",
+                name: "key",
+                type: "string",
+              },
+              {
+                components: [
+                  {
+                    internalType: "uint256",
+                    name: "offset",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "length",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "enum IStrategyBuilderModule.ParamType",
+                    name: "paramType",
+                    type: "uint8",
+                  },
+                ],
+                internalType: "struct IStrategyBuilderModule.Parameter",
+                name: "parameterReplacement",
+                type: "tuple",
+              },
+            ],
+            internalType: "struct IStrategyBuilderModule.ContextKey[]",
+            name: "inputs",
+            type: "tuple[]",
+          },
+          {
+            components: [
+              {
+                internalType: "string",
+                name: "key",
+                type: "string",
+              },
+              {
+                components: [
+                  {
+                    internalType: "uint256",
+                    name: "offset",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "length",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "enum IStrategyBuilderModule.ParamType",
+                    name: "paramType",
+                    type: "uint8",
+                  },
+                ],
+                internalType: "struct IStrategyBuilderModule.Parameter",
+                name: "parameterReplacement",
+                type: "tuple",
+              },
+            ],
+            internalType: "struct IStrategyBuilderModule.ContextKey",
+            name: "output",
+            type: "tuple",
+          },
+          {
+            internalType: "uint8",
+            name: "result",
+            type: "uint8",
+          },
         ],
         indexed: false,
         internalType: "struct IStrategyBuilderModule.Action",
@@ -304,6 +377,31 @@ const _abi = [
     inputs: [
       {
         indexed: true,
+        internalType: "bytes32",
+        name: "contextId",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "key",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "result",
+        type: "bytes",
+      },
+    ],
+    name: "ContextVariableStored",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
         internalType: "address",
         name: "wallet",
         type: "address",
@@ -319,6 +417,12 @@ const _abi = [
         internalType: "address",
         name: "creator",
         type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "contextId",
+        type: "bytes32",
       },
       {
         components: [
@@ -383,6 +487,81 @@ const _abi = [
                     name: "actionType",
                     type: "uint8",
                   },
+                  {
+                    components: [
+                      {
+                        internalType: "string",
+                        name: "key",
+                        type: "string",
+                      },
+                      {
+                        components: [
+                          {
+                            internalType: "uint256",
+                            name: "offset",
+                            type: "uint256",
+                          },
+                          {
+                            internalType: "uint256",
+                            name: "length",
+                            type: "uint256",
+                          },
+                          {
+                            internalType:
+                              "enum IStrategyBuilderModule.ParamType",
+                            name: "paramType",
+                            type: "uint8",
+                          },
+                        ],
+                        internalType: "struct IStrategyBuilderModule.Parameter",
+                        name: "parameterReplacement",
+                        type: "tuple",
+                      },
+                    ],
+                    internalType: "struct IStrategyBuilderModule.ContextKey[]",
+                    name: "inputs",
+                    type: "tuple[]",
+                  },
+                  {
+                    components: [
+                      {
+                        internalType: "string",
+                        name: "key",
+                        type: "string",
+                      },
+                      {
+                        components: [
+                          {
+                            internalType: "uint256",
+                            name: "offset",
+                            type: "uint256",
+                          },
+                          {
+                            internalType: "uint256",
+                            name: "length",
+                            type: "uint256",
+                          },
+                          {
+                            internalType:
+                              "enum IStrategyBuilderModule.ParamType",
+                            name: "paramType",
+                            type: "uint8",
+                          },
+                        ],
+                        internalType: "struct IStrategyBuilderModule.Parameter",
+                        name: "parameterReplacement",
+                        type: "tuple",
+                      },
+                    ],
+                    internalType: "struct IStrategyBuilderModule.ContextKey",
+                    name: "output",
+                    type: "tuple",
+                  },
+                  {
+                    internalType: "uint8",
+                    name: "result",
+                    type: "uint8",
+                  },
                 ],
                 internalType: "struct IStrategyBuilderModule.Action[]",
                 name: "actions",
@@ -392,6 +571,11 @@ const _abi = [
             internalType: "struct IStrategyBuilderModule.StrategyStep[]",
             name: "steps",
             type: "tuple[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "contextId",
+            type: "bytes32",
           },
         ],
         indexed: false,
@@ -487,6 +671,79 @@ const _abi = [
           {
             internalType: "enum IStrategyBuilderModule.ActionType",
             name: "actionType",
+            type: "uint8",
+          },
+          {
+            components: [
+              {
+                internalType: "string",
+                name: "key",
+                type: "string",
+              },
+              {
+                components: [
+                  {
+                    internalType: "uint256",
+                    name: "offset",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "length",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "enum IStrategyBuilderModule.ParamType",
+                    name: "paramType",
+                    type: "uint8",
+                  },
+                ],
+                internalType: "struct IStrategyBuilderModule.Parameter",
+                name: "parameterReplacement",
+                type: "tuple",
+              },
+            ],
+            internalType: "struct IStrategyBuilderModule.ContextKey[]",
+            name: "inputs",
+            type: "tuple[]",
+          },
+          {
+            components: [
+              {
+                internalType: "string",
+                name: "key",
+                type: "string",
+              },
+              {
+                components: [
+                  {
+                    internalType: "uint256",
+                    name: "offset",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "uint256",
+                    name: "length",
+                    type: "uint256",
+                  },
+                  {
+                    internalType: "enum IStrategyBuilderModule.ParamType",
+                    name: "paramType",
+                    type: "uint8",
+                  },
+                ],
+                internalType: "struct IStrategyBuilderModule.Parameter",
+                name: "parameterReplacement",
+                type: "tuple",
+              },
+            ],
+            internalType: "struct IStrategyBuilderModule.ContextKey",
+            name: "output",
+            type: "tuple",
+          },
+          {
+            internalType: "uint8",
+            name: "result",
             type: "uint8",
           },
         ],
@@ -690,6 +947,79 @@ const _abi = [
                 name: "actionType",
                 type: "uint8",
               },
+              {
+                components: [
+                  {
+                    internalType: "string",
+                    name: "key",
+                    type: "string",
+                  },
+                  {
+                    components: [
+                      {
+                        internalType: "uint256",
+                        name: "offset",
+                        type: "uint256",
+                      },
+                      {
+                        internalType: "uint256",
+                        name: "length",
+                        type: "uint256",
+                      },
+                      {
+                        internalType: "enum IStrategyBuilderModule.ParamType",
+                        name: "paramType",
+                        type: "uint8",
+                      },
+                    ],
+                    internalType: "struct IStrategyBuilderModule.Parameter",
+                    name: "parameterReplacement",
+                    type: "tuple",
+                  },
+                ],
+                internalType: "struct IStrategyBuilderModule.ContextKey[]",
+                name: "inputs",
+                type: "tuple[]",
+              },
+              {
+                components: [
+                  {
+                    internalType: "string",
+                    name: "key",
+                    type: "string",
+                  },
+                  {
+                    components: [
+                      {
+                        internalType: "uint256",
+                        name: "offset",
+                        type: "uint256",
+                      },
+                      {
+                        internalType: "uint256",
+                        name: "length",
+                        type: "uint256",
+                      },
+                      {
+                        internalType: "enum IStrategyBuilderModule.ParamType",
+                        name: "paramType",
+                        type: "uint8",
+                      },
+                    ],
+                    internalType: "struct IStrategyBuilderModule.Parameter",
+                    name: "parameterReplacement",
+                    type: "tuple",
+                  },
+                ],
+                internalType: "struct IStrategyBuilderModule.ContextKey",
+                name: "output",
+                type: "tuple",
+              },
+              {
+                internalType: "uint8",
+                name: "result",
+                type: "uint8",
+              },
             ],
             internalType: "struct IStrategyBuilderModule.Action[]",
             name: "actions",
@@ -870,6 +1200,81 @@ const _abi = [
                     name: "actionType",
                     type: "uint8",
                   },
+                  {
+                    components: [
+                      {
+                        internalType: "string",
+                        name: "key",
+                        type: "string",
+                      },
+                      {
+                        components: [
+                          {
+                            internalType: "uint256",
+                            name: "offset",
+                            type: "uint256",
+                          },
+                          {
+                            internalType: "uint256",
+                            name: "length",
+                            type: "uint256",
+                          },
+                          {
+                            internalType:
+                              "enum IStrategyBuilderModule.ParamType",
+                            name: "paramType",
+                            type: "uint8",
+                          },
+                        ],
+                        internalType: "struct IStrategyBuilderModule.Parameter",
+                        name: "parameterReplacement",
+                        type: "tuple",
+                      },
+                    ],
+                    internalType: "struct IStrategyBuilderModule.ContextKey[]",
+                    name: "inputs",
+                    type: "tuple[]",
+                  },
+                  {
+                    components: [
+                      {
+                        internalType: "string",
+                        name: "key",
+                        type: "string",
+                      },
+                      {
+                        components: [
+                          {
+                            internalType: "uint256",
+                            name: "offset",
+                            type: "uint256",
+                          },
+                          {
+                            internalType: "uint256",
+                            name: "length",
+                            type: "uint256",
+                          },
+                          {
+                            internalType:
+                              "enum IStrategyBuilderModule.ParamType",
+                            name: "paramType",
+                            type: "uint8",
+                          },
+                        ],
+                        internalType: "struct IStrategyBuilderModule.Parameter",
+                        name: "parameterReplacement",
+                        type: "tuple",
+                      },
+                    ],
+                    internalType: "struct IStrategyBuilderModule.ContextKey",
+                    name: "output",
+                    type: "tuple",
+                  },
+                  {
+                    internalType: "uint8",
+                    name: "result",
+                    type: "uint8",
+                  },
                 ],
                 internalType: "struct IStrategyBuilderModule.Action[]",
                 name: "actions",
@@ -879,6 +1284,11 @@ const _abi = [
             internalType: "struct IStrategyBuilderModule.StrategyStep[]",
             name: "steps",
             type: "tuple[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "contextId",
+            type: "bytes32",
           },
         ],
         internalType: "struct IStrategyBuilderModule.Strategy",
