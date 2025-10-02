@@ -336,6 +336,7 @@ contract FeeHandlerTest is Test {
 
         vm.assume(beneficiary != FEE_PAYER);
         vm.assume(creator != FEE_PAYER);
+        vm.assume(beneficiary != address(handler));
 
         vm.prank(FEE_PAYER);
         Token _token = new Token("test", "MT", _maxTokenSupply);
@@ -356,6 +357,8 @@ contract FeeHandlerTest is Test {
         uint256 withdrawableToken = handler.getWithdrawableBalance(beneficiary, address(_token));
         vm.prank(beneficiary);
         handler.withdraw(address(_token));
+
+        console.log(withdrawableToken);
 
         assert(_token.balanceOf(beneficiary) == withdrawableToken);
     }

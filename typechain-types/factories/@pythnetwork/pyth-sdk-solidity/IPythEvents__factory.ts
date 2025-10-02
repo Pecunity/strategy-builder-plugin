@@ -40,6 +40,49 @@ const _abi = [
     name: "PriceFeedUpdate",
     type: "event",
   },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "bytes32",
+        name: "id",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "startTime",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "endTime",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "int64",
+        name: "twapPrice",
+        type: "int64",
+      },
+      {
+        indexed: false,
+        internalType: "uint64",
+        name: "twapConf",
+        type: "uint64",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "downSlotsRatio",
+        type: "uint32",
+      },
+    ],
+    name: "TwapPriceFeedUpdate",
+    type: "event",
+  },
 ] as const;
 
 export class IPythEvents__factory {

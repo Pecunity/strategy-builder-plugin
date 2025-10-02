@@ -7,6 +7,7 @@ import {IPriceOracle} from "contracts/interfaces/IPriceOracle.sol";
 import {PythStructs} from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import {IPyth} from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import {MockPythReverting} from "contracts/test/mocks/MockPythReverting.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract PriceOracleTest is Test {
     PriceOracle oracle;
@@ -33,7 +34,7 @@ contract PriceOracleTest is Test {
         address _token = makeAddr("random-token");
 
         vm.prank(BAD_ACTOR);
-        vm.expectRevert("Ownable: caller is not the owner");
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, BAD_ACTOR));
         oracle.setOracleID(_token, id);
     }
 

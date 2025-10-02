@@ -52,6 +52,28 @@ export declare namespace PythStructs {
     price: PythStructs.PriceStructOutput;
     emaPrice: PythStructs.PriceStructOutput;
   };
+
+  export type TwapPriceFeedStruct = {
+    id: BytesLike;
+    startTime: BigNumberish;
+    endTime: BigNumberish;
+    twap: PythStructs.PriceStruct;
+    downSlotsRatio: BigNumberish;
+  };
+
+  export type TwapPriceFeedStructOutput = [
+    id: string,
+    startTime: bigint,
+    endTime: bigint,
+    twap: PythStructs.PriceStructOutput,
+    downSlotsRatio: bigint
+  ] & {
+    id: string;
+    startTime: bigint;
+    endTime: bigint;
+    twap: PythStructs.PriceStructOutput;
+    downSlotsRatio: bigint;
+  };
 }
 
 export interface IPythInterface extends Interface {
@@ -61,14 +83,19 @@ export interface IPythInterface extends Interface {
       | "getEmaPriceUnsafe"
       | "getPriceNoOlderThan"
       | "getPriceUnsafe"
+      | "getTwapUpdateFee"
       | "getUpdateFee"
       | "parsePriceFeedUpdates"
       | "parsePriceFeedUpdatesUnique"
+      | "parsePriceFeedUpdatesWithConfig"
+      | "parseTwapPriceFeedUpdates"
       | "updatePriceFeeds"
       | "updatePriceFeedsIfNecessary"
   ): FunctionFragment;
 
-  getEvent(nameOrSignatureOrTopic: "PriceFeedUpdate"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "PriceFeedUpdate" | "TwapPriceFeedUpdate"
+  ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "getEmaPriceNoOlderThan",
@@ -87,6 +114,10 @@ export interface IPythInterface extends Interface {
     values: [BytesLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "getTwapUpdateFee",
+    values: [BytesLike[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getUpdateFee",
     values: [BytesLike[]]
   ): string;
@@ -97,6 +128,22 @@ export interface IPythInterface extends Interface {
   encodeFunctionData(
     functionFragment: "parsePriceFeedUpdatesUnique",
     values: [BytesLike[], BytesLike[], BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "parsePriceFeedUpdatesWithConfig",
+    values: [
+      BytesLike[],
+      BytesLike[],
+      BigNumberish,
+      BigNumberish,
+      boolean,
+      boolean,
+      boolean
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "parseTwapPriceFeedUpdates",
+    values: [BytesLike[], BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "updatePriceFeeds",
@@ -124,6 +171,10 @@ export interface IPythInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getTwapUpdateFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getUpdateFee",
     data: BytesLike
   ): Result;
@@ -133,6 +184,14 @@ export interface IPythInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "parsePriceFeedUpdatesUnique",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "parsePriceFeedUpdatesWithConfig",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "parseTwapPriceFeedUpdates",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -163,6 +222,37 @@ export namespace PriceFeedUpdateEvent {
     publishTime: bigint;
     price: bigint;
     conf: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace TwapPriceFeedUpdateEvent {
+  export type InputTuple = [
+    id: BytesLike,
+    startTime: BigNumberish,
+    endTime: BigNumberish,
+    twapPrice: BigNumberish,
+    twapConf: BigNumberish,
+    downSlotsRatio: BigNumberish
+  ];
+  export type OutputTuple = [
+    id: string,
+    startTime: bigint,
+    endTime: bigint,
+    twapPrice: bigint,
+    twapConf: bigint,
+    downSlotsRatio: bigint
+  ];
+  export interface OutputObject {
+    id: string;
+    startTime: bigint;
+    endTime: bigint;
+    twapPrice: bigint;
+    twapConf: bigint;
+    downSlotsRatio: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -237,6 +327,12 @@ export interface IPyth extends BaseContract {
     "view"
   >;
 
+  getTwapUpdateFee: TypedContractMethod<
+    [updateData: BytesLike[]],
+    [bigint],
+    "view"
+  >;
+
   getUpdateFee: TypedContractMethod<
     [updateData: BytesLike[]],
     [bigint],
@@ -262,6 +358,31 @@ export interface IPyth extends BaseContract {
       maxPublishTime: BigNumberish
     ],
     [PythStructs.PriceFeedStructOutput[]],
+    "payable"
+  >;
+
+  parsePriceFeedUpdatesWithConfig: TypedContractMethod<
+    [
+      updateData: BytesLike[],
+      priceIds: BytesLike[],
+      minAllowedPublishTime: BigNumberish,
+      maxAllowedPublishTime: BigNumberish,
+      checkUniqueness: boolean,
+      checkUpdateDataIsMinimal: boolean,
+      storeUpdatesIfFresh: boolean
+    ],
+    [
+      [PythStructs.PriceFeedStructOutput[], bigint[]] & {
+        priceFeeds: PythStructs.PriceFeedStructOutput[];
+        slots: bigint[];
+      }
+    ],
+    "payable"
+  >;
+
+  parseTwapPriceFeedUpdates: TypedContractMethod<
+    [updateData: BytesLike[], priceIds: BytesLike[]],
+    [PythStructs.TwapPriceFeedStructOutput[]],
     "payable"
   >;
 
@@ -314,6 +435,9 @@ export interface IPyth extends BaseContract {
     "view"
   >;
   getFunction(
+    nameOrSignature: "getTwapUpdateFee"
+  ): TypedContractMethod<[updateData: BytesLike[]], [bigint], "view">;
+  getFunction(
     nameOrSignature: "getUpdateFee"
   ): TypedContractMethod<[updateData: BytesLike[]], [bigint], "view">;
   getFunction(
@@ -341,6 +465,33 @@ export interface IPyth extends BaseContract {
     "payable"
   >;
   getFunction(
+    nameOrSignature: "parsePriceFeedUpdatesWithConfig"
+  ): TypedContractMethod<
+    [
+      updateData: BytesLike[],
+      priceIds: BytesLike[],
+      minAllowedPublishTime: BigNumberish,
+      maxAllowedPublishTime: BigNumberish,
+      checkUniqueness: boolean,
+      checkUpdateDataIsMinimal: boolean,
+      storeUpdatesIfFresh: boolean
+    ],
+    [
+      [PythStructs.PriceFeedStructOutput[], bigint[]] & {
+        priceFeeds: PythStructs.PriceFeedStructOutput[];
+        slots: bigint[];
+      }
+    ],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "parseTwapPriceFeedUpdates"
+  ): TypedContractMethod<
+    [updateData: BytesLike[], priceIds: BytesLike[]],
+    [PythStructs.TwapPriceFeedStructOutput[]],
+    "payable"
+  >;
+  getFunction(
     nameOrSignature: "updatePriceFeeds"
   ): TypedContractMethod<[updateData: BytesLike[]], [void], "payable">;
   getFunction(
@@ -362,6 +513,13 @@ export interface IPyth extends BaseContract {
     PriceFeedUpdateEvent.OutputTuple,
     PriceFeedUpdateEvent.OutputObject
   >;
+  getEvent(
+    key: "TwapPriceFeedUpdate"
+  ): TypedContractEvent<
+    TwapPriceFeedUpdateEvent.InputTuple,
+    TwapPriceFeedUpdateEvent.OutputTuple,
+    TwapPriceFeedUpdateEvent.OutputObject
+  >;
 
   filters: {
     "PriceFeedUpdate(bytes32,uint64,int64,uint64)": TypedContractEvent<
@@ -373,6 +531,17 @@ export interface IPyth extends BaseContract {
       PriceFeedUpdateEvent.InputTuple,
       PriceFeedUpdateEvent.OutputTuple,
       PriceFeedUpdateEvent.OutputObject
+    >;
+
+    "TwapPriceFeedUpdate(bytes32,uint64,uint64,int64,uint64,uint32)": TypedContractEvent<
+      TwapPriceFeedUpdateEvent.InputTuple,
+      TwapPriceFeedUpdateEvent.OutputTuple,
+      TwapPriceFeedUpdateEvent.OutputObject
+    >;
+    TwapPriceFeedUpdate: TypedContractEvent<
+      TwapPriceFeedUpdateEvent.InputTuple,
+      TwapPriceFeedUpdateEvent.OutputTuple,
+      TwapPriceFeedUpdateEvent.OutputObject
     >;
   };
 }

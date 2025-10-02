@@ -75,12 +75,40 @@ export type ExecutionManifestStructOutput = [
 };
 
 export declare namespace IStrategyBuilderModule {
+  export type ParameterStruct = {
+    offset: BigNumberish;
+    length: BigNumberish;
+    paramType: BigNumberish;
+  };
+
+  export type ParameterStructOutput = [
+    offset: bigint,
+    length: bigint,
+    paramType: bigint
+  ] & { offset: bigint; length: bigint; paramType: bigint };
+
+  export type ContextKeyStruct = {
+    key: string;
+    parameterReplacement: IStrategyBuilderModule.ParameterStruct;
+  };
+
+  export type ContextKeyStructOutput = [
+    key: string,
+    parameterReplacement: IStrategyBuilderModule.ParameterStructOutput
+  ] & {
+    key: string;
+    parameterReplacement: IStrategyBuilderModule.ParameterStructOutput;
+  };
+
   export type ActionStruct = {
     selector: BytesLike;
     parameter: BytesLike;
     target: AddressLike;
     value: BigNumberish;
     actionType: BigNumberish;
+    inputs: IStrategyBuilderModule.ContextKeyStruct[];
+    output: IStrategyBuilderModule.ContextKeyStruct;
+    result: BigNumberish;
   };
 
   export type ActionStructOutput = [
@@ -88,13 +116,19 @@ export declare namespace IStrategyBuilderModule {
     parameter: string,
     target: string,
     value: bigint,
-    actionType: bigint
+    actionType: bigint,
+    inputs: IStrategyBuilderModule.ContextKeyStructOutput[],
+    output: IStrategyBuilderModule.ContextKeyStructOutput,
+    result: bigint
   ] & {
     selector: string;
     parameter: string;
     target: string;
     value: bigint;
     actionType: bigint;
+    inputs: IStrategyBuilderModule.ContextKeyStructOutput[];
+    output: IStrategyBuilderModule.ContextKeyStructOutput;
+    result: bigint;
   };
 
   export type ConditionStruct = {
@@ -132,14 +166,17 @@ export declare namespace IStrategyBuilderModule {
   export type StrategyStruct = {
     creator: AddressLike;
     steps: IStrategyBuilderModule.StrategyStepStruct[];
+    contextId: BytesLike;
   };
 
   export type StrategyStructOutput = [
     creator: string,
-    steps: IStrategyBuilderModule.StrategyStepStructOutput[]
+    steps: IStrategyBuilderModule.StrategyStepStructOutput[],
+    contextId: string
   ] & {
     creator: string;
     steps: IStrategyBuilderModule.StrategyStepStructOutput[];
+    contextId: string;
   };
 
   export type AutomationStruct = {
@@ -169,6 +206,7 @@ export interface StrategyBuilderModuleInterface extends Interface {
       | "automation"
       | "createAutomation"
       | "createStrategy"
+      | "createStrategyWithExistingContext"
       | "deleteAutomation"
       | "deleteStrategy"
       | "executeAutomation"
@@ -190,6 +228,7 @@ export interface StrategyBuilderModuleInterface extends Interface {
       | "AutomationCreated"
       | "AutomationDeleted"
       | "AutomationExecuted"
+      | "ContextVariableStored"
       | "StrategyCreated"
       | "StrategyDeleted"
       | "StrategyExecuted"
@@ -220,6 +259,15 @@ export interface StrategyBuilderModuleInterface extends Interface {
       BigNumberish,
       AddressLike,
       IStrategyBuilderModule.StrategyStepStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "createStrategyWithExistingContext",
+    values: [
+      BigNumberish,
+      AddressLike,
+      IStrategyBuilderModule.StrategyStepStruct[],
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
@@ -283,6 +331,10 @@ export interface StrategyBuilderModuleInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createStrategy",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "createStrategyWithExistingContext",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -418,23 +470,44 @@ export namespace AutomationExecutedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace ContextVariableStoredEvent {
+  export type InputTuple = [
+    contextId: BytesLike,
+    key: string,
+    result: BytesLike
+  ];
+  export type OutputTuple = [contextId: string, key: string, result: string];
+  export interface OutputObject {
+    contextId: string;
+    key: string;
+    result: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace StrategyCreatedEvent {
   export type InputTuple = [
     wallet: AddressLike,
     strategyId: BigNumberish,
     creator: AddressLike,
+    contextId: BytesLike,
     strategy: IStrategyBuilderModule.StrategyStruct
   ];
   export type OutputTuple = [
     wallet: string,
     strategyId: bigint,
     creator: string,
+    contextId: string,
     strategy: IStrategyBuilderModule.StrategyStructOutput
   ];
   export interface OutputObject {
     wallet: string;
     strategyId: bigint;
     creator: string;
+    contextId: string;
     strategy: IStrategyBuilderModule.StrategyStructOutput;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -567,6 +640,17 @@ export interface StrategyBuilderModule extends BaseContract {
     "nonpayable"
   >;
 
+  createStrategyWithExistingContext: TypedContractMethod<
+    [
+      id: BigNumberish,
+      creator: AddressLike,
+      steps: IStrategyBuilderModule.StrategyStepStruct[],
+      contextId: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   deleteAutomation: TypedContractMethod<
     [id: BigNumberish],
     [void],
@@ -660,6 +744,18 @@ export interface StrategyBuilderModule extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "createStrategyWithExistingContext"
+  ): TypedContractMethod<
+    [
+      id: BigNumberish,
+      creator: AddressLike,
+      steps: IStrategyBuilderModule.StrategyStepStruct[],
+      contextId: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "deleteAutomation"
   ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
@@ -740,6 +836,13 @@ export interface StrategyBuilderModule extends BaseContract {
     AutomationExecutedEvent.OutputObject
   >;
   getEvent(
+    key: "ContextVariableStored"
+  ): TypedContractEvent<
+    ContextVariableStoredEvent.InputTuple,
+    ContextVariableStoredEvent.OutputTuple,
+    ContextVariableStoredEvent.OutputObject
+  >;
+  getEvent(
     key: "StrategyCreated"
   ): TypedContractEvent<
     StrategyCreatedEvent.InputTuple,
@@ -813,7 +916,18 @@ export interface StrategyBuilderModule extends BaseContract {
       AutomationExecutedEvent.OutputObject
     >;
 
-    "StrategyCreated(address,uint32,address,tuple)": TypedContractEvent<
+    "ContextVariableStored(bytes32,string,bytes)": TypedContractEvent<
+      ContextVariableStoredEvent.InputTuple,
+      ContextVariableStoredEvent.OutputTuple,
+      ContextVariableStoredEvent.OutputObject
+    >;
+    ContextVariableStored: TypedContractEvent<
+      ContextVariableStoredEvent.InputTuple,
+      ContextVariableStoredEvent.OutputTuple,
+      ContextVariableStoredEvent.OutputObject
+    >;
+
+    "StrategyCreated(address,uint32,address,bytes32,tuple)": TypedContractEvent<
       StrategyCreatedEvent.InputTuple,
       StrategyCreatedEvent.OutputTuple,
       StrategyCreatedEvent.OutputObject

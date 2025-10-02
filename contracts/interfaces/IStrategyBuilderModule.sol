@@ -26,6 +26,34 @@ interface IStrategyBuilderModule {
         address target; // The target address to which the action is directed.
         uint256 value; // The value (in wei) to be sent along with the action.
         ActionType actionType; // The type of action (external or internal).
+        ContextKey[] inputs;
+        ContextKey output;
+        uint8 result;
+    }
+
+    struct ContextKey {
+        string key;
+        Parameter parameterReplacement;
+    }
+
+    struct Parameter {
+        uint256 offset; // Byte offset in parameter where replacement happens
+        uint256 length; // Length of data to replace (32 for uint256, 20 for address)
+        ParamType paramType; // Type of parameter being replaced
+    }
+
+    enum ParamType {
+        UINT256,
+        ADDRESS,
+        BYTES32,
+        BOOL
+    }
+
+    struct ActionContext {
+        mapping(string => bytes) variables;
+        mapping(string => address) addresses;
+        mapping(string => uint256) amounts;
+        mapping(string => bool) booleans;
     }
 
     /// @dev Struct defining a condition that must be met for a strategy or automation to be executed.
@@ -49,6 +77,7 @@ interface IStrategyBuilderModule {
     struct Strategy {
         address creator; // The address of the creator of the strategy.
         StrategyStep[] steps; // The steps that make up the strategy.
+        bytes32 contextId;
     }
 
     /// @dev Struct representing an automation process that can be executed based on a condition.
@@ -93,7 +122,10 @@ interface IStrategyBuilderModule {
     /// @param strategyId The unique ID of the created strategy.
     /// @param creator The address of the strategy creator.
     /// @param strategy The details of the created strategy.
-    event StrategyCreated(address indexed wallet, uint32 strategyId, address creator, Strategy strategy);
+    /// @param contextId The used context for the strategy
+    event StrategyCreated(
+        address indexed wallet, uint32 strategyId, address creator, bytes32 contextId, Strategy strategy
+    );
 
     /// @notice Event emitted when a strategy is executed.
     /// @param wallet The address of the wallet executing the strategy.
@@ -147,6 +179,8 @@ interface IStrategyBuilderModule {
     /// @param wallet The address of the wallet executing the action.
     /// @param action The details of the action being executed.
     event ActionExecuted(address indexed wallet, Action action);
+
+    event ContextVariableStored(bytes32 indexed contextId, string key, bytes result);
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃     Public Functions       ┃

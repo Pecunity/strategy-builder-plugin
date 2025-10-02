@@ -42,6 +42,8 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
     /// @notice Maps automation IDs to automation data
     mapping(bytes32 => Automation) private automations;
 
+    mapping(address => mapping(bytes32 => ActionContext)) private globalContexts;
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Modifier            ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -98,34 +100,16 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         external
         strategyDoesNotExist(msg.sender, id)
     {
-        _validateSteps(steps);
+        _createStrategy(id, creator, steps, bytes32(0));
+    }
 
-        Strategy storage newStrategy = strategies[getStorageId(msg.sender, id)];
-
-        newStrategy.creator = creator;
-
-        for (uint256 i = 0; i < steps.length; i++) {
-            StrategyStep memory step = steps[i];
-
-            if (step.condition.conditionAddress != address(0)) {
-                // Validate the condition
-                _validateCondition(step.condition);
-
-                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, id, true);
-            }
-
-            // Create a new step in storage
-            StrategyStep storage newStep = newStrategy.steps.push();
-            newStep.condition = step.condition;
-
-            // Loop through the actions and add them to the step
-            for (uint256 j = 0; j < step.actions.length; j++) {
-                _validateAction(step.actions[j]);
-                newStep.actions.push(step.actions[j]);
-            }
-        }
-
-        emit StrategyCreated(msg.sender, id, creator, newStrategy);
+    function createStrategyWithExistingContext(
+        uint32 id,
+        address creator,
+        StrategyStep[] calldata steps,
+        bytes32 contextId
+    ) external strategyDoesNotExist(msg.sender, id) {
+        _createStrategy(id, creator, steps, contextId);
     }
 
     /// @inheritdoc IStrategyBuilderModule
@@ -222,18 +206,200 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         emit AutomationExecuted(wallet, id, _automation.paymentToken, feeInToken, feeInUSD);
     }
 
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃       Context functions         ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    /**
+     * @dev Process action parameters by replacing values at specified offsets
+     */
+    function _processActionParameters(Action memory action, ActionContext storage context)
+        internal
+        view
+        returns (bytes memory)
+    {
+        if (action.inputs.length == 0) {
+            return action.parameter;
+        }
+
+        bytes memory processedParams = action.parameter;
+
+        // Process each input replacement
+        for (uint256 i = 0; i < action.inputs.length; i++) {
+            ContextKey memory input = action.inputs[i];
+
+            if (_hasValidKey(input.key)) {
+                bytes memory replacementValue =
+                    _getContextValueByType(context, input.key, input.parameterReplacement.paramType);
+
+                if (replacementValue.length > 0) {
+                    processedParams =
+                        _replaceParameterAtOffset(processedParams, input.parameterReplacement, replacementValue);
+                }
+            }
+        }
+
+        return processedParams;
+    }
+
+    /**
+     * @dev Get context value by type from global storage
+     */
+    function _getContextValueByType(ActionContext storage context, string memory key, ParamType paramType)
+        internal
+        view
+        returns (bytes memory)
+    {
+        if (paramType == ParamType.UINT256) {
+            uint256 amount = context.amounts[key];
+            if (amount > 0 || context.variables[key].length > 0) {
+                return amount > 0 ? abi.encode(amount) : context.variables[key];
+            }
+        } else if (paramType == ParamType.ADDRESS) {
+            address addr = context.addresses[key];
+            if (addr != address(0)) {
+                return abi.encode(addr);
+            }
+        } else if (paramType == ParamType.BOOL) {
+            // Check if boolean was explicitly set
+            if (context.variables[key].length > 0) {
+                bool value = context.booleans[key];
+                return abi.encode(value);
+            }
+        } else if (paramType == ParamType.BYTES32) {
+            bytes memory data = context.variables[key];
+            if (data.length >= 32) {
+                return data;
+            }
+        }
+
+        // Fallback to raw variables
+        return context.variables[key];
+    }
+
+    /**
+     * @dev Replace parameter value at specific offset
+     */
+    function _replaceParameterAtOffset(bytes memory parameters, Parameter memory param, bytes memory replacement)
+        internal
+        pure
+        returns (bytes memory)
+    {
+        require(param.offset + param.length <= parameters.length, "Invalid parameter offset");
+        require(replacement.length >= param.length, "Replacement too short");
+
+        // Replace bytes at the specified offset
+        for (uint256 i = 0; i < param.length; i++) {
+            parameters[param.offset + i] = replacement[i];
+        }
+
+        return parameters;
+    }
+
+    function _storeToGlobalContext(address wallet, bytes32 contextId, ContextKey memory outputKey, bytes memory result)
+        internal
+    {
+        if (!_hasValidKey(outputKey.key)) return;
+
+        ActionContext storage globalContext = globalContexts[wallet][contextId];
+
+        // Store raw result
+        globalContext.variables[outputKey.key] = result;
+
+        // Parse and store typed values based on paramType
+        if (outputKey.parameterReplacement.paramType == ParamType.UINT256) {
+            if (result.length >= 32) {
+                uint256 value = abi.decode(result, (uint256));
+                globalContext.amounts[outputKey.key] = value;
+            }
+        } else if (outputKey.parameterReplacement.paramType == ParamType.ADDRESS) {
+            if (result.length >= 32) {
+                address addr = abi.decode(result, (address));
+                globalContext.addresses[outputKey.key] = addr;
+            }
+        } else if (outputKey.parameterReplacement.paramType == ParamType.BOOL) {
+            if (result.length >= 32) {
+                bool value = abi.decode(result, (bool));
+                globalContext.booleans[outputKey.key] = value;
+            }
+        }
+        // BYTES32 is stored as raw variables
+
+        emit ContextVariableStored(contextId, outputKey.key, result);
+    }
+
+    function _hasValidKey(string memory key) internal pure returns (bool) {
+        return bytes(key).length > 0;
+    }
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Internal functions         ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+    function _createStrategy(uint32 id, address creator, StrategyStep[] calldata steps, bytes32 contextId)
+        internal
+        strategyDoesNotExist(msg.sender, id)
+    {
+        _validateSteps(steps);
+
+        Strategy storage newStrategy = strategies[getStorageId(msg.sender, id)];
+
+        newStrategy.creator = creator;
+
+        newStrategy.contextId = contextId == bytes32(0)
+            ? keccak256(abi.encodePacked(msg.sender, id, block.timestamp, block.number))
+            : contextId;
+
+        for (uint256 i = 0; i < steps.length; i++) {
+            StrategyStep memory step = steps[i];
+
+            if (step.condition.conditionAddress != address(0)) {
+                // Validate the condition
+                _validateCondition(step.condition);
+
+                _changeStrategyInCondition(msg.sender, step.condition.conditionAddress, step.condition.id, id, true);
+            }
+
+            // Create a new step in storage
+            StrategyStep storage newStep = newStrategy.steps.push();
+            newStep.condition = step.condition;
+
+            // Loop through the actions and add them to the step
+            for (uint256 j = 0; j < step.actions.length; j++) {
+                _validateAction(step.actions[j]);
+
+                Action memory _currAction = step.actions[j];
+                Action storage newAction = newStep.actions.push();
+
+                newAction.target = _currAction.target;
+                newAction.parameter = _currAction.parameter;
+                newAction.value = _currAction.value;
+                newAction.selector = _currAction.selector;
+                newAction.actionType = _currAction.actionType;
+
+                newAction.output = _currAction.output;
+                newAction.result = _currAction.result;
+
+                // Save the input keys for this action into the new step's actions
+                // Create a copy of the input keys array
+                uint256 inputCount = step.actions[j].inputs.length;
+                for (uint256 k = 0; k < inputCount; k++) {
+                    newAction.inputs.push(step.actions[j].inputs[k]);
+                }
+            }
+        }
+
+        emit StrategyCreated(msg.sender, id, creator, newStrategy.contextId, newStrategy);
+    }
+
     function _executeStrategy(address wallet, uint32 id) internal returns (uint256 fee) {
-        fee = _executeStep(wallet, id, 0);
+        fee = _executeStep(wallet, id, 0, getStorageId(wallet, id));
 
         emit StrategyExecuted(wallet, id);
     }
 
-    function _executeStep(address wallet, uint32 id, uint16 index) internal returns (uint256 fee) {
-        StrategyStep memory _step = strategies[getStorageId(wallet, id)].steps[index];
+    function _executeStep(address wallet, uint32 id, uint16 index, bytes32 strategyId) internal returns (uint256 fee) {
+        StrategyStep memory _step = strategies[strategyId].steps[index];
 
         //Check Condition
         (uint8 conditionResult, uint16 nextIndex) = _checkCondition(wallet, _step.condition);
@@ -241,7 +407,7 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         if (conditionResult == 1) {
             //Execute all actions from the step
             for (uint256 i = 0; i < _step.actions.length; i++) {
-                uint256 _actionFee = _executeAction(wallet, _step.actions[i]);
+                uint256 _actionFee = _executeAction(wallet, _step.actions[i], strategies[strategyId].contextId);
                 fee += _actionFee;
             }
 
@@ -250,19 +416,22 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
 
         if (nextIndex != 0) {
             //if there is a next step go to it
-            uint256 _feeNextStep = _executeStep(wallet, id, nextIndex);
+            uint256 _feeNextStep = _executeStep(wallet, id, nextIndex, strategyId);
             fee += _feeNextStep;
         }
     }
 
-    function _executeAction(address _wallet, Action memory _action) internal returns (uint256 feeInUSD) {
+    function _executeAction(address _wallet, Action memory _action, bytes32 contextId)
+        internal
+        returns (uint256 feeInUSD)
+    {
         (address tokenToTrack, bool exist) =
             feeController.getTokenForAction(_action.target, _action.selector, _action.parameter);
         // If the volume token exist track the volume before and after the execution, else get the min fee
 
         uint256 preExecBalance = exist ? IERC20(tokenToTrack).balanceOf(_wallet) : 0;
 
-        _execute(_wallet, _action);
+        _execute(_wallet, _action, contextId);
 
         IFeeController.FeeType feeType = feeController.functionFeeConfig(_action.selector).feeType;
 
@@ -280,19 +449,77 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         emit ActionExecuted(_wallet, _action);
     }
 
-    function _execute(address _wallet, Action memory _action) internal {
-        bytes memory data =
-            _action.selector == bytes4(0) ? bytes("") : abi.encodePacked(_action.selector, _action.parameter);
+    function _execute(address _wallet, Action memory _action, bytes32 contextId) internal {
+        bytes memory executionParams = _action.parameter;
+        if (_action.inputs.length > 0) {
+            executionParams = _processActionParameters(_action, globalContexts[_wallet][contextId]);
+        }
 
+        bytes memory data =
+            _action.selector == bytes4(0) ? bytes("") : abi.encodePacked(_action.selector, executionParams);
+
+        bytes memory executionResult;
         if (_action.actionType == ActionType.EXTERNAL) {
-            IModularAccount(_wallet).execute(_action.target, _action.value, data);
+            executionResult = IModularAccount(_wallet).execute(_action.target, _action.value, data);
         } else {
             (, bytes memory _result) = _action.target.call(data);
-            IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
-            for (uint256 i = 0; i < executions.length; i++) {
-                IModularAccount(_wallet).execute(executions[i].target, executions[i].value, executions[i].data);
+
+            bool hasStoreResult = _hasStoreResult(_result);
+
+            if (hasStoreResult) {
+                (IAction.PluginExecution[] memory executions, bytes memory actionCallResult) =
+                    abi.decode(_result, (IAction.PluginExecution[], bytes));
+
+                executionResult = _executePluginsAndGetResult(_wallet, executions, _action.result, actionCallResult);
+            } else {
+                IAction.PluginExecution[] memory executions = abi.decode(_result, (IAction.PluginExecution[]));
+
+                executionResult = _executePluginsAndGetResult(_wallet, executions, _action.result, "");
             }
         }
+
+        if (bytes(_action.output.key).length > 0) {
+            _storeToGlobalContext(_wallet, contextId, _action.output, executionResult);
+        }
+    }
+
+    function _hasStoreResult(bytes memory data) internal pure returns (bool) {
+        // Check if the data starts with a tuple containing 2 elements
+        // This is a simplified check - you might want more robust detection
+        if (data.length < 64) return false;
+
+        // Try to peek at the structure
+        uint256 firstOffset;
+        uint256 secondOffset;
+
+        assembly {
+            firstOffset := mload(add(data, 0x20)) // First element offset
+            secondOffset := mload(add(data, 0x40)) // Second element offset
+        }
+
+        // If we have two valid offsets, it's likely a tuple with 2 elements
+        return firstOffset > 0 && secondOffset > firstOffset;
+    }
+
+    function _executePluginsAndGetResult(
+        address _wallet,
+        IAction.PluginExecution[] memory executions,
+        uint256 resultIndex,
+        bytes memory actionCallResult
+    ) internal returns (bytes memory) {
+        require(resultIndex <= executions.length, "Invalid execution index");
+
+        bytes memory result;
+        for (uint256 i = 0; i < executions.length; i++) {
+            bytes memory _executionResult =
+                IModularAccount(_wallet).execute(executions[i].target, executions[i].value, executions[i].data);
+
+            if (resultIndex == i + 1) {
+                result = _executionResult;
+            }
+        }
+
+        return resultIndex == 0 ? actionCallResult : result;
     }
 
     function _deleteAutomation(address wallet, uint32 id) internal {
@@ -508,7 +735,7 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
     function executionManifest() external pure returns (ExecutionManifest memory) {
         ExecutionManifest memory manifest;
 
-        ManifestExecutionFunction[] memory executionFunctions = new ManifestExecutionFunction[](5);
+        ManifestExecutionFunction[] memory executionFunctions = new ManifestExecutionFunction[](6);
         // 1. Publicly callable
         executionFunctions[0] = ManifestExecutionFunction({
             executionSelector: this.executeAutomation.selector,
@@ -537,6 +764,12 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
 
         executionFunctions[4] = ManifestExecutionFunction({
             executionSelector: this.deleteAutomation.selector,
+            skipRuntimeValidation: false,
+            allowGlobalValidation: true
+        });
+
+        executionFunctions[5] = ManifestExecutionFunction({
+            executionSelector: this.executeStrategy.selector,
             skipRuntimeValidation: false,
             allowGlobalValidation: true
         });
