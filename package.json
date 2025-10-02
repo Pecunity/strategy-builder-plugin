@@ -1,7 +1,7 @@
 {
-  "name": "strategy-builder-plugin",
-  "version": "2.0.0",
-  "description": "This is  an ERC-6900 compatible plugin called StrategyBuilderPlugin, built in Foundry. It has one function that can be called through a user operation, called `increment`. In `/src` you will find this plugin, documented so you can understand how it works in detail.",
+  "name": "pecunity-strategy-builder",
+  "version": "2.0.1",
+  "description": "This is  an ERC-6900 compatible module called StrategyBuilder, built in Foundry. It has one function that can be called through a user operation, called `increment`. In `/src` you will find this plugin, documented so you can understand how it works in detail.",
   "main": "index.js",
   "directories": {
     "lib": "lib",
@@ -9,7 +9,8 @@
   },
   "files": [
     "/contracts/**/*.sol",
-    "!/contracts/test/**/*"
+    "!/contracts/test/**/*",
+    "/assets/*"
   ],
   "scripts": {
     "test": "forge test",
