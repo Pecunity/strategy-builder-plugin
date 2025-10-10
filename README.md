@@ -32,7 +32,17 @@ The **StrategyBuilder** is a modular smart contract built on the **ERC6900 stand
 
 By leveraging the **ERC6900 modular account standard**, this plugin enhances DeFi automation, making complex financial strategies **accessible, secure, and highly efficient** for both institutional and individual users.
 
----
+## Planned Chain Launches
+
+We plan to launch StrategyBuilder on the following blockchains:
+
+- BNB Chain
+
+- Base
+
+- Arbitrum
+
+## These networks were chosen for their scalability, strong DeFi ecosystems, and compatibility with modular smart account standards.
 
 ## Installation
 
@@ -94,7 +104,7 @@ There are four core smart contracts that make up the heart of the system:
 - **StrategyBuilderPlugin**  
   An ERC-6900 compatible plugin contract that provides the main functionality of the strategy builder—allowing you to create, execute, and manage strategies.
 
-> 🔎 For a detailed description of the **StrategyBuilder**, check out the official documentation: [https://docs.octodefi.com](https://docs.octodefi.com)
+> 🔎 For a detailed description of the **StrategyBuilder**, check out the official documentation: [https://docs.pecunity.io](https://docs.pecunity.io)
 
 ### Source Code
 
@@ -105,7 +115,7 @@ You can find the source code for each core contract below:
 | PriceOracle           | Fetches price data from Pyth           | [PriceOracle.sol](./contracts/PriceOracle.sol)                     |
 | FeeController         | Manages function-specific fees         | [FeeController.sol](./contracts/FeeController.sol)                 |
 | FeeHandler            | Handles fee distribution               | [FeeHandler.sol](./contracts/FeeHandler.sol)                       |
-| StrategyBuilderPlugin | Strategy builder core logic (ERC-6900) | [StrategyBuilderPlugin.sol](./contracts/StrategyBuilderPlugin.sol) |
+| StrategyBuilderModule | Strategy builder core logic (ERC-6900) | [StrategyBuilderPlugin.sol](./contracts/StrategyBuilderModule.sol) |
 
 ---
 
