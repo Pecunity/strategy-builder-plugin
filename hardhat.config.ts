@@ -35,6 +35,10 @@ const config: HardhatUserConfig = {
       ...getNetwork(Network.ARBITRUM_SEPOLIA),
       chainId: 421614,
     },
+    sepolia: {
+      ...getNetwork(Network.SEPOLIA),
+      chainId: 11155111,
+    },
   },
   etherscan: {
     apiKey: ARBISCAN_API_KEY,
