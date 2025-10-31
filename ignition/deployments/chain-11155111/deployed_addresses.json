@@ -3,5 +3,7 @@
   "StrategyBuilderCoreModule#FeeHandler": "0x1c57461F160F3C1C5cF15457f05e71eA69AaE2eb",
   "StrategyBuilderCoreModule#PriceOracle": "0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d",
   "StrategyBuilderCoreModule#FeeController": "0x9C736C92997F7C9d67c2CcDa6Ba24281498B8c64",
-  "StrategyBuilderCoreModule#StrategyBuilderModule": "0xD0089f421393639BcCAFf3867fD935995505e30D"
+  "StrategyBuilderCoreModule#StrategyBuilderModule": "0xD0089f421393639BcCAFf3867fD935995505e30D",
+  "TimeCondition#TimeCondition": "0xf6c7c333ab2646cF733027a4047036c0FC3469aD",
+  "ERC20TokenOrCoinBalancedCondition#CoinOrERC20BalanceCondition": "0x340952d86A3DacAFb0780e299f1ab74FB8d79eE4"
 }
