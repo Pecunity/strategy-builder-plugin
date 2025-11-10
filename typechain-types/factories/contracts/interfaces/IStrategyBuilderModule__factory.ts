@@ -62,6 +62,11 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "InvalidContextKey",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "InvalidID",
     type: "error",
   },
@@ -395,6 +400,19 @@ const _abi = [
       },
     ],
     name: "ContextVariableStored",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "enabled",
+        type: "bool",
+      },
+    ],
+    name: "FeesEnabled",
     type: "event",
   },
   {
@@ -1063,6 +1081,20 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "disableFees",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "enableFees",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint32",
@@ -1106,6 +1138,35 @@ const _abi = [
         type: "address",
       },
       {
+        internalType: "bytes32",
+        name: "contextId",
+        type: "bytes32",
+      },
+      {
+        internalType: "string",
+        name: "key",
+        type: "string",
+      },
+    ],
+    name: "getContextVariable",
+    outputs: [
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
         internalType: "uint32",
         name: "id",
         type: "uint32",
@@ -1120,6 +1181,34 @@ const _abi = [
       },
     ],
     stateMutability: "pure",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "contextId",
+        type: "bytes32",
+      },
+      {
+        internalType: "string",
+        name: "key",
+        type: "string",
+      },
+      {
+        internalType: "enum IStrategyBuilderModule.ParamType",
+        name: "paramType",
+        type: "uint8",
+      },
+      {
+        internalType: "bytes",
+        name: "value",
+        type: "bytes",
+      },
+    ],
+    name: "storeConextVariable",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

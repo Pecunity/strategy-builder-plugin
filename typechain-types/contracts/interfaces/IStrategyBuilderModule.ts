@@ -156,9 +156,13 @@ export interface IStrategyBuilderModuleInterface extends Interface {
       | "createStrategy"
       | "deleteAutomation"
       | "deleteStrategy"
+      | "disableFees"
+      | "enableFees"
       | "executeAutomation"
       | "executeStrategy"
+      | "getContextVariable"
       | "getStorageId"
+      | "storeConextVariable"
       | "strategy"
   ): FunctionFragment;
 
@@ -169,6 +173,7 @@ export interface IStrategyBuilderModuleInterface extends Interface {
       | "AutomationDeleted"
       | "AutomationExecuted"
       | "ContextVariableStored"
+      | "FeesEnabled"
       | "StrategyCreated"
       | "StrategyDeleted"
       | "StrategyExecuted"
@@ -206,6 +211,14 @@ export interface IStrategyBuilderModuleInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "disableFees",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "enableFees",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "executeAutomation",
     values: [BigNumberish, AddressLike, AddressLike]
   ): string;
@@ -214,8 +227,16 @@ export interface IStrategyBuilderModuleInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "getContextVariable",
+    values: [AddressLike, BytesLike, string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getStorageId",
     values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "storeConextVariable",
+    values: [BytesLike, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "strategy",
@@ -240,6 +261,11 @@ export interface IStrategyBuilderModuleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "disableFees",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "enableFees", data: BytesLike): Result;
+  decodeFunctionResult(
     functionFragment: "executeAutomation",
     data: BytesLike
   ): Result;
@@ -248,7 +274,15 @@ export interface IStrategyBuilderModuleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getContextVariable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getStorageId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "storeConextVariable",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "strategy", data: BytesLike): Result;
@@ -356,6 +390,18 @@ export namespace ContextVariableStoredEvent {
     contextId: string;
     key: string;
     result: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace FeesEnabledEvent {
+  export type InputTuple = [enabled: boolean];
+  export type OutputTuple = [enabled: boolean];
+  export interface OutputObject {
+    enabled: boolean;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -521,6 +567,10 @@ export interface IStrategyBuilderModule extends BaseContract {
 
   deleteStrategy: TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
 
+  disableFees: TypedContractMethod<[], [void], "nonpayable">;
+
+  enableFees: TypedContractMethod<[], [void], "nonpayable">;
+
   executeAutomation: TypedContractMethod<
     [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
     [void],
@@ -533,10 +583,27 @@ export interface IStrategyBuilderModule extends BaseContract {
     "nonpayable"
   >;
 
+  getContextVariable: TypedContractMethod<
+    [wallet: AddressLike, contextId: BytesLike, key: string],
+    [string],
+    "view"
+  >;
+
   getStorageId: TypedContractMethod<
     [wallet: AddressLike, id: BigNumberish],
     [string],
     "view"
+  >;
+
+  storeConextVariable: TypedContractMethod<
+    [
+      contextId: BytesLike,
+      key: string,
+      paramType: BigNumberish,
+      value: BytesLike
+    ],
+    [void],
+    "nonpayable"
   >;
 
   strategy: TypedContractMethod<
@@ -587,6 +654,12 @@ export interface IStrategyBuilderModule extends BaseContract {
     nameOrSignature: "deleteStrategy"
   ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "disableFees"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "enableFees"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "executeAutomation"
   ): TypedContractMethod<
     [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
@@ -597,11 +670,30 @@ export interface IStrategyBuilderModule extends BaseContract {
     nameOrSignature: "executeStrategy"
   ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "getContextVariable"
+  ): TypedContractMethod<
+    [wallet: AddressLike, contextId: BytesLike, key: string],
+    [string],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getStorageId"
   ): TypedContractMethod<
     [wallet: AddressLike, id: BigNumberish],
     [string],
     "view"
+  >;
+  getFunction(
+    nameOrSignature: "storeConextVariable"
+  ): TypedContractMethod<
+    [
+      contextId: BytesLike,
+      key: string,
+      paramType: BigNumberish,
+      value: BytesLike
+    ],
+    [void],
+    "nonpayable"
   >;
   getFunction(
     nameOrSignature: "strategy"
@@ -645,6 +737,13 @@ export interface IStrategyBuilderModule extends BaseContract {
     ContextVariableStoredEvent.InputTuple,
     ContextVariableStoredEvent.OutputTuple,
     ContextVariableStoredEvent.OutputObject
+  >;
+  getEvent(
+    key: "FeesEnabled"
+  ): TypedContractEvent<
+    FeesEnabledEvent.InputTuple,
+    FeesEnabledEvent.OutputTuple,
+    FeesEnabledEvent.OutputObject
   >;
   getEvent(
     key: "StrategyCreated"
@@ -729,6 +828,17 @@ export interface IStrategyBuilderModule extends BaseContract {
       ContextVariableStoredEvent.InputTuple,
       ContextVariableStoredEvent.OutputTuple,
       ContextVariableStoredEvent.OutputObject
+    >;
+
+    "FeesEnabled(bool)": TypedContractEvent<
+      FeesEnabledEvent.InputTuple,
+      FeesEnabledEvent.OutputTuple,
+      FeesEnabledEvent.OutputObject
+    >;
+    FeesEnabled: TypedContractEvent<
+      FeesEnabledEvent.InputTuple,
+      FeesEnabledEvent.OutputTuple,
+      FeesEnabledEvent.OutputObject
     >;
 
     "StrategyCreated(address,uint32,address,bytes32,tuple)": TypedContractEvent<

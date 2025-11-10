@@ -16,29 +16,39 @@ import {IActionRegistry} from "./interfaces/IActionRegistry.sol";
 import {IAction} from "./interfaces/IAction.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title StrategyBuilderModule
  * @dev A moodule for creating, executing, and managing automated strategies based on predefined conditions and actions.
  */
-contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExecutionModule {
+contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModule, IExecutionModule {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     /// @notice Fee controller contract
     IFeeController public immutable feeController;
+
     /// @notice Fee handler contract
     IFeeHandler public immutable feeHandler;
+
     /// @notice Action Registry contract
     IActionRegistry public immutable actionRegistry;
 
+    /// @notice Global flag controlling whether fee calculations and payments are enabled
+    /// @dev Defaults to true; can be toggled by owner for testing or promotional periods
+    bool public feesEnabled = true;
+
     /// @notice Maps strategy IDs to strategy data
     mapping(bytes32 => Strategy) private strategies;
+
     /// @notice Tracks where each strategy is used
     mapping(bytes32 => uint32[]) private strategiesUsed;
+
     /// @notice Maps automation IDs to their index in the owner's strategy usage array
     mapping(bytes32 => uint32) private automationsToIndex; //Maps each automation ID to its index in the owner's used strategy array.
+
     /// @notice Maps automation IDs to automation data
     mapping(bytes32 => Automation) private automations;
 
@@ -85,10 +95,30 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
     /// @param _feeController Address of the contract responsible for fee configuration and validation.
     /// @param _feeHandler Address of the contract responsible for fee distribution and handling.
     /// @param _actionRegistry The address of the ActionRegistry contract used to validate allowed action contracts.
-    constructor(address _feeController, address _feeHandler, address _actionRegistry) {
+    constructor(address _feeController, address _feeHandler, address _actionRegistry) Ownable(msg.sender) {
         feeController = IFeeController(_feeController);
         feeHandler = IFeeHandler(_feeHandler);
         actionRegistry = IActionRegistry(_actionRegistry);
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    Admin functions    ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    /// @notice Enable fee payments
+    /// @dev Only callable by owner/admin if using access control
+    function enableFees() external onlyOwner {
+        // Optional: require(msg.sender == owner, "Unauthorized");
+        feesEnabled = true;
+        emit FeesEnabled(true);
+    }
+
+    /// @notice Disable fee payments
+    /// @dev Only callable by owner/admin if using access control
+    function disableFees() external onlyOwner {
+        // Optional: require(msg.sender == owner, "Unauthorized");
+        feesEnabled = false;
+        emit FeesEnabled(false);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -193,7 +223,7 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
 
         uint256 feeInUSD = _executeStrategy(wallet, _automation.strategyId);
 
-        if (feeInUSD > _automation.maxFeeAmount) {
+        if (feesEnabled && feeInUSD > _automation.maxFeeAmount) {
             revert FeeExceedMaxFee();
         }
 
@@ -204,6 +234,18 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         _updateCondition(wallet, _automation.condition, id);
 
         emit AutomationExecuted(wallet, id, _automation.paymentToken, feeInToken, feeInUSD);
+    }
+
+    function storeConextVariable(bytes32 contextId, string memory key, ParamType paramType, bytes memory value)
+        external
+    {
+        if (_hasValidKey(key)) revert InvalidContextKey();
+
+        ActionContext storage context = globalContexts[msg.sender][contextId];
+
+        _storeParamInContext(context, key, paramType, value);
+
+        emit ContextVariableStored(contextId, key, value);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -307,25 +349,50 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         globalContext.variables[outputKey.key] = result;
 
         // Parse and store typed values based on paramType
-        if (outputKey.parameterReplacement.paramType == ParamType.UINT256) {
-            if (result.length >= 32) {
-                uint256 value = abi.decode(result, (uint256));
-                globalContext.amounts[outputKey.key] = value;
-            }
-        } else if (outputKey.parameterReplacement.paramType == ParamType.ADDRESS) {
-            if (result.length >= 32) {
-                address addr = abi.decode(result, (address));
-                globalContext.addresses[outputKey.key] = addr;
-            }
-        } else if (outputKey.parameterReplacement.paramType == ParamType.BOOL) {
-            if (result.length >= 32) {
-                bool value = abi.decode(result, (bool));
-                globalContext.booleans[outputKey.key] = value;
-            }
-        }
+        // if (outputKey.parameterReplacement.paramType == ParamType.UINT256) {
+        //     if (result.length >= 32) {
+        //         uint256 value = abi.decode(result, (uint256));
+        //         globalContext.amounts[outputKey.key] = value;
+        //     }
+        // } else if (outputKey.parameterReplacement.paramType == ParamType.ADDRESS) {
+        //     if (result.length >= 32) {
+        //         address addr = abi.decode(result, (address));
+        //         globalContext.addresses[outputKey.key] = addr;
+        //     }
+        // } else if (outputKey.parameterReplacement.paramType == ParamType.BOOL) {
+        //     if (result.length >= 32) {
+        //         bool value = abi.decode(result, (bool));
+        //         globalContext.booleans[outputKey.key] = value;
+        //     }
+        // }
+        _storeParamInContext(globalContext, outputKey.key, outputKey.parameterReplacement.paramType, result);
         // BYTES32 is stored as raw variables
 
         emit ContextVariableStored(contextId, outputKey.key, result);
+    }
+
+    function _storeParamInContext(
+        ActionContext storage context,
+        string memory key,
+        ParamType paramType,
+        bytes memory result
+    ) internal {
+        if (paramType == ParamType.UINT256) {
+            if (result.length >= 32) {
+                uint256 value = abi.decode(result, (uint256));
+                context.amounts[key] = value;
+            }
+        } else if (paramType == ParamType.ADDRESS) {
+            if (result.length >= 32) {
+                address addr = abi.decode(result, (address));
+                context.addresses[key] = addr;
+            }
+        } else if (paramType == ParamType.BOOL) {
+            if (result.length >= 32) {
+                bool value = abi.decode(result, (bool));
+                context.booleans[key] = value;
+            }
+        }
     }
 
     function _hasValidKey(string memory key) internal pure returns (bool) {
@@ -425,6 +492,12 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         internal
         returns (uint256 feeInUSD)
     {
+        if (!feesEnabled) {
+            _execute(_wallet, _action, contextId);
+            emit ActionExecuted(_wallet, _action);
+            return 0; // No fee calculation or emission if disabled
+        }
+
         (address tokenToTrack, bool exist) =
             feeController.getTokenForAction(_action.target, _action.selector, _action.parameter);
         // If the volume token exist track the volume before and after the execution, else get the min fee
@@ -608,6 +681,10 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
         address beneficiary,
         address creator
     ) internal returns (uint256) {
+        if (feeInUSD == 0) {
+            return 0; // Early return for zero or disabled fees
+        }
+
         uint256 feeInToken = feeController.calculateTokenAmount(paymentToken, feeInUSD);
 
         if (paymentToken != address(0)) {
@@ -800,5 +877,13 @@ contract StrategyBuilderModule is ReentrancyGuard, IStrategyBuilderModule, IExec
 
     function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
         return interfaceId == type(IStrategyBuilderModule).interfaceId;
+    }
+
+    function getContextVariable(address wallet, bytes32 contextId, string memory key)
+        external
+        view
+        returns (bytes memory)
+    {
+        return globalContexts[wallet][contextId].variables[key];
     }
 }

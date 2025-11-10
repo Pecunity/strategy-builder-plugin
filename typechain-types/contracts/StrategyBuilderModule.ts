@@ -209,17 +209,25 @@ export interface StrategyBuilderModuleInterface extends Interface {
       | "createStrategyWithExistingContext"
       | "deleteAutomation"
       | "deleteStrategy"
+      | "disableFees"
+      | "enableFees"
       | "executeAutomation"
       | "executeStrategy"
       | "executionManifest"
       | "feeController"
       | "feeHandler"
+      | "feesEnabled"
+      | "getContextVariable"
       | "getStorageId"
       | "moduleId"
       | "onInstall"
       | "onUninstall"
+      | "owner"
+      | "renounceOwnership"
+      | "storeConextVariable"
       | "strategy"
       | "supportsInterface"
+      | "transferOwnership"
   ): FunctionFragment;
 
   getEvent(
@@ -229,6 +237,8 @@ export interface StrategyBuilderModuleInterface extends Interface {
       | "AutomationDeleted"
       | "AutomationExecuted"
       | "ContextVariableStored"
+      | "FeesEnabled"
+      | "OwnershipTransferred"
       | "StrategyCreated"
       | "StrategyDeleted"
       | "StrategyExecuted"
@@ -279,6 +289,14 @@ export interface StrategyBuilderModuleInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "disableFees",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "enableFees",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "executeAutomation",
     values: [BigNumberish, AddressLike, AddressLike]
   ): string;
@@ -299,6 +317,14 @@ export interface StrategyBuilderModuleInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "feesEnabled",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getContextVariable",
+    values: [AddressLike, BytesLike, string]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getStorageId",
     values: [AddressLike, BigNumberish]
   ): string;
@@ -311,6 +337,15 @@ export interface StrategyBuilderModuleInterface extends Interface {
     functionFragment: "onUninstall",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "storeConextVariable",
+    values: [BytesLike, string, BigNumberish, BytesLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "strategy",
     values: [AddressLike, BigNumberish]
@@ -318,6 +353,10 @@ export interface StrategyBuilderModuleInterface extends Interface {
   encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [AddressLike]
   ): string;
 
   decodeFunctionResult(
@@ -346,6 +385,11 @@ export interface StrategyBuilderModuleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "disableFees",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "enableFees", data: BytesLike): Result;
+  decodeFunctionResult(
     functionFragment: "executeAutomation",
     data: BytesLike
   ): Result;
@@ -363,6 +407,14 @@ export interface StrategyBuilderModuleInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "feeHandler", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "feesEnabled",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getContextVariable",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getStorageId",
     data: BytesLike
   ): Result;
@@ -372,9 +424,22 @@ export interface StrategyBuilderModuleInterface extends Interface {
     functionFragment: "onUninstall",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "storeConextVariable",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "strategy", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
 }
@@ -481,6 +546,31 @@ export namespace ContextVariableStoredEvent {
     contextId: string;
     key: string;
     result: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace FeesEnabledEvent {
+  export type InputTuple = [enabled: boolean];
+  export type OutputTuple = [enabled: boolean];
+  export interface OutputObject {
+    enabled: boolean;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -659,6 +749,10 @@ export interface StrategyBuilderModule extends BaseContract {
 
   deleteStrategy: TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
 
+  disableFees: TypedContractMethod<[], [void], "nonpayable">;
+
+  enableFees: TypedContractMethod<[], [void], "nonpayable">;
+
   executeAutomation: TypedContractMethod<
     [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
     [void],
@@ -681,6 +775,14 @@ export interface StrategyBuilderModule extends BaseContract {
 
   feeHandler: TypedContractMethod<[], [string], "view">;
 
+  feesEnabled: TypedContractMethod<[], [boolean], "view">;
+
+  getContextVariable: TypedContractMethod<
+    [wallet: AddressLike, contextId: BytesLike, key: string],
+    [string],
+    "view"
+  >;
+
   getStorageId: TypedContractMethod<
     [wallet: AddressLike, id: BigNumberish],
     [string],
@@ -693,6 +795,21 @@ export interface StrategyBuilderModule extends BaseContract {
 
   onUninstall: TypedContractMethod<[arg0: BytesLike], [void], "view">;
 
+  owner: TypedContractMethod<[], [string], "view">;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  storeConextVariable: TypedContractMethod<
+    [
+      contextId: BytesLike,
+      key: string,
+      paramType: BigNumberish,
+      value: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   strategy: TypedContractMethod<
     [wallet: AddressLike, id: BigNumberish],
     [IStrategyBuilderModule.StrategyStructOutput],
@@ -703,6 +820,12 @@ export interface StrategyBuilderModule extends BaseContract {
     [interfaceId: BytesLike],
     [boolean],
     "view"
+  >;
+
+  transferOwnership: TypedContractMethod<
+    [newOwner: AddressLike],
+    [void],
+    "nonpayable"
   >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
@@ -762,6 +885,12 @@ export interface StrategyBuilderModule extends BaseContract {
     nameOrSignature: "deleteStrategy"
   ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "disableFees"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "enableFees"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "executeAutomation"
   ): TypedContractMethod<
     [id: BigNumberish, wallet: AddressLike, beneficary: AddressLike],
@@ -781,6 +910,16 @@ export interface StrategyBuilderModule extends BaseContract {
     nameOrSignature: "feeHandler"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "feesEnabled"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "getContextVariable"
+  ): TypedContractMethod<
+    [wallet: AddressLike, contextId: BytesLike, key: string],
+    [string],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getStorageId"
   ): TypedContractMethod<
     [wallet: AddressLike, id: BigNumberish],
@@ -797,6 +936,24 @@ export interface StrategyBuilderModule extends BaseContract {
     nameOrSignature: "onUninstall"
   ): TypedContractMethod<[arg0: BytesLike], [void], "view">;
   getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "renounceOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "storeConextVariable"
+  ): TypedContractMethod<
+    [
+      contextId: BytesLike,
+      key: string,
+      paramType: BigNumberish,
+      value: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "strategy"
   ): TypedContractMethod<
     [wallet: AddressLike, id: BigNumberish],
@@ -806,6 +963,9 @@ export interface StrategyBuilderModule extends BaseContract {
   getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "transferOwnership"
+  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
 
   getEvent(
     key: "ActionExecuted"
@@ -841,6 +1001,20 @@ export interface StrategyBuilderModule extends BaseContract {
     ContextVariableStoredEvent.InputTuple,
     ContextVariableStoredEvent.OutputTuple,
     ContextVariableStoredEvent.OutputObject
+  >;
+  getEvent(
+    key: "FeesEnabled"
+  ): TypedContractEvent<
+    FeesEnabledEvent.InputTuple,
+    FeesEnabledEvent.OutputTuple,
+    FeesEnabledEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferred"
+  ): TypedContractEvent<
+    OwnershipTransferredEvent.InputTuple,
+    OwnershipTransferredEvent.OutputTuple,
+    OwnershipTransferredEvent.OutputObject
   >;
   getEvent(
     key: "StrategyCreated"
@@ -925,6 +1099,28 @@ export interface StrategyBuilderModule extends BaseContract {
       ContextVariableStoredEvent.InputTuple,
       ContextVariableStoredEvent.OutputTuple,
       ContextVariableStoredEvent.OutputObject
+    >;
+
+    "FeesEnabled(bool)": TypedContractEvent<
+      FeesEnabledEvent.InputTuple,
+      FeesEnabledEvent.OutputTuple,
+      FeesEnabledEvent.OutputObject
+    >;
+    FeesEnabled: TypedContractEvent<
+      FeesEnabledEvent.InputTuple,
+      FeesEnabledEvent.OutputTuple,
+      FeesEnabledEvent.OutputObject
+    >;
+
+    "OwnershipTransferred(address,address)": TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+    OwnershipTransferred: TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
     >;
 
     "StrategyCreated(address,uint32,address,bytes32,tuple)": TypedContractEvent<

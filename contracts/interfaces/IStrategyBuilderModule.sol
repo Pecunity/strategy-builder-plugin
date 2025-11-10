@@ -112,10 +112,18 @@ interface IStrategyBuilderModule {
     error InvalidCondition();
     error PluginExecutionFailed();
     error NoConditionOrActions(uint256 stepIndex);
+    error InvalidContextKey();
 
     // ┏━━━━━━━━━━━━━━━━━━┓
     // ┃     Events       ┃
     // ┗━━━━━━━━━━━━━━━━━━┛
+
+    /**
+     * @notice Emitted when the global feesEnabled flag is toggled
+     * @dev Allows off-chain monitoring of fee payment availability across all executions
+     * @param enabled True if fees are now enabled, false if disabled
+     */
+    event FeesEnabled(bool enabled);
 
     /// @notice Event emitted when a strategy is created.
     /// @param wallet The address of the wallet that created the strategy.
@@ -186,6 +194,17 @@ interface IStrategyBuilderModule {
     // ┃     Public Functions       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
+    /// @notice Enables fee calculations and payments for all strategy and automation executions
+    ///  @dev Only callable by contract owner/admin. Restores normal fee processing after disablement.
+    ///      Emits FeesEnabled event with true parameter.
+    function enableFees() external;
+
+    /// @notice Disables fee calculations and payments for all strategy and automation executions
+    /// @dev Only callable by contract owner/admin. All actions execute without fees when disabled.
+    ///      Useful for emergency pauses, testing, or promotional zero-fee periods.
+    ///      Emits FeesEnabled event with false parameter.
+    function disableFees() external;
+
     /// @notice Creates a new strategy with a given ID, creator address, and strategy steps.
     /// @dev The strategy is stored in a mapping using a bytes32 key generated from the strategy ID and msg.sender.
     /// @param id The unique identifier for the strategy.
@@ -231,6 +250,16 @@ interface IStrategyBuilderModule {
     /// @param beneficary The address that will receive a portion of the execution fees as a reward.
     function executeAutomation(uint32 id, address wallet, address beneficary) external;
 
+    /// @notice Stores or updates a typed variable in the caller's global context
+    /// @dev Validates non-empty key and stores value with type-specific handling for efficient retrieval.
+    ///      Raw bytes always stored; typed mappings populated when possible. Emits ContextVariableStored event.
+    /// @param contextId Unique identifier for the strategy's shared context
+    /// @param key Non-empty string identifier for the context variable
+    /// @param paramType Expected data type for storage and subsequent retrieval
+    /// @param value Raw bytes value to store in the context
+    function storeConextVariable(bytes32 contextId, string memory key, ParamType paramType, bytes memory value)
+        external;
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃     View Functions      ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -255,4 +284,17 @@ interface IStrategyBuilderModule {
     /// @param id The unique ID to be included in the storage ID calculation.
     /// @return A unique `bytes32` storage identifier based on the wallet address and ID.
     function getStorageId(address wallet, uint32 id) external pure returns (bytes32);
+
+    /// @notice Retrieves a stored context variable value as raw bytes
+    /// @dev Returns the raw bytes value from the variables mapping for a given context and key
+    ///      For type-specific access, use dedicated view functions or off-chain ABI decoding
+    ///      Empty bytes returned if variable doesn't exist in the specified context
+    /// @param wallet Address of the modular account owning the context
+    /// @param contextId Identifier of the strategy context containing the variable
+    /// @param key String identifier of the specific context variable to retrieve
+    /// @return value Raw bytes value stored for the specified key, or empty bytes if not set
+    function getContextVariable(address wallet, bytes32 contextId, string memory key)
+        external
+        view
+        returns (bytes memory);
 }
