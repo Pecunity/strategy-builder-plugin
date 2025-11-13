@@ -1,0 +1,18 @@
+{
+  "StrategyBuilderCoreModule": {
+    "vault": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123",
+    "pythOracle": "0x4D7E825f80bDf85e913E0DD2A2D54927e9dE1594",
+    "owner": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123",
+    "maxOracleDelay": 60,
+    "maxFeeLimits": [500, 1000, 200],
+    "minFeesInUSD": [
+      "1000000000000000n",
+      "2000000000000000n",
+      "5000000000000000n"
+    ],
+    "beneficiaryPercentage": 5000,
+    "creatorPercentage": 1500,
+    "vaultPercentage": 3500,
+    "ethOracleID": "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f"
+  }
+}

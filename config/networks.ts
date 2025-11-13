@@ -5,4 +5,5 @@ export enum Network {
   "OPTIMISM" = "opt-mainnet",
   "ARBITRUM_SEPOLIA" = "arb-sepolia",
   "SEPOLIA" = "eth-sepolia",
+  "BNB" = "bnb-mainnet",
 }

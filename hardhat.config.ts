@@ -40,6 +40,10 @@ const config: HardhatUserConfig = {
       ...getNetwork(Network.SEPOLIA),
       chainId: 11155111,
     },
+    bnbMainnet: {
+      ...getNetwork(Network.BNB),
+      chainId: 56,
+    },
   },
   etherscan: {
     apiKey: ARBISCAN_API_KEY,
