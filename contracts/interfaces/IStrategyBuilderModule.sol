@@ -32,7 +32,7 @@ interface IStrategyBuilderModule {
     }
 
     struct ContextKey {
-        string key;
+        bytes32 key;
         Parameter parameterReplacement;
     }
 
@@ -50,10 +50,10 @@ interface IStrategyBuilderModule {
     }
 
     struct ActionContext {
-        mapping(string => bytes) variables;
-        mapping(string => address) addresses;
-        mapping(string => uint256) amounts;
-        mapping(string => bool) booleans;
+        mapping(bytes32 => bytes) variables;
+        mapping(bytes32 => address) addresses;
+        mapping(bytes32 => uint256) amounts;
+        mapping(bytes32 => bool) booleans;
     }
 
     /// @dev Struct defining a condition that must be met for a strategy or automation to be executed.
@@ -188,7 +188,7 @@ interface IStrategyBuilderModule {
     /// @param action The details of the action being executed.
     event ActionExecuted(address indexed wallet, Action action);
 
-    event ContextVariableStored(bytes32 indexed contextId, string key, bytes result);
+    event ContextVariableStored(bytes32 indexed contextId, bytes32 key, bytes result);
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃     Public Functions       ┃
@@ -211,6 +211,13 @@ interface IStrategyBuilderModule {
     /// @param creator The address of the strategy creator.
     /// @param steps An array of StrategyStep structs defining the sequence of actions and conditions in the strategy.
     function createStrategy(uint32 id, address creator, StrategyStep[] calldata steps) external;
+
+    function createStrategyWithExistingContext(
+        uint32 id,
+        address creator,
+        StrategyStep[] calldata steps,
+        bytes32 contextId
+    ) external;
 
     /// @notice Deletes a strategy associated with the caller's address and the given strategy ID.
     /// @dev Removes the strategy with the specified ID, ensuring the caller is the owner of the strategy.
@@ -257,8 +264,7 @@ interface IStrategyBuilderModule {
     /// @param key Non-empty string identifier for the context variable
     /// @param paramType Expected data type for storage and subsequent retrieval
     /// @param value Raw bytes value to store in the context
-    function storeConextVariable(bytes32 contextId, string memory key, ParamType paramType, bytes memory value)
-        external;
+    function storeConextVariable(bytes32 contextId, bytes32 key, ParamType paramType, bytes memory value) external;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃     View Functions      ┃
@@ -291,10 +297,7 @@ interface IStrategyBuilderModule {
     ///      Empty bytes returned if variable doesn't exist in the specified context
     /// @param wallet Address of the modular account owning the context
     /// @param contextId Identifier of the strategy context containing the variable
-    /// @param key String identifier of the specific context variable to retrieve
+    /// @param key  identifier of the specific context variable to retrieve
     /// @return value Raw bytes value stored for the specified key, or empty bytes if not set
-    function getContextVariable(address wallet, bytes32 contextId, string memory key)
-        external
-        view
-        returns (bytes memory);
+    function getContextVariable(address wallet, bytes32 contextId, bytes32 key) external view returns (bytes memory);
 }

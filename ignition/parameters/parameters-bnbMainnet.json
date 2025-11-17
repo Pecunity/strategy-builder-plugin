@@ -3,7 +3,7 @@
     "vault": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123",
     "pythOracle": "0x4D7E825f80bDf85e913E0DD2A2D54927e9dE1594",
     "owner": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123",
-    "maxOracleDelay": 60,
+    "maxOracleDelay": 600,
     "maxFeeLimits": [500, 1000, 200],
     "minFeesInUSD": [
       "1000000000000000n",

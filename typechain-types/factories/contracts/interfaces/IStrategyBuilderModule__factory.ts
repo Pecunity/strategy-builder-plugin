@@ -176,9 +176,9 @@ const _abi = [
           {
             components: [
               {
-                internalType: "string",
+                internalType: "bytes32",
                 name: "key",
-                type: "string",
+                type: "bytes32",
               },
               {
                 components: [
@@ -210,9 +210,9 @@ const _abi = [
           {
             components: [
               {
-                internalType: "string",
+                internalType: "bytes32",
                 name: "key",
-                type: "string",
+                type: "bytes32",
               },
               {
                 components: [
@@ -388,9 +388,9 @@ const _abi = [
       },
       {
         indexed: false,
-        internalType: "string",
+        internalType: "bytes32",
         name: "key",
-        type: "string",
+        type: "bytes32",
       },
       {
         indexed: false,
@@ -508,9 +508,9 @@ const _abi = [
                   {
                     components: [
                       {
-                        internalType: "string",
+                        internalType: "bytes32",
                         name: "key",
-                        type: "string",
+                        type: "bytes32",
                       },
                       {
                         components: [
@@ -543,9 +543,9 @@ const _abi = [
                   {
                     components: [
                       {
-                        internalType: "string",
+                        internalType: "bytes32",
                         name: "key",
-                        type: "string",
+                        type: "bytes32",
                       },
                       {
                         components: [
@@ -694,9 +694,9 @@ const _abi = [
           {
             components: [
               {
-                internalType: "string",
+                internalType: "bytes32",
                 name: "key",
-                type: "string",
+                type: "bytes32",
               },
               {
                 components: [
@@ -728,9 +728,9 @@ const _abi = [
           {
             components: [
               {
-                internalType: "string",
+                internalType: "bytes32",
                 name: "key",
-                type: "string",
+                type: "bytes32",
               },
               {
                 components: [
@@ -968,9 +968,9 @@ const _abi = [
               {
                 components: [
                   {
-                    internalType: "string",
+                    internalType: "bytes32",
                     name: "key",
-                    type: "string",
+                    type: "bytes32",
                   },
                   {
                     components: [
@@ -1002,9 +1002,9 @@ const _abi = [
               {
                 components: [
                   {
-                    internalType: "string",
+                    internalType: "bytes32",
                     name: "key",
-                    type: "string",
+                    type: "bytes32",
                   },
                   {
                     components: [
@@ -1143,9 +1143,9 @@ const _abi = [
         type: "bytes32",
       },
       {
-        internalType: "string",
+        internalType: "bytes32",
         name: "key",
-        type: "string",
+        type: "bytes32",
       },
     ],
     name: "getContextVariable",
@@ -1191,9 +1191,9 @@ const _abi = [
         type: "bytes32",
       },
       {
-        internalType: "string",
+        internalType: "bytes32",
         name: "key",
-        type: "string",
+        type: "bytes32",
       },
       {
         internalType: "enum IStrategyBuilderModule.ParamType",
@@ -1292,9 +1292,9 @@ const _abi = [
                   {
                     components: [
                       {
-                        internalType: "string",
+                        internalType: "bytes32",
                         name: "key",
-                        type: "string",
+                        type: "bytes32",
                       },
                       {
                         components: [
@@ -1327,9 +1327,9 @@ const _abi = [
                   {
                     components: [
                       {
-                        internalType: "string",
+                        internalType: "bytes32",
                         name: "key",
-                        type: "string",
+                        type: "bytes32",
                       },
                       {
                         components: [

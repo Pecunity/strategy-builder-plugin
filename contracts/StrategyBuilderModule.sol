@@ -236,10 +236,8 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
         emit AutomationExecuted(wallet, id, _automation.paymentToken, feeInToken, feeInUSD);
     }
 
-    function storeConextVariable(bytes32 contextId, string memory key, ParamType paramType, bytes memory value)
-        external
-    {
-        if (_hasValidKey(key)) revert InvalidContextKey();
+    function storeConextVariable(bytes32 contextId, bytes32 key, ParamType paramType, bytes memory value) external {
+        if (!_hasValidKey(key)) revert InvalidContextKey();
 
         ActionContext storage context = globalContexts[msg.sender][contextId];
 
@@ -287,7 +285,7 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
     /**
      * @dev Get context value by type from global storage
      */
-    function _getContextValueByType(ActionContext storage context, string memory key, ParamType paramType)
+    function _getContextValueByType(ActionContext storage context, bytes32 key, ParamType paramType)
         internal
         view
         returns (bytes memory)
@@ -371,12 +369,9 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
         emit ContextVariableStored(contextId, outputKey.key, result);
     }
 
-    function _storeParamInContext(
-        ActionContext storage context,
-        string memory key,
-        ParamType paramType,
-        bytes memory result
-    ) internal {
+    function _storeParamInContext(ActionContext storage context, bytes32 key, ParamType paramType, bytes memory result)
+        internal
+    {
         if (paramType == ParamType.UINT256) {
             if (result.length >= 32) {
                 uint256 value = abi.decode(result, (uint256));
@@ -395,8 +390,8 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
         }
     }
 
-    function _hasValidKey(string memory key) internal pure returns (bool) {
-        return bytes(key).length > 0;
+    function _hasValidKey(bytes32 key) internal pure returns (bool) {
+        return key != bytes32(0);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -551,7 +546,7 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
             }
         }
 
-        if (bytes(_action.output.key).length > 0) {
+        if (_action.output.key != bytes32(0)) {
             _storeToGlobalContext(_wallet, contextId, _action.output, executionResult);
         }
     }
@@ -879,11 +874,7 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
         return interfaceId == type(IStrategyBuilderModule).interfaceId;
     }
 
-    function getContextVariable(address wallet, bytes32 contextId, string memory key)
-        external
-        view
-        returns (bytes memory)
-    {
+    function getContextVariable(address wallet, bytes32 contextId, bytes32 key) external view returns (bytes memory) {
         return globalContexts[wallet][contextId].variables[key];
     }
 }

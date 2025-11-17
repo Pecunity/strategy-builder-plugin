@@ -37,7 +37,7 @@ export declare namespace IStrategyBuilderModule {
   ] & { offset: bigint; length: bigint; paramType: bigint };
 
   export type ContextKeyStruct = {
-    key: string;
+    key: BytesLike;
     parameterReplacement: IStrategyBuilderModule.ParameterStruct;
   };
 
@@ -228,7 +228,7 @@ export interface IStrategyBuilderModuleInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getContextVariable",
-    values: [AddressLike, BytesLike, string]
+    values: [AddressLike, BytesLike, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getStorageId",
@@ -236,7 +236,7 @@ export interface IStrategyBuilderModuleInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "storeConextVariable",
-    values: [BytesLike, string, BigNumberish, BytesLike]
+    values: [BytesLike, BytesLike, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "strategy",
@@ -382,7 +382,7 @@ export namespace AutomationExecutedEvent {
 export namespace ContextVariableStoredEvent {
   export type InputTuple = [
     contextId: BytesLike,
-    key: string,
+    key: BytesLike,
     result: BytesLike
   ];
   export type OutputTuple = [contextId: string, key: string, result: string];
@@ -584,7 +584,7 @@ export interface IStrategyBuilderModule extends BaseContract {
   >;
 
   getContextVariable: TypedContractMethod<
-    [wallet: AddressLike, contextId: BytesLike, key: string],
+    [wallet: AddressLike, contextId: BytesLike, key: BytesLike],
     [string],
     "view"
   >;
@@ -598,7 +598,7 @@ export interface IStrategyBuilderModule extends BaseContract {
   storeConextVariable: TypedContractMethod<
     [
       contextId: BytesLike,
-      key: string,
+      key: BytesLike,
       paramType: BigNumberish,
       value: BytesLike
     ],
@@ -672,7 +672,7 @@ export interface IStrategyBuilderModule extends BaseContract {
   getFunction(
     nameOrSignature: "getContextVariable"
   ): TypedContractMethod<
-    [wallet: AddressLike, contextId: BytesLike, key: string],
+    [wallet: AddressLike, contextId: BytesLike, key: BytesLike],
     [string],
     "view"
   >;
@@ -688,7 +688,7 @@ export interface IStrategyBuilderModule extends BaseContract {
   ): TypedContractMethod<
     [
       contextId: BytesLike,
-      key: string,
+      key: BytesLike,
       paramType: BigNumberish,
       value: BytesLike
     ],
@@ -819,7 +819,7 @@ export interface IStrategyBuilderModule extends BaseContract {
       AutomationExecutedEvent.OutputObject
     >;
 
-    "ContextVariableStored(bytes32,string,bytes)": TypedContractEvent<
+    "ContextVariableStored(bytes32,bytes32,bytes)": TypedContractEvent<
       ContextVariableStoredEvent.InputTuple,
       ContextVariableStoredEvent.OutputTuple,
       ContextVariableStoredEvent.OutputObject
