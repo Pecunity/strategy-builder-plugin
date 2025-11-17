@@ -154,6 +154,7 @@ export interface IStrategyBuilderModuleInterface extends Interface {
       | "automation"
       | "createAutomation"
       | "createStrategy"
+      | "createStrategyWithExistingContext"
       | "deleteAutomation"
       | "deleteStrategy"
       | "disableFees"
@@ -200,6 +201,15 @@ export interface IStrategyBuilderModuleInterface extends Interface {
       BigNumberish,
       AddressLike,
       IStrategyBuilderModule.StrategyStepStruct[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "createStrategyWithExistingContext",
+    values: [
+      BigNumberish,
+      AddressLike,
+      IStrategyBuilderModule.StrategyStepStruct[],
+      BytesLike
     ]
   ): string;
   encodeFunctionData(
@@ -250,6 +260,10 @@ export interface IStrategyBuilderModuleInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "createStrategy",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "createStrategyWithExistingContext",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -559,6 +573,17 @@ export interface IStrategyBuilderModule extends BaseContract {
     "nonpayable"
   >;
 
+  createStrategyWithExistingContext: TypedContractMethod<
+    [
+      id: BigNumberish,
+      creator: AddressLike,
+      steps: IStrategyBuilderModule.StrategyStepStruct[],
+      contextId: BytesLike
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   deleteAutomation: TypedContractMethod<
     [id: BigNumberish],
     [void],
@@ -643,6 +668,18 @@ export interface IStrategyBuilderModule extends BaseContract {
       id: BigNumberish,
       creator: AddressLike,
       steps: IStrategyBuilderModule.StrategyStepStruct[]
+    ],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "createStrategyWithExistingContext"
+  ): TypedContractMethod<
+    [
+      id: BigNumberish,
+      creator: AddressLike,
+      steps: IStrategyBuilderModule.StrategyStepStruct[],
+      contextId: BytesLike
     ],
     [void],
     "nonpayable"

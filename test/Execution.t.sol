@@ -17,11 +17,15 @@ contract StrategyExecutionTest is Test {
 
     address public constant STRATEGY_BUILDER_PLUGIN = 0x4095B6aC5abbDEFFb690447dF6F487E8a2B387DF;
     address public constant AAVE_V3_Actions = 0x8C262ec2db34a6CdA55ba9aDe792225191e0754C;
-    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0x2A9b50800138a9841Fc9789c2708219073997786;
-    address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0xc12376C08c26eE282589682C65D87772AdFD9F40;
+    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0x99BfEA7af9226b343059Fb367Ae620Dbb0495F0A;
+    address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0x97366851B9768b4F176788de6f6bA572f163310A;
+    address public constant PANCAKE_SWAP_V3_SWAP_ACTIONS = 0xFBa49Aa14263f906A1545e863221756203d66468;
     address public constant TIME_CONDITION = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
+    address public constant MATH_ACTION = 0xf1610D38E8D379780C3d33196b6CD756627897D3;
+    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0x655F3398Be75c65DB1B911189a78348E6F35C1Ce;
 
     address public constant PANCAKE_SWAP_V3_ROUTER = 0x13f4EA83D0bd40E75C8222255bc855a974568Dd4;
+    address public constant PANCAKE_SWAP_V3_POSITION_MANAGER = 0x46A15B0b27311cedF172AB29E4f4766fbE7F4364;
 
     address public constant USDT = 0x55d398326f99059fF775485246999027B3197955;
     address public constant aBNB = 0x9B00a09492a626678E5A3009982191586C444Df9;
@@ -34,7 +38,7 @@ contract StrategyExecutionTest is Test {
     uint32 public constant STRATEGY_ID = 3155266195;
 
     //1.1 Supply wBNB
-    uint256 constant AMOUNT = 20 ether;
+    uint256 constant AMOUNT = 2 ether;
     bytes32 constant SUPPLY_AMOUNT_KEY = bytes32(bytes("supply_amount"));
 
     //1.2 Borrow USDT to HealthFactor
@@ -47,7 +51,7 @@ contract StrategyExecutionTest is Test {
     uint24 constant POOL_FEE = 100;
     IUniswapV3OneSidedLPActions.AddLiquidityOneSidedRangeParams LP_PARAMS = IUniswapV3OneSidedLPActions
         .AddLiquidityOneSidedRangeParams({tokenIn: USDT, token0: USDT, token1: wBNB, fee: POOL_FEE, recipient: wallet});
-    uint24 constant PERCENTAGE = 1250;
+    uint24 constant PERCENTAGE = 250;
     bytes32 constant LP_POSITION_KEY = bytes32(bytes("lp_position"));
 
     //2 Inteval Strategy
@@ -66,6 +70,12 @@ contract StrategyExecutionTest is Test {
     //2.2 Supply wBNB to Aave and repay USDT to Aave
     uint256 constant PERCENTAGE_AAVE = 10_000;
 
+    //3 Price Range Strategy
+    uint256 constant PERCENTAGE_LP = 1000;
+    uint32 public constant STRATEGY_ID_LOWER_TICK = 3155266197;
+    uint32 public constant CONDITION_ID_LOWER_TICK = 3155266197;
+    bytes32 constant REMOVE_LP_AMOUNT_KEY = bytes32(bytes("remove_lp_amount"));
+
     address public EXECUTOR = makeAddr("executor");
     address public TRADER = makeAddr("trader");
 
@@ -81,7 +91,117 @@ contract StrategyExecutionTest is Test {
 
         createSecondStrategy();
 
-        mockTimeAndExecute();
+        createThirdStrategy();
+
+        checkRangeCondition();
+        changePriceToUpperAndExecute();
+
+        // mockTimeAndExecute();
+    }
+
+    function checkRangeCondition() internal view {
+        uint256 lpPosition = abi.decode(
+            IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).getContextVariable(wallet, CONTEXT_ID, LP_POSITION_KEY),
+            (uint256)
+        );
+
+        (,,,,, int24 tickLower,,,,,,) =
+            INonfungiblePositionManager(PANCAKE_SWAP_V3_POSITION_MANAGER).positions(lpPosition);
+
+        (, int24 tick,,,,,) = IPancakeSwapPoolState(PANCAKE_SWAP_POOL).slot0();
+
+        uint8 isTrue = IPancakeSwapV3PositionRangeChecker(PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER).checkCondition(
+            wallet, STRATEGY_ID_LOWER_TICK
+        );
+
+        console2.log("==============================");
+        console2.log("=== Strategy 3 Information ===");
+        console2.log("Lower tick trigger", tickLower);
+        console2.log("Current tick", tick);
+        console2.log("Is tick out of range", isTrue == 1);
+    }
+
+    function changePriceToUpperAndExecute() internal {
+        deal(USDT, TRADER, 80000000 ether);
+        for (uint256 i; i < 30; i++) {
+            _mockSwap(USDT, 90000 ether, TRADER);
+        }
+
+        vm.prank(EXECUTOR);
+        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(STRATEGY_ID_LOWER_TICK, wallet, EXECUTOR);
+
+        uint256 removeLpAmount = abi.decode(
+            IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).getContextVariable(wallet, CONTEXT_ID, REMOVE_LP_AMOUNT_KEY),
+            (uint256)
+        );
+        console2.log("=== Strategy 3 Execcution ===");
+        console2.log("Remove LP amount", _toDecimalString(removeLpAmount, 18));
+    }
+
+    function createThirdStrategy() internal {
+        IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](1);
+
+        IStrategyBuilderModule.Action[] memory actions = new IStrategyBuilderModule.Action[](1);
+
+        IStrategyBuilderModule.ContextKey[] memory inputs = new IStrategyBuilderModule.ContextKey[](1);
+        inputs[0] = IStrategyBuilderModule.ContextKey({
+            key: LP_POSITION_KEY,
+            parameterReplacement: IStrategyBuilderModule.Parameter({
+                offset: 32,
+                length: 32,
+                paramType: IStrategyBuilderModule.ParamType.UINT256
+            })
+        });
+
+        actions[0] = IStrategyBuilderModule.Action({
+            selector: IPancakeSwapV3LPActions.removeLiquidityPercentage.selector,
+            parameter: abi.encode(wallet, 0, PERCENTAGE_LP),
+            value: 0,
+            target: PANCAKE_SWAP_V3_LP_ACTIONS,
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
+            inputs: inputs, // LP position ID
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: REMOVE_LP_AMOUNT_KEY,
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 32,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 1
+        });
+
+        steps[0] = IStrategyBuilderModule.StrategyStep({
+            condition: IStrategyBuilderModule.Condition({conditionAddress: address(0), id: 0, result0: 0, result1: 0}),
+            actions: actions
+        });
+
+        vm.prank(wallet);
+        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).createStrategyWithExistingContext(
+            STRATEGY_ID_LOWER_TICK, address(0), steps, CONTEXT_ID
+        );
+
+        vm.prank(wallet);
+        IPancakeSwapV3PositionRangeChecker(PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER).addCondition(
+            CONDITION_ID_LOWER_TICK,
+            IPancakeSwapV3PositionRangeChecker.Condition({
+                contextId: CONTEXT_ID,
+                contextKey: LP_POSITION_KEY,
+                rangeCheck: IPancakeSwapV3PositionRangeChecker.PositionRangeStatusCheck.UnderLowerRange
+            })
+        );
+
+        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+            conditionAddress: PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER,
+            id: CONDITION_ID_LOWER_TICK,
+            result0: 0,
+            result1: 0
+        });
+
+        vm.prank(wallet);
+        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).createAutomation(
+            STRATEGY_ID_LOWER_TICK, STRATEGY_ID_LOWER_TICK, address(0), type(uint256).max, condition
+        );
     }
 
     function createSecondStrategy() internal {
@@ -193,12 +313,12 @@ contract StrategyExecutionTest is Test {
     }
 
     function mockTimeAndExecute() internal {
-        for (uint256 i; i < 100; i++) {
-            deal(USDT, TRADER, 20000 ether);
-            _mockSwap(USDT, 20000 ether, TRADER);
+        for (uint256 i; i < 1000; i++) {
+            deal(USDT, TRADER, 80000 ether);
+            _mockSwap(USDT, 80000 ether, TRADER);
 
-            deal(wBNB, TRADER, 20 ether);
-            _mockSwap(wBNB, 20 ether, TRADER);
+            deal(wBNB, TRADER, 80 ether);
+            _mockSwap(wBNB, 80 ether, TRADER);
         }
 
         vm.warp(block.timestamp + DELTA_INTERVAL);
@@ -219,11 +339,11 @@ contract StrategyExecutionTest is Test {
         console2.log("=== Strategy 2 Execution ===");
         uint256 aBNBBalance = IERC20(aBNB).balanceOf(wallet);
         console2.log("Fees collected and supplied and repayed!");
-        console2.log("aBNB Amount:", (aBNBBalance - aBNBBalanceBeforeExecution));
+        console2.log("aBNB Amount:", _toDecimalString(aBNBBalance - aBNBBalanceBeforeExecution, 18));
 
         uint256 usdtBalance = IERC20(debtUSDT).balanceOf(wallet);
 
-        console2.log("USDT debt Amount:", (usdtBalanceBeforeExecution - usdtBalance));
+        console2.log("USDT debt Amount:", _toDecimalString(usdtBalanceBeforeExecution - usdtBalance, 18));
 
         ITimeCondition.Condition memory conditionInfo =
             TimeCondition(TIME_CONDITION).walletCondition(wallet, CONDITION_ID_INTERVAL);
@@ -247,7 +367,7 @@ contract StrategyExecutionTest is Test {
 
         actions[0] = IStrategyBuilderModule.Action({
             selector: IAaveV3Actions.supplyETH.selector,
-            parameter: abi.encode(wallet, 0),
+            parameter: abi.encode(wallet, AMOUNT),
             value: 0,
             target: AAVE_V3_Actions,
             actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
@@ -404,6 +524,29 @@ interface IPancakeV3RouterMinimal {
     }
 
     function exactInput(ExactInputParams calldata params) external payable returns (uint256 amountOut);
+}
+
+interface IPancakeSwapPoolState {
+    function slot0()
+        external
+        view
+        returns (
+            uint160 sqrtPriceX96,
+            int24 tick,
+            uint16 observationIndex,
+            uint16 observationCardinality,
+            uint16 observationCardinalityNext,
+            uint32 feeProtocol,
+            bool unlocked
+        );
+
+    function liquidity() external view returns (uint128);
+
+    function tickSpacing() external view returns (int24);
+
+    function token0() external view returns (address);
+
+    function token1() external view returns (address);
 }
 
 interface IAaveV3Actions is IAction {
@@ -757,4 +900,59 @@ interface INonfungiblePositionManager {
         uint128 amount0Max;
         uint128 amount1Max;
     }
+
+    function positions(uint256 tokenId)
+        external
+        view
+        returns (
+            uint96 nonce,
+            address operator,
+            address token0,
+            address token1,
+            uint24 fee,
+            int24 tickLower,
+            int24 tickUpper,
+            uint128 liquidity,
+            uint256 feeGrowthInside0LastX128,
+            uint256 feeGrowthInside1LastX128,
+            uint128 tokensOwed0,
+            uint128 tokensOwed1
+        );
+}
+
+interface IPancakeSwapV3PositionRangeChecker {
+    // -------------------------
+    // Enums
+    // -------------------------
+    enum PositionRangeStatusCheck {
+        InRange,
+        UnderLowerRange,
+        OverUpperRange
+    }
+
+    // -------------------------
+    // Structs
+    // -------------------------
+    struct Condition {
+        bytes32 contextId;
+        bytes32 contextKey;
+        PositionRangeStatusCheck rangeCheck;
+    }
+
+    // -------------------------
+    // Events
+    // -------------------------
+    event ConditionAdded(uint32 id, address wallet, Condition condition);
+
+    // -------------------------
+    // Functions
+    // -------------------------
+
+    function addCondition(uint32 _id, Condition calldata condition) external;
+
+    function deleteCondition(uint32 _id) external;
+
+    function checkCondition(address wallet, uint32 id) external view returns (uint8);
+
+    function walletCondition(address _wallet, uint32 _id) external view returns (Condition memory);
 }

@@ -70,6 +70,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPythEvents__factory>;
     getContractFactory(
+      name: "MathAction",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MathAction__factory>;
+    getContractFactory(
       name: "ActionRegistry",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ActionRegistry__factory>;
@@ -241,6 +245,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IPythEvents>;
     getContractAt(
+      name: "MathAction",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MathAction>;
+    getContractAt(
       name: "ActionRegistry",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -423,6 +432,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
     deployContract(
+      name: "MathAction",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MathAction>;
+    deployContract(
       name: "ActionRegistry",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ActionRegistry>;
@@ -593,6 +606,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
+    deployContract(
+      name: "MathAction",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MathAction>;
     deployContract(
       name: "ActionRegistry",
       args: any[],
