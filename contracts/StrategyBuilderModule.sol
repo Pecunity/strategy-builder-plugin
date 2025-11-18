@@ -343,30 +343,24 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
 
         ActionContext storage globalContext = globalContexts[wallet][contextId];
 
-        // Store raw result
-        globalContext.variables[outputKey.key] = result;
+        require(
+            outputKey.parameterReplacement.offset + outputKey.parameterReplacement.length <= result.length,
+            "Slice out of bounds"
+        );
 
-        // Parse and store typed values based on paramType
-        // if (outputKey.parameterReplacement.paramType == ParamType.UINT256) {
-        //     if (result.length >= 32) {
-        //         uint256 value = abi.decode(result, (uint256));
-        //         globalContext.amounts[outputKey.key] = value;
-        //     }
-        // } else if (outputKey.parameterReplacement.paramType == ParamType.ADDRESS) {
-        //     if (result.length >= 32) {
-        //         address addr = abi.decode(result, (address));
-        //         globalContext.addresses[outputKey.key] = addr;
-        //     }
-        // } else if (outputKey.parameterReplacement.paramType == ParamType.BOOL) {
-        //     if (result.length >= 32) {
-        //         bool value = abi.decode(result, (bool));
-        //         globalContext.booleans[outputKey.key] = value;
-        //     }
-        // }
-        _storeParamInContext(globalContext, outputKey.key, outputKey.parameterReplacement.paramType, result);
+        // ---- SIMPLE BYTE SLICE ----
+        bytes memory sliced = new bytes(outputKey.parameterReplacement.length);
+        for (uint256 i; i < outputKey.parameterReplacement.length; i++) {
+            sliced[i] = result[outputKey.parameterReplacement.offset + i];
+        }
+
+        // Store raw result
+        globalContext.variables[outputKey.key] = sliced;
+
+        _storeParamInContext(globalContext, outputKey.key, outputKey.parameterReplacement.paramType, sliced);
         // BYTES32 is stored as raw variables
 
-        emit ContextVariableStored(contextId, outputKey.key, result);
+        emit ContextVariableStored(contextId, outputKey.key, sliced);
     }
 
     function _storeParamInContext(ActionContext storage context, bytes32 key, ParamType paramType, bytes memory result)
@@ -681,6 +675,8 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
         }
 
         uint256 feeInToken = feeController.calculateTokenAmount(paymentToken, feeInUSD);
+
+        if (feeInToken == 0) return 0;
 
         if (paymentToken != address(0)) {
             bytes memory _approveData = abi.encodeCall(IERC20.approve, (address(feeHandler), feeInToken));

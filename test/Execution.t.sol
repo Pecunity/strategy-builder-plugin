@@ -19,15 +19,15 @@ contract StrategyExecutionTest is Test {
 
     address wallet = 0x25cc8eE8efDFd50D063A717363D099E92EBc56b7;
 
-    address public constant STRATEGY_BUILDER_PLUGIN = 0x8286fd90531b7c27aA29B972ED7326E78CFDF697;
+    address public constant STRATEGY_BUILDER_PLUGIN = 0xdD51892fF209fa146e60d2f9F9c2bCBb9bb193e2;
     address public constant AAVE_V3_Actions = 0x8C262ec2db34a6CdA55ba9aDe792225191e0754C;
-    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0x6B08e4Ae6B243447a04BA3baEEde1ceD761BF178;
-    address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0xfA3b3c765090C7b009470aC24F42a739132C3D5a;
-    address public constant PANCAKE_SWAP_V3_SWAP_ACTIONS = 0xDe291067c3286A678475521ef85b1c3AB6C39b93;
+    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0xF47c41bc6945d9F644DEBDde933786D8adc0C7C6;
+    address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0xE234Df5EfA5c5B1C04efc4F35d86F89B9A427509;
+    address public constant PANCAKE_SWAP_V3_SWAP_ACTIONS = 0x51ba132B96607A4BfdCd212772aC2Ab3f5E1D851;
     address public constant TIME_CONDITION = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
-    address public constant MATH_ACTION = 0xB23B5aBEDe7E7d446A7F6CCb4A081ecaAe36A138;
+    address public constant MATH_ACTION = 0x418451F863fcdDAD562Ba39a578B4cb326dcFf95;
     address public constant ERC20_TOKEN_BALANCE_CONDITION = 0x9C736C92997F7C9d67c2CcDa6Ba24281498B8c64;
-    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0x8dC79c7C4d992D53Ea19946260671ac919A7862A;
+    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0xB4b15Bbb7E378d9A7c544DeEf5b748D70b296a6F;
 
     address public constant PANCAKE_SWAP_V3_ROUTER = 0x13f4EA83D0bd40E75C8222255bc855a974568Dd4;
     address public constant PANCAKE_SWAP_V3_POSITION_MANAGER = 0x46A15B0b27311cedF172AB29E4f4766fbE7F4364;
@@ -249,7 +249,7 @@ contract StrategyExecutionTest is Test {
 
         secondStepActions[0] = IStrategyBuilderModule.Action({
             selector: IPancakeSwapV3SwapActions.swapInputSinglePercentage.selector,
-            parameter: abi.encode(wallet, PERCENTAGE_SWAP, wBNB, USDT, POOL_FEE),
+            parameter: abi.encode(wallet, PERCENTAGE_SWAP, wBNB, USDT, POOL_FEE, false),
             value: 0,
             target: PANCAKE_SWAP_V3_SWAP_ACTIONS,
             actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
@@ -262,7 +262,7 @@ contract StrategyExecutionTest is Test {
                     paramType: IStrategyBuilderModule.ParamType.UINT256
                 })
             }),
-            result: 1
+            result: 2
         });
 
         steps[1] = IStrategyBuilderModule.StrategyStep({condition: coinBalanceCondition, actions: secondStepActions});
@@ -679,11 +679,11 @@ contract StrategyExecutionTest is Test {
         console2.log("USDT  Amount:", _toDecimalString(usdtBalanceAfter, 18));
 
         console2.log("=============================");
-        uint256 wBNBAmountZapper = IERC20(wBNB).balanceOf(0x42965f89d0425558FD52730715345abE4c6302d5);
+        uint256 wBNBAmountZapper = IERC20(wBNB).balanceOf(0xDA173458775a10EA42FDC9C3588914F37aC521F7);
         console2.log("BNB Amount after execution!");
         console2.log("wBNB Amount Zapper:", _toDecimalString(wBNBAmountZapper, 18));
 
-        uint256 usdtBalanceZapper = IERC20(USDT).balanceOf(0x42965f89d0425558FD52730715345abE4c6302d5);
+        uint256 usdtBalanceZapper = IERC20(USDT).balanceOf(0xDA173458775a10EA42FDC9C3588914F37aC521F7);
 
         console2.log("USD Amount after execution!");
         console2.log("USDT  Amount Zapper:", _toDecimalString(usdtBalanceZapper, 18));
@@ -1194,13 +1194,17 @@ interface IPancakeSwapV3SwapActions is IAction {
         uint256 amountOutMinimum,
         address tokenIn,
         address tokenOut,
-        uint24 fee
+        uint24 fee,
+        bool native
     ) external view returns (PluginExecution[] memory);
 
-    function swapExactInput(address wallet, uint256 amountIn, uint256 amountOutMinimum, bytes calldata path)
-        external
-        view
-        returns (PluginExecution[] memory);
+    function swapExactInput(
+        address wallet,
+        uint256 amountIn,
+        uint256 amountOutMinimum,
+        bytes calldata path,
+        bool native
+    ) external view returns (PluginExecution[] memory);
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Swap Percentage Functions   ┃
@@ -1211,7 +1215,8 @@ interface IPancakeSwapV3SwapActions is IAction {
         uint256 percentage,
         address tokenIn,
         address tokenOut,
-        uint24 fee
+        uint24 fee,
+        bool native
     ) external view returns (PluginExecution[] memory);
 
     function swapInputPercentage(address wallet, uint256 percentage, bytes calldata path)

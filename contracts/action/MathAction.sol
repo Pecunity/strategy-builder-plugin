@@ -31,9 +31,11 @@ contract MathAction is IAction {
     {
         uint256 A = input > 0
             ? input
-            : abi.decode(
-                IStrategyBuilderModule(strategyBuilderModule).getContextVariable(wallet, contextId, param.a), (uint256)
-            );
+            : param.a == bytes32(0)
+                ? 0
+                : abi.decode(
+                    IStrategyBuilderModule(strategyBuilderModule).getContextVariable(wallet, contextId, param.a), (uint256)
+                );
 
         uint256 B = abi.decode(
             IStrategyBuilderModule(strategyBuilderModule).getContextVariable(wallet, contextId, param.b), (uint256)
