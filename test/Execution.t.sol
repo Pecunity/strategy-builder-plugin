@@ -8,6 +8,10 @@ import {ITokenGetter} from "../../contracts/interfaces/ITokenGetter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {TimeCondition} from "../../contracts/condition/examples/TimeCondition.sol";
 import {ITimeCondition} from "../../contracts/condition/examples/interfaces/ITimeCondition.sol";
+import {CoinOrERC20BalanceCondition} from "../../contracts/condition/examples/CoinOrERC20BalanceCondition.sol";
+import {ICoinOrERC20BalanceCondition} from
+    "../../contracts/condition/examples/interfaces/ICoinOrERC20BalanceCondition.sol";
+import {MathAction} from "../../contracts/action/MathAction.sol";
 
 contract StrategyExecutionTest is Test {
     string BNB_FORK = vm.envString("BNB_FORK");
@@ -15,14 +19,15 @@ contract StrategyExecutionTest is Test {
 
     address wallet = 0x25cc8eE8efDFd50D063A717363D099E92EBc56b7;
 
-    address public constant STRATEGY_BUILDER_PLUGIN = 0x4095B6aC5abbDEFFb690447dF6F487E8a2B387DF;
+    address public constant STRATEGY_BUILDER_PLUGIN = 0x8286fd90531b7c27aA29B972ED7326E78CFDF697;
     address public constant AAVE_V3_Actions = 0x8C262ec2db34a6CdA55ba9aDe792225191e0754C;
-    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0x99BfEA7af9226b343059Fb367Ae620Dbb0495F0A;
-    address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0x97366851B9768b4F176788de6f6bA572f163310A;
-    address public constant PANCAKE_SWAP_V3_SWAP_ACTIONS = 0xFBa49Aa14263f906A1545e863221756203d66468;
+    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0x6B08e4Ae6B243447a04BA3baEEde1ceD761BF178;
+    address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0xfA3b3c765090C7b009470aC24F42a739132C3D5a;
+    address public constant PANCAKE_SWAP_V3_SWAP_ACTIONS = 0xDe291067c3286A678475521ef85b1c3AB6C39b93;
     address public constant TIME_CONDITION = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
-    address public constant MATH_ACTION = 0xf1610D38E8D379780C3d33196b6CD756627897D3;
-    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0x655F3398Be75c65DB1B911189a78348E6F35C1Ce;
+    address public constant MATH_ACTION = 0xB23B5aBEDe7E7d446A7F6CCb4A081ecaAe36A138;
+    address public constant ERC20_TOKEN_BALANCE_CONDITION = 0x9C736C92997F7C9d67c2CcDa6Ba24281498B8c64;
+    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0x8dC79c7C4d992D53Ea19946260671ac919A7862A;
 
     address public constant PANCAKE_SWAP_V3_ROUTER = 0x13f4EA83D0bd40E75C8222255bc855a974568Dd4;
     address public constant PANCAKE_SWAP_V3_POSITION_MANAGER = 0x46A15B0b27311cedF172AB29E4f4766fbE7F4364;
@@ -76,6 +81,17 @@ contract StrategyExecutionTest is Test {
     uint32 public constant CONDITION_ID_LOWER_TICK = 3155266197;
     bytes32 constant REMOVE_LP_AMOUNT_KEY = bytes32(bytes("remove_lp_amount"));
 
+    //3.1 swap all wBNB into USDT
+    uint256 constant PERCENTAGE_SWAP = 1000;
+    bytes32 constant SWAPPED_AMOUNT_KEY = bytes32(bytes("swapped_amount"));
+
+    //3.2 Repay 100% of USDT
+    uint256 constant REAY_PERCENTAGE = 10000;
+    bytes32 constant REPAY_AMOUNT = bytes32(bytes("repay_amount"));
+
+    //3.3 Calculate provide lp amount
+    bytes32 constant PROVIDE_LP_AMOUNT_KEY = bytes32(bytes("provide_lp_amount"));
+
     address public EXECUTOR = makeAddr("executor");
     address public TRADER = makeAddr("trader");
 
@@ -93,7 +109,7 @@ contract StrategyExecutionTest is Test {
 
         createThirdStrategy();
 
-        checkRangeCondition();
+        // checkRangeCondition();
         changePriceToUpperAndExecute();
 
         // mockTimeAndExecute();
@@ -105,13 +121,13 @@ contract StrategyExecutionTest is Test {
             (uint256)
         );
 
-        (,,,,, int24 tickLower,,,,,,) =
+        (,,,,, int24 tickLower,,,,, uint128 token0Owed, uint128 token1Owed) =
             INonfungiblePositionManager(PANCAKE_SWAP_V3_POSITION_MANAGER).positions(lpPosition);
 
         (, int24 tick,,,,,) = IPancakeSwapPoolState(PANCAKE_SWAP_POOL).slot0();
 
         uint8 isTrue = IPancakeSwapV3PositionRangeChecker(PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER).checkCondition(
-            wallet, STRATEGY_ID_LOWER_TICK
+            wallet, CONDITION_ID_LOWER_TICK
         );
 
         console2.log("==============================");
@@ -119,6 +135,8 @@ contract StrategyExecutionTest is Test {
         console2.log("Lower tick trigger", tickLower);
         console2.log("Current tick", tick);
         console2.log("Is tick out of range", isTrue == 1);
+        console2.log("Token0 Owed", _toDecimalString(token0Owed, 18));
+        console2.log("Token1 Owed", _toDecimalString(token1Owed, 18));
     }
 
     function changePriceToUpperAndExecute() internal {
@@ -127,6 +145,13 @@ contract StrategyExecutionTest is Test {
             _mockSwap(USDT, 90000 ether, TRADER);
         }
 
+        checkRangeCondition();
+
+        uint256 usdtBalanceBefore = IERC20(USDT).balanceOf(wallet);
+
+        console2.log("USD Amount before execution!");
+        console2.log("USDT  Amount:", _toDecimalString(usdtBalanceBefore, 18));
+
         vm.prank(EXECUTOR);
         IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(STRATEGY_ID_LOWER_TICK, wallet, EXECUTOR);
 
@@ -134,15 +159,52 @@ contract StrategyExecutionTest is Test {
             IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).getContextVariable(wallet, CONTEXT_ID, REMOVE_LP_AMOUNT_KEY),
             (uint256)
         );
-        console2.log("=== Strategy 3 Execcution ===");
+
+        uint256 swappedAmount = abi.decode(
+            IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).getContextVariable(wallet, CONTEXT_ID, SWAPPED_AMOUNT_KEY),
+            (uint256)
+        );
+
+        uint256 provideLPAmount = abi.decode(
+            IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).getContextVariable(
+                wallet, CONTEXT_ID, PROVIDE_LP_AMOUNT_KEY
+            ),
+            (uint256)
+        );
+        uint256 repayAmount = abi.decode(
+            IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).getContextVariable(wallet, CONTEXT_ID, REPAY_AMOUNT),
+            (uint256)
+        );
+        uint256 borrowedAmount = abi.decode(
+            IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).getContextVariable(wallet, CONTEXT_ID, BORROW_AMOUNT_KEY),
+            (uint256)
+        );
+        console2.log("=== Strategy 3 Execution ===");
         console2.log("Remove LP amount", _toDecimalString(removeLpAmount, 18));
+        console2.log("Swapped Amount", _toDecimalString(swappedAmount, 18));
+        console2.log("Repay Amount", _toDecimalString(repayAmount, 18));
+        console2.log("Borrowed Amount", _toDecimalString(borrowedAmount, 18));
+
+        console2.log("=============================");
+        uint256 wBNBAmount = IERC20(wBNB).balanceOf(wallet);
+        console2.log("BNB Amount after execution!");
+        console2.log("wBNB Amount:", _toDecimalString(wBNBAmount, 18));
+
+        uint256 usdtBalance = IERC20(USDT).balanceOf(wallet);
+
+        console2.log("USD Amount after execution!");
+        console2.log("USDT  Amount:", _toDecimalString(usdtBalance, 18));
+        console2.log("Provide LP Amount:", _toDecimalString(provideLPAmount, 18));
     }
 
     function createThirdStrategy() internal {
-        IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](1);
+        IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](3);
 
-        IStrategyBuilderModule.Action[] memory actions = new IStrategyBuilderModule.Action[](1);
+        IStrategyBuilderModule.Action[] memory firstStepActions = new IStrategyBuilderModule.Action[](1);
+        IStrategyBuilderModule.Action[] memory secondStepActions = new IStrategyBuilderModule.Action[](1);
+        IStrategyBuilderModule.Action[] memory thirdStepActions = new IStrategyBuilderModule.Action[](4);
 
+        // First Step always remove lp
         IStrategyBuilderModule.ContextKey[] memory inputs = new IStrategyBuilderModule.ContextKey[](1);
         inputs[0] = IStrategyBuilderModule.ContextKey({
             key: LP_POSITION_KEY,
@@ -153,7 +215,7 @@ contract StrategyExecutionTest is Test {
             })
         });
 
-        actions[0] = IStrategyBuilderModule.Action({
+        firstStepActions[0] = IStrategyBuilderModule.Action({
             selector: IPancakeSwapV3LPActions.removeLiquidityPercentage.selector,
             parameter: abi.encode(wallet, 0, PERCENTAGE_LP),
             value: 0,
@@ -172,9 +234,144 @@ contract StrategyExecutionTest is Test {
         });
 
         steps[0] = IStrategyBuilderModule.StrategyStep({
-            condition: IStrategyBuilderModule.Condition({conditionAddress: address(0), id: 0, result0: 0, result1: 0}),
-            actions: actions
+            condition: IStrategyBuilderModule.Condition({conditionAddress: address(0), id: 0, result0: 0, result1: 1}),
+            actions: firstStepActions
         });
+
+        // Second Step: swapp all wBNB if some exist
+
+        IStrategyBuilderModule.Condition memory coinBalanceCondition = IStrategyBuilderModule.Condition({
+            conditionAddress: ERC20_TOKEN_BALANCE_CONDITION,
+            id: STRATEGY_ID_LOWER_TICK,
+            result0: 2,
+            result1: 2
+        });
+
+        secondStepActions[0] = IStrategyBuilderModule.Action({
+            selector: IPancakeSwapV3SwapActions.swapInputSinglePercentage.selector,
+            parameter: abi.encode(wallet, PERCENTAGE_SWAP, wBNB, USDT, POOL_FEE),
+            value: 0,
+            target: PANCAKE_SWAP_V3_SWAP_ACTIONS,
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // LP position ID
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: SWAPPED_AMOUNT_KEY,
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 32,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 1
+        });
+
+        steps[1] = IStrategyBuilderModule.StrategyStep({condition: coinBalanceCondition, actions: secondStepActions});
+
+        // // Third Step: adjust aave position and provide lp again
+
+        thirdStepActions[0] = IStrategyBuilderModule.Action({
+            selector: IAaveV3Actions.repayPercentageOfBalance.selector,
+            parameter: abi.encode(wallet, USDT, REAY_PERCENTAGE, 2),
+            value: 0,
+            target: AAVE_V3_Actions,
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // LP position ID
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: REPAY_AMOUNT,
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 32,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 2
+        });
+
+        thirdStepActions[1] = IStrategyBuilderModule.Action({
+            selector: IAaveV3Actions.borrowToHealthFactor.selector,
+            parameter: abi.encode(wallet, USDT, HEALTH_FACTOR, INTEREST_RATE_MODE),
+            value: 0,
+            target: AAVE_V3_Actions,
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+            output: IStrategyBuilderModule.ContextKey({ // save the borrowed amount into context
+                key: BORROW_AMOUNT_KEY,
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 32,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 0
+        });
+
+        // add the total amount that i want to provide as lp
+        MathAction.MathParams[] memory mathParams = new MathAction.MathParams[](3);
+        mathParams[0] = MathAction.MathParams({op: MathAction.Op.ADD, a: REMOVE_LP_AMOUNT_KEY, b: SWAPPED_AMOUNT_KEY});
+        mathParams[1] = MathAction.MathParams({op: MathAction.Op.SUB, a: bytes32(0), b: REPAY_AMOUNT});
+        mathParams[2] = MathAction.MathParams({op: MathAction.Op.ADD, a: bytes32(0), b: BORROW_AMOUNT_KEY});
+
+        thirdStepActions[2] = IStrategyBuilderModule.Action({
+            selector: MathAction.executeBatch.selector,
+            parameter: abi.encode(wallet, CONTEXT_ID, mathParams),
+            value: 0,
+            target: MATH_ACTION,
+            actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // Empty array
+            output: IStrategyBuilderModule.ContextKey({ // save the borrowed amount into context
+                key: PROVIDE_LP_AMOUNT_KEY,
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 32,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 0
+        });
+
+        IStrategyBuilderModule.ContextKey[] memory lpInputs = new IStrategyBuilderModule.ContextKey[](1);
+        lpInputs[0] = IStrategyBuilderModule.ContextKey({
+            key: PROVIDE_LP_AMOUNT_KEY,
+            parameterReplacement: IStrategyBuilderModule.Parameter({
+                offset: 32,
+                length: 32,
+                paramType: IStrategyBuilderModule.ParamType.UINT256
+            })
+        });
+
+        thirdStepActions[3] = IStrategyBuilderModule.Action({
+            selector: IUniswapV3OneSidedLPActions.addLiquidityOneSidedPercentageRange.selector,
+            parameter: abi.encode(PERCENTAGE, 0, LP_PARAMS),
+            value: 0,
+            target: PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS,
+            actionType: IStrategyBuilderModule.ActionType.INTERNAL_ACTION,
+            inputs: lpInputs, // provide one sidedd with the total borrow amount
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: LP_POSITION_KEY,
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 32,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 2
+        });
+
+        steps[2] = IStrategyBuilderModule.StrategyStep({
+            condition: IStrategyBuilderModule.Condition({conditionAddress: address(0), id: 0, result0: 0, result1: 0}),
+            actions: thirdStepActions
+        });
+
+        vm.prank(wallet);
+        CoinOrERC20BalanceCondition(ERC20_TOKEN_BALANCE_CONDITION).addCondition(
+            STRATEGY_ID_LOWER_TICK,
+            ICoinOrERC20BalanceCondition.Condition({
+                baseToken: wBNB,
+                amount: 0,
+                comparison: ICoinOrERC20BalanceCondition.Comparison.GREATER,
+                updateable: true
+            })
+        );
 
         vm.prank(wallet);
         IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).createStrategyWithExistingContext(
@@ -187,7 +384,8 @@ contract StrategyExecutionTest is Test {
             IPancakeSwapV3PositionRangeChecker.Condition({
                 contextId: CONTEXT_ID,
                 contextKey: LP_POSITION_KEY,
-                rangeCheck: IPancakeSwapV3PositionRangeChecker.PositionRangeStatusCheck.UnderLowerRange
+                rangeCheck: IPancakeSwapV3PositionRangeChecker.PositionRangeStatusCheck.UnderLowerRange,
+                updateable: true
             })
         );
 
@@ -469,6 +667,26 @@ contract StrategyExecutionTest is Test {
             (uint256)
         );
         console2.log("LP Position:", lpPosition);
+
+        console2.log("=============================");
+        uint256 wBNBAmountAfter = IERC20(wBNB).balanceOf(wallet);
+        console2.log("BNB Amount after execution!");
+        console2.log("wBNB Amount:", _toDecimalString(wBNBAmountAfter, 18));
+
+        uint256 usdtBalanceAfter = IERC20(USDT).balanceOf(wallet);
+
+        console2.log("USD Amount after execution!");
+        console2.log("USDT  Amount:", _toDecimalString(usdtBalanceAfter, 18));
+
+        console2.log("=============================");
+        uint256 wBNBAmountZapper = IERC20(wBNB).balanceOf(0x42965f89d0425558FD52730715345abE4c6302d5);
+        console2.log("BNB Amount after execution!");
+        console2.log("wBNB Amount Zapper:", _toDecimalString(wBNBAmountZapper, 18));
+
+        uint256 usdtBalanceZapper = IERC20(USDT).balanceOf(0x42965f89d0425558FD52730715345abE4c6302d5);
+
+        console2.log("USD Amount after execution!");
+        console2.log("USDT  Amount Zapper:", _toDecimalString(usdtBalanceZapper, 18));
     }
 
     function _toDecimalString(uint256 amount, uint8 decimals) internal pure returns (string memory) {
@@ -937,6 +1155,7 @@ interface IPancakeSwapV3PositionRangeChecker {
         bytes32 contextId;
         bytes32 contextKey;
         PositionRangeStatusCheck rangeCheck;
+        bool updateable;
     }
 
     // -------------------------
@@ -955,4 +1174,56 @@ interface IPancakeSwapV3PositionRangeChecker {
     function checkCondition(address wallet, uint32 id) external view returns (uint8);
 
     function walletCondition(address _wallet, uint32 _id) external view returns (Condition memory);
+}
+
+interface IPancakeSwapV3SwapActions is IAction {
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    View Getters           ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function router() external view returns (address);
+    function WETH() external view returns (address);
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    Swap Standard Functions       ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function swapExactInputSingle(
+        address wallet,
+        uint256 amountIn,
+        uint256 amountOutMinimum,
+        address tokenIn,
+        address tokenOut,
+        uint24 fee
+    ) external view returns (PluginExecution[] memory);
+
+    function swapExactInput(address wallet, uint256 amountIn, uint256 amountOutMinimum, bytes calldata path)
+        external
+        view
+        returns (PluginExecution[] memory);
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    Swap Percentage Functions   ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function swapInputSinglePercentage(
+        address wallet,
+        uint256 percentage,
+        address tokenIn,
+        address tokenOut,
+        uint24 fee
+    ) external view returns (PluginExecution[] memory);
+
+    function swapInputPercentage(address wallet, uint256 percentage, bytes calldata path)
+        external
+        view
+        returns (PluginExecution[] memory);
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    Identifiers            ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function identifier() external pure returns (bytes4);
+
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool);
 }
