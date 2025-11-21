@@ -538,12 +538,19 @@ export namespace AutomationExecutedEvent {
 export namespace ContextVariableStoredEvent {
   export type InputTuple = [
     contextId: BytesLike,
+    wallet: AddressLike,
     key: BytesLike,
     result: BytesLike
   ];
-  export type OutputTuple = [contextId: string, key: string, result: string];
+  export type OutputTuple = [
+    contextId: string,
+    wallet: string,
+    key: string,
+    result: string
+  ];
   export interface OutputObject {
     contextId: string;
+    wallet: string;
     key: string;
     result: string;
   }
@@ -1090,7 +1097,7 @@ export interface StrategyBuilderModule extends BaseContract {
       AutomationExecutedEvent.OutputObject
     >;
 
-    "ContextVariableStored(bytes32,bytes32,bytes)": TypedContractEvent<
+    "ContextVariableStored(bytes32,address,bytes32,bytes)": TypedContractEvent<
       ContextVariableStoredEvent.InputTuple,
       ContextVariableStoredEvent.OutputTuple,
       ContextVariableStoredEvent.OutputObject

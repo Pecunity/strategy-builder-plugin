@@ -188,7 +188,7 @@ interface IStrategyBuilderModule {
     /// @param action The details of the action being executed.
     event ActionExecuted(address indexed wallet, Action action);
 
-    event ContextVariableStored(bytes32 indexed contextId, bytes32 key, bytes result);
+    event ContextVariableStored(bytes32 indexed contextId, address indexed wallet, bytes32 key, bytes result);
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃     Public Functions       ┃

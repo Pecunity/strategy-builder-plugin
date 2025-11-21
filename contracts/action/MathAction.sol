@@ -29,34 +29,52 @@ contract MathAction is IAction {
         view
         returns (uint256)
     {
-        uint256 A = input > 0
-            ? input
-            : param.a == bytes32(0)
-                ? 0
-                : abi.decode(
-                    IStrategyBuilderModule(strategyBuilderModule).getContextVariable(wallet, contextId, param.a), (uint256)
-                );
+        // ---------------------------------
+        // Determine A
+        // ---------------------------------
+        uint256 A;
+        if (input > 0) {
+            A = input;
+        } else if (param.a == bytes32(0)) {
+            A = 0;
+        } else {
+            bytes memory rawA =
+                IStrategyBuilderModule(strategyBuilderModule).getContextVariable(wallet, contextId, param.a);
 
-        uint256 B = abi.decode(
-            IStrategyBuilderModule(strategyBuilderModule).getContextVariable(wallet, contextId, param.b), (uint256)
-        );
-
-        uint256 result;
-
-        if (param.op == Op.ADD) {
-            unchecked {
-                result = A + B;
-            }
-        } else if (param.op == Op.SUB) {
-            result = (A >= B ? A - B : 0);
-        } else if (param.op == Op.MUL) {
-            result = A * B;
-        } else if (param.op == Op.DIV) {
-            require(B > 0, "DIV by zero");
-            result = A / B;
+            A = rawA.length == 0 ? 0 : abi.decode(rawA, (uint256));
         }
 
-        return result;
+        // ---------------------------------
+        // Determine B (always taken from context)
+        // ---------------------------------
+        uint256 B;
+        if (param.b == bytes32(0)) {
+            B = 0;
+        } else {
+            bytes memory rawB =
+                IStrategyBuilderModule(strategyBuilderModule).getContextVariable(wallet, contextId, param.b);
+
+            B = rawB.length == 0 ? 0 : abi.decode(rawB, (uint256));
+        }
+
+        // ---------------------------
+        // Execute operation
+        // ---------------------------
+        if (param.op == Op.ADD) {
+            unchecked {
+                return A + B;
+            }
+        } else if (param.op == Op.SUB) {
+            return A >= B ? A - B : 0;
+        } else if (param.op == Op.MUL) {
+            return A * B;
+        } else if (param.op == Op.DIV) {
+            // Return 0 instead of revert
+            return B == 0 ? 0 : A / B;
+        }
+
+        // Unknown op → return 0 safely instead of reverting
+        return 0;
     }
 
     function executeBatch(address wallet, bytes32 contextId, MathParams[] calldata params)

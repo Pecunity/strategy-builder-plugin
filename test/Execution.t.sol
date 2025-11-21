@@ -19,15 +19,15 @@ contract StrategyExecutionTest is Test {
 
     address wallet = 0x25cc8eE8efDFd50D063A717363D099E92EBc56b7;
 
-    address public constant STRATEGY_BUILDER_PLUGIN = 0xdD51892fF209fa146e60d2f9F9c2bCBb9bb193e2;
+    address public constant STRATEGY_BUILDER_PLUGIN = 0xE5C97A92cD1514c273F3292084f9a8Bc79f43E44;
     address public constant AAVE_V3_Actions = 0x8C262ec2db34a6CdA55ba9aDe792225191e0754C;
-    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0xF47c41bc6945d9F644DEBDde933786D8adc0C7C6;
+    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0x76F20A078392bF5A8e68d4d3b6Dcede4C554c9B0;
     address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0xE234Df5EfA5c5B1C04efc4F35d86F89B9A427509;
     address public constant PANCAKE_SWAP_V3_SWAP_ACTIONS = 0x51ba132B96607A4BfdCd212772aC2Ab3f5E1D851;
     address public constant TIME_CONDITION = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
-    address public constant MATH_ACTION = 0x418451F863fcdDAD562Ba39a578B4cb326dcFf95;
+    address public constant MATH_ACTION = 0x2b2A8248F85d84f815316858a140Be64b0C5dD82;
     address public constant ERC20_TOKEN_BALANCE_CONDITION = 0x9C736C92997F7C9d67c2CcDa6Ba24281498B8c64;
-    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0xB4b15Bbb7E378d9A7c544DeEf5b748D70b296a6F;
+    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0x8e61B06eDEF8557CD1e4F530d96B22736Fcb34e0;
 
     address public constant PANCAKE_SWAP_V3_ROUTER = 0x13f4EA83D0bd40E75C8222255bc855a974568Dd4;
     address public constant PANCAKE_SWAP_V3_POSITION_MANAGER = 0x46A15B0b27311cedF172AB29E4f4766fbE7F4364;
@@ -100,6 +100,23 @@ contract StrategyExecutionTest is Test {
         vm.selectFork(baseFork);
     }
 
+    function test_activate_automation() external {
+        uint32 conditionId = 10021;
+
+        uint32 automationId = 1002;
+
+        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+            conditionAddress: 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d,
+            result0: 0,
+            result1: 1,
+            id: conditionId
+        });
+
+        address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
+
+        vm.prank(wallet);
+    }
+
     function test_automationExecution() external {
         deal(wallet, 21 ether);
 
@@ -144,6 +161,9 @@ contract StrategyExecutionTest is Test {
         for (uint256 i; i < 30; i++) {
             _mockSwap(USDT, 90000 ether, TRADER);
         }
+
+        deal(wBNB, TRADER, 10 ether);
+        _mockSwap(wBNB, 10 ether, TRADER);
 
         checkRangeCondition();
 
@@ -200,7 +220,7 @@ contract StrategyExecutionTest is Test {
     function createThirdStrategy() internal {
         IStrategyBuilderModule.StrategyStep[] memory steps = new IStrategyBuilderModule.StrategyStep[](3);
 
-        IStrategyBuilderModule.Action[] memory firstStepActions = new IStrategyBuilderModule.Action[](1);
+        IStrategyBuilderModule.Action[] memory firstStepActions = new IStrategyBuilderModule.Action[](4);
         IStrategyBuilderModule.Action[] memory secondStepActions = new IStrategyBuilderModule.Action[](1);
         IStrategyBuilderModule.Action[] memory thirdStepActions = new IStrategyBuilderModule.Action[](4);
 
@@ -231,6 +251,60 @@ contract StrategyExecutionTest is Test {
                 })
             }),
             result: 1
+        });
+
+        firstStepActions[1] = IStrategyBuilderModule.Action({
+            selector: IStrategyBuilderModule.storeConextVariable.selector,
+            parameter: abi.encode(CONTEXT_ID, SWAPPED_AMOUNT_KEY, IStrategyBuilderModule.ParamType.UINT256, abi.encode(0)),
+            value: 0,
+            target: STRATEGY_BUILDER_PLUGIN,
+            actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // LP position ID
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: "",
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 0,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 0
+        });
+
+        firstStepActions[2] = IStrategyBuilderModule.Action({
+            selector: IStrategyBuilderModule.storeConextVariable.selector,
+            parameter: abi.encode(CONTEXT_ID, REPAY_AMOUNT, IStrategyBuilderModule.ParamType.UINT256, abi.encode(0)),
+            value: 0,
+            target: STRATEGY_BUILDER_PLUGIN,
+            actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // LP position ID
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: "",
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 0,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 0
+        });
+
+        firstStepActions[3] = IStrategyBuilderModule.Action({
+            selector: IStrategyBuilderModule.storeConextVariable.selector,
+            parameter: abi.encode(CONTEXT_ID, BORROW_AMOUNT_KEY, IStrategyBuilderModule.ParamType.UINT256, abi.encode(0)),
+            value: 0,
+            target: STRATEGY_BUILDER_PLUGIN,
+            actionType: IStrategyBuilderModule.ActionType.EXTERNAL,
+            inputs: new IStrategyBuilderModule.ContextKey[](0), // LP position ID
+            output: IStrategyBuilderModule.ContextKey({ // Empty struct
+                key: "",
+                parameterReplacement: IStrategyBuilderModule.Parameter({
+                    offset: 0,
+                    length: 0,
+                    paramType: IStrategyBuilderModule.ParamType.UINT256
+                })
+            }),
+            result: 0
         });
 
         steps[0] = IStrategyBuilderModule.StrategyStep({
@@ -679,11 +753,11 @@ contract StrategyExecutionTest is Test {
         console2.log("USDT  Amount:", _toDecimalString(usdtBalanceAfter, 18));
 
         console2.log("=============================");
-        uint256 wBNBAmountZapper = IERC20(wBNB).balanceOf(0xDA173458775a10EA42FDC9C3588914F37aC521F7);
+        uint256 wBNBAmountZapper = IERC20(wBNB).balanceOf(0xbC7Ed7324D8B9a400Cf8045A6eEFED9D56B5a84E);
         console2.log("BNB Amount after execution!");
         console2.log("wBNB Amount Zapper:", _toDecimalString(wBNBAmountZapper, 18));
 
-        uint256 usdtBalanceZapper = IERC20(USDT).balanceOf(0xDA173458775a10EA42FDC9C3588914F37aC521F7);
+        uint256 usdtBalanceZapper = IERC20(USDT).balanceOf(0xbC7Ed7324D8B9a400Cf8045A6eEFED9D56B5a84E);
 
         console2.log("USD Amount after execution!");
         console2.log("USDT  Amount Zapper:", _toDecimalString(usdtBalanceZapper, 18));

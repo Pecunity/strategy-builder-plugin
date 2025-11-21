@@ -1,10 +1,10 @@
 {
   "TimeCondition#TimeCondition": "0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d",
   "ERC20TokenOrCoinBalancedCondition#CoinOrERC20BalanceCondition": "0x9C736C92997F7C9d67c2CcDa6Ba24281498B8c64",
-  "StrategyBuilderCoreModule#ActionRegistry": "0x4CB0f2b70143Febc842883925414B51865504b21",
-  "StrategyBuilderCoreModule#FeeHandler": "0x8327FEc07210c27139c1eBb54Ebe0Ac09038bA18",
-  "StrategyBuilderCoreModule#PriceOracle": "0xE8Eb0388Cbdd47f39024aa9544fb71d0a1552848",
-  "StrategyBuilderCoreModule#FeeController": "0x00CdEe323e1d01b5456B2854D2A46A156C893Cb4",
-  "StrategyBuilderCoreModule#StrategyBuilderModule": "0xdD51892fF209fa146e60d2f9F9c2bCBb9bb193e2",
-  "MathActionModule#MathAction": "0x418451F863fcdDAD562Ba39a578B4cb326dcFf95"
+  "StrategyBuilderCoreModule#ActionRegistry": "0x35e8aA5c85E0096e54b1D8808164577feB9011A4",
+  "StrategyBuilderCoreModule#FeeHandler": "0x82a63b422F49BcC3022169378bd7f41B8050Ce7D",
+  "StrategyBuilderCoreModule#PriceOracle": "0xCa1AddFe3a20A18221fA18ce2C2b565D1e047761",
+  "StrategyBuilderCoreModule#FeeController": "0x52D5a1CE7AB7De9d0da56A567e93b590407d55E2",
+  "StrategyBuilderCoreModule#StrategyBuilderModule": "0xE5C97A92cD1514c273F3292084f9a8Bc79f43E44",
+  "MathActionModule#MathAction": "0x2b2A8248F85d84f815316858a140Be64b0C5dD82"
 }

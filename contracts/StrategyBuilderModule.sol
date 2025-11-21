@@ -243,7 +243,7 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
 
         _storeParamInContext(context, key, paramType, value);
 
-        emit ContextVariableStored(contextId, key, value);
+        emit ContextVariableStored(contextId, msg.sender, key, value);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -360,7 +360,7 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
         _storeParamInContext(globalContext, outputKey.key, outputKey.parameterReplacement.paramType, sliced);
         // BYTES32 is stored as raw variables
 
-        emit ContextVariableStored(contextId, outputKey.key, sliced);
+        emit ContextVariableStored(contextId, msg.sender, outputKey.key, sliced);
     }
 
     function _storeParamInContext(ActionContext storage context, bytes32 key, ParamType paramType, bytes memory result)

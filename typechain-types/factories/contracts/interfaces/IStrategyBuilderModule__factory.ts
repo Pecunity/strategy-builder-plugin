@@ -387,6 +387,12 @@ const _abi = [
         type: "bytes32",
       },
       {
+        indexed: true,
+        internalType: "address",
+        name: "wallet",
+        type: "address",
+      },
+      {
         indexed: false,
         internalType: "bytes32",
         name: "key",
