@@ -678,17 +678,21 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
 
         if (feeInToken == 0) return 0;
 
-        if (paymentToken != address(0)) {
+        uint256 deposit = feeHandler.getDeposit(wallet, paymentToken);
+
+        uint256 remaining = deposit > feeInToken ? 0 : feeInToken - deposit;
+
+        if (paymentToken != address(0) && remaining > 0) {
             bytes memory _approveData = abi.encodeCall(IERC20.approve, (address(feeHandler), feeInToken));
             IModularAccount(wallet).execute(paymentToken, 0, _approveData);
         }
 
         bytes memory _handleFeeData = paymentToken != address(0)
             ? abi.encodeCall(IFeeHandler.handleFee, (paymentToken, feeInToken, beneficiary, creator))
-            : abi.encodeCall(IFeeHandler.handleFeeETH, (beneficiary, creator));
+            : abi.encodeCall(IFeeHandler.handleFeeETH, (beneficiary, creator, feeInToken));
 
         bytes memory paymentResult = IModularAccount(wallet).execute(
-            address(feeHandler), paymentToken == address(0) ? feeInToken : 0, _handleFeeData
+            address(feeHandler), paymentToken == address(0) ? remaining : 0, _handleFeeData
         );
 
         uint256 totalFee = abi.decode(paymentResult, (uint256));

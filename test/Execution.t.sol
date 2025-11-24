@@ -12,6 +12,7 @@ import {CoinOrERC20BalanceCondition} from "../../contracts/condition/examples/Co
 import {ICoinOrERC20BalanceCondition} from
     "../../contracts/condition/examples/interfaces/ICoinOrERC20BalanceCondition.sol";
 import {MathAction} from "../../contracts/action/MathAction.sol";
+import {ICondition} from "../../contracts/interfaces/ICondition.sol";
 
 contract StrategyExecutionTest is Test {
     string BNB_FORK = vm.envString("BNB_FORK");
@@ -103,18 +104,26 @@ contract StrategyExecutionTest is Test {
     function test_activate_automation() external {
         uint32 conditionId = 10021;
 
-        uint32 automationId = 1002;
+        // uint32 automationId = 10021;
+        uint32 automationId = 10021;
 
-        IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
-            conditionAddress: 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d,
-            result0: 0,
-            result1: 1,
-            id: conditionId
-        });
+        vm.mockCall(
+            0x8e61B06eDEF8557CD1e4F530d96B22736Fcb34e0,
+            abi.encodeWithSelector(ICondition.checkCondition.selector),
+            abi.encode(1)
+        );
 
-        address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
+        // IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+        //     conditionAddress: 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d,
+        //     result0: 0,
+        //     result1: 1,
+        //     id: conditionId
+        // });
 
-        vm.prank(wallet);
+        // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
+
+        vm.prank(EXECUTOR);
+        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
     }
 
     function test_automationExecution() external {

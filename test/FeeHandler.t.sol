@@ -264,7 +264,7 @@ contract FeeHandlerTest is Test {
 
         vm.startPrank(FEE_PAYER);
 
-        handler.handleFeeETH{value: _amount}(beneficiary, creator);
+        handler.handleFeeETH{value: _amount}(beneficiary, creator, _amount);
 
         assert(handler.getWithdrawableBalance(beneficiary, address(0)) > 0);
         assert(handler.getWithdrawableBalance(creator, address(0)) > 0);
@@ -293,7 +293,7 @@ contract FeeHandlerTest is Test {
 
         vm.startPrank(FEE_PAYER);
 
-        handler.handleFeeETH{value: _amount}(beneficiary, creator);
+        handler.handleFeeETH{value: _amount}(beneficiary, creator, _amount);
 
         assert(handler.getWithdrawableBalance(beneficiary, address(0)) > 0);
         assert(handler.getWithdrawableBalance(creator, address(0)) > 0);
@@ -305,7 +305,7 @@ contract FeeHandlerTest is Test {
         address creator = makeAddr("creator");
 
         vm.expectRevert(IFeeHandler.TokenNotAllowed.selector);
-        handler.handleFeeETH(beneficiary, creator);
+        handler.handleFeeETH(beneficiary, creator, 1e18);
     }
 
     function test_withdraw_Success_ETH(uint256 amount) external {
@@ -321,7 +321,7 @@ contract FeeHandlerTest is Test {
 
         vm.startPrank(FEE_PAYER);
 
-        handler.handleFeeETH{value: _amount}(beneficiary, creator);
+        handler.handleFeeETH{value: _amount}(beneficiary, creator, _amount);
         vm.stopPrank();
 
         uint256 withdrawableETH = handler.getWithdrawableBalance(beneficiary, address(0));

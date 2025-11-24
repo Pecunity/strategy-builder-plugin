@@ -35,6 +35,25 @@ const _abi = [
         type: "address",
       },
       {
+        indexed: true,
+        internalType: "address",
+        name: "oracle",
+        type: "address",
+      },
+    ],
+    name: "CustomOracleSet",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+      {
         indexed: false,
         internalType: "bytes32",
         name: "oracleID",

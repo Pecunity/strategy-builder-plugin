@@ -31,7 +31,9 @@ export interface IPriceOracleInterface extends Interface {
       | "setOracleID"
   ): FunctionFragment;
 
-  getEvent(nameOrSignatureOrTopic: "OracleSet"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "CustomOracleSet" | "OracleSet"
+  ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "PRICE_DECIMALS",
@@ -63,6 +65,19 @@ export interface IPriceOracleInterface extends Interface {
     functionFragment: "setOracleID",
     data: BytesLike
   ): Result;
+}
+
+export namespace CustomOracleSetEvent {
+  export type InputTuple = [token: AddressLike, oracle: AddressLike];
+  export type OutputTuple = [token: string, oracle: string];
+  export interface OutputObject {
+    token: string;
+    oracle: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace OracleSetEvent {
@@ -155,6 +170,13 @@ export interface IPriceOracle extends BaseContract {
   >;
 
   getEvent(
+    key: "CustomOracleSet"
+  ): TypedContractEvent<
+    CustomOracleSetEvent.InputTuple,
+    CustomOracleSetEvent.OutputTuple,
+    CustomOracleSetEvent.OutputObject
+  >;
+  getEvent(
     key: "OracleSet"
   ): TypedContractEvent<
     OracleSetEvent.InputTuple,
@@ -163,6 +185,17 @@ export interface IPriceOracle extends BaseContract {
   >;
 
   filters: {
+    "CustomOracleSet(address,address)": TypedContractEvent<
+      CustomOracleSetEvent.InputTuple,
+      CustomOracleSetEvent.OutputTuple,
+      CustomOracleSetEvent.OutputObject
+    >;
+    CustomOracleSet: TypedContractEvent<
+      CustomOracleSetEvent.InputTuple,
+      CustomOracleSetEvent.OutputTuple,
+      CustomOracleSetEvent.OutputObject
+    >;
+
     "OracleSet(address,bytes32)": TypedContractEvent<
       OracleSetEvent.InputTuple,
       OracleSetEvent.OutputTuple,

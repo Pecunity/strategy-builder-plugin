@@ -32,6 +32,9 @@ export interface FeeHandlerInterface extends Interface {
       | "beneficiaryPercentage"
       | "burnerAddress"
       | "creatorPercentage"
+      | "depositETH"
+      | "depositToken"
+      | "getDeposit"
       | "getWithdrawableBalance"
       | "handleFee"
       | "handleFeeETH"
@@ -53,10 +56,13 @@ export interface FeeHandlerInterface extends Interface {
       | "vault"
       | "vaultPercentage"
       | "withdraw"
+      | "withdrawDeposit"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "Deposit"
+      | "DepositWithdrawn"
       | "FeeHandled"
       | "FeeHandledETH"
       | "OwnershipTransferred"
@@ -94,6 +100,18 @@ export interface FeeHandlerInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "depositETH",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "depositToken",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getDeposit",
+    values: [AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getWithdrawableBalance",
     values: [AddressLike, AddressLike]
   ): string;
@@ -103,7 +121,7 @@ export interface FeeHandlerInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "handleFeeETH",
-    values: [AddressLike, AddressLike]
+    values: [AddressLike, AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -165,6 +183,10 @@ export interface FeeHandlerInterface extends Interface {
     functionFragment: "withdraw",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawDeposit",
+    values: [AddressLike, BigNumberish]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "MAX_PRIMARY_TOKEN_DISCOUNT",
@@ -190,6 +212,12 @@ export interface FeeHandlerInterface extends Interface {
     functionFragment: "creatorPercentage",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "depositETH", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "depositToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "getDeposit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getWithdrawableBalance",
     data: BytesLike
@@ -256,6 +284,46 @@ export interface FeeHandlerInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawDeposit",
+    data: BytesLike
+  ): Result;
+}
+
+export namespace DepositEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    token: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [user: string, token: string, amount: bigint];
+  export interface OutputObject {
+    user: string;
+    token: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace DepositWithdrawnEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    token: AddressLike,
+    amount: BigNumberish
+  ];
+  export type OutputTuple = [user: string, token: string, amount: bigint];
+  export interface OutputObject {
+    user: string;
+    token: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace FeeHandledEvent {
@@ -521,6 +589,20 @@ export interface FeeHandler extends BaseContract {
 
   creatorPercentage: TypedContractMethod<[], [bigint], "view">;
 
+  depositETH: TypedContractMethod<[], [void], "payable">;
+
+  depositToken: TypedContractMethod<
+    [token: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  getDeposit: TypedContractMethod<
+    [user: AddressLike, token: AddressLike],
+    [bigint],
+    "view"
+  >;
+
   getWithdrawableBalance: TypedContractMethod<
     [user: AddressLike, token: AddressLike],
     [bigint],
@@ -539,7 +621,7 @@ export interface FeeHandler extends BaseContract {
   >;
 
   handleFeeETH: TypedContractMethod<
-    [beneficiary: AddressLike, creator: AddressLike],
+    [beneficiary: AddressLike, creator: AddressLike, amount: BigNumberish],
     [bigint],
     "payable"
   >;
@@ -600,6 +682,12 @@ export interface FeeHandler extends BaseContract {
 
   withdraw: TypedContractMethod<[token: AddressLike], [void], "nonpayable">;
 
+  withdrawDeposit: TypedContractMethod<
+    [token: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
@@ -633,6 +721,23 @@ export interface FeeHandler extends BaseContract {
     nameOrSignature: "creatorPercentage"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "depositETH"
+  ): TypedContractMethod<[], [void], "payable">;
+  getFunction(
+    nameOrSignature: "depositToken"
+  ): TypedContractMethod<
+    [token: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getDeposit"
+  ): TypedContractMethod<
+    [user: AddressLike, token: AddressLike],
+    [bigint],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getWithdrawableBalance"
   ): TypedContractMethod<
     [user: AddressLike, token: AddressLike],
@@ -654,7 +759,7 @@ export interface FeeHandler extends BaseContract {
   getFunction(
     nameOrSignature: "handleFeeETH"
   ): TypedContractMethod<
-    [beneficiary: AddressLike, creator: AddressLike],
+    [beneficiary: AddressLike, creator: AddressLike, amount: BigNumberish],
     [bigint],
     "payable"
   >;
@@ -720,7 +825,28 @@ export interface FeeHandler extends BaseContract {
   getFunction(
     nameOrSignature: "withdraw"
   ): TypedContractMethod<[token: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "withdrawDeposit"
+  ): TypedContractMethod<
+    [token: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
+  getEvent(
+    key: "Deposit"
+  ): TypedContractEvent<
+    DepositEvent.InputTuple,
+    DepositEvent.OutputTuple,
+    DepositEvent.OutputObject
+  >;
+  getEvent(
+    key: "DepositWithdrawn"
+  ): TypedContractEvent<
+    DepositWithdrawnEvent.InputTuple,
+    DepositWithdrawnEvent.OutputTuple,
+    DepositWithdrawnEvent.OutputObject
+  >;
   getEvent(
     key: "FeeHandled"
   ): TypedContractEvent<
@@ -793,6 +919,28 @@ export interface FeeHandler extends BaseContract {
   >;
 
   filters: {
+    "Deposit(address,address,uint256)": TypedContractEvent<
+      DepositEvent.InputTuple,
+      DepositEvent.OutputTuple,
+      DepositEvent.OutputObject
+    >;
+    Deposit: TypedContractEvent<
+      DepositEvent.InputTuple,
+      DepositEvent.OutputTuple,
+      DepositEvent.OutputObject
+    >;
+
+    "DepositWithdrawn(address,address,uint256)": TypedContractEvent<
+      DepositWithdrawnEvent.InputTuple,
+      DepositWithdrawnEvent.OutputTuple,
+      DepositWithdrawnEvent.OutputObject
+    >;
+    DepositWithdrawn: TypedContractEvent<
+      DepositWithdrawnEvent.InputTuple,
+      DepositWithdrawnEvent.OutputTuple,
+      DepositWithdrawnEvent.OutputObject
+    >;
+
     "FeeHandled(address,uint256,address,address,uint256,uint256,uint256,uint256)": TypedContractEvent<
       FeeHandledEvent.InputTuple,
       FeeHandledEvent.OutputTuple,
