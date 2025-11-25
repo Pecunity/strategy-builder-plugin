@@ -4,4 +4,5 @@
 import type * as interfaces from "./interfaces";
 export type { interfaces };
 export type { CoinOrERC20BalanceCondition } from "./CoinOrERC20BalanceCondition";
+export type { DepositFeeHandler } from "./DepositFeeHandler";
 export type { TimeCondition } from "./TimeCondition";

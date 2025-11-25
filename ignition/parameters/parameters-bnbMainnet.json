@@ -17,5 +17,8 @@
   },
   "MathActionModule": {
     "strategyBuilderModule": "0x00FB707CCc491DB9b5bf556EeeD00CB83eD10E05"
+  },
+  "DepositFeeHandlerModule": {
+    "feeHandler": "0x21094487bB278Ad5F18dE0c7f91EfA4dc739cC7f"
   }
 }

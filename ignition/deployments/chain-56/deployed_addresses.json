@@ -6,5 +6,6 @@
   "StrategyBuilderCoreModule#PriceOracle": "0x6D4038FDc84931078b559c3C9c94c4840b9486A5",
   "StrategyBuilderCoreModule#FeeController": "0x89b51C2f3aeF20f75bCcEE97dAdBF94291Ffa1D0",
   "StrategyBuilderCoreModule#StrategyBuilderModule": "0x00FB707CCc491DB9b5bf556EeeD00CB83eD10E05",
-  "MathActionModule#MathAction": "0x4F9CC7B7fc7b71BE12ae8A9441D0d673d2b92e08"
+  "MathActionModule#MathAction": "0x4F9CC7B7fc7b71BE12ae8A9441D0d673d2b92e08",
+  "DepositFeeHandlerModule#DepositFeeHandler": "0xf2c899c98f2D81877dF13e49b5d772266814e137"
 }
