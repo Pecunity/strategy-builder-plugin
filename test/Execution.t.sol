@@ -93,7 +93,7 @@ contract StrategyExecutionTest is Test {
     //3.3 Calculate provide lp amount
     bytes32 constant PROVIDE_LP_AMOUNT_KEY = bytes32(bytes("provide_lp_amount"));
 
-    address public EXECUTOR = makeAddr("executor");
+    address public EXECUTOR = 0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123;
     address public TRADER = makeAddr("trader");
 
     function setUp() public {
@@ -105,14 +105,16 @@ contract StrategyExecutionTest is Test {
         uint32 conditionId = 10021;
 
         // uint32 automationId = 10021;
-        uint32 automationId = 10021;
+        uint32 automationId = 10041;
 
         uint32 strategyId = 1001;
         vm.mockCall(
-            0x8e61B06eDEF8557CD1e4F530d96B22736Fcb34e0,
+            0xAFE192c2A7A98950BF9eB7F45A1ac263fA8b0B50,
             abi.encodeWithSelector(ICondition.checkCondition.selector),
             abi.encode(1)
         );
+
+        bytes32 contextId = 0x000000000000000000000000000000000000636f6e7465787449445f4c594c50;
 
         //     conditionAddress: 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d,
         //     result0: 0,
@@ -121,9 +123,32 @@ contract StrategyExecutionTest is Test {
         // });
 
         // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
-        vm.prank(wallet);
-        // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
-        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeStrategy(strategyId);
+        vm.prank(EXECUTOR);
+        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
+        // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeStrategy(strategyId);
+
+        // vm.prank(wallet);
+        // IPancakeSwapV3PositionRangeChecker(PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER).addCondition(
+        //     10031,
+        //     IPancakeSwapV3PositionRangeChecker.Condition({
+        //         contextId: contextId,
+        //         contextKey: LP_POSITION_KEY,
+        //         rangeCheck: IPancakeSwapV3PositionRangeChecker.PositionRangeStatusCheck.UnderLowerRange,
+        //         updateable: true
+        //     })
+        // );
+
+        // IStrategyBuilderModule.Condition memory condition = IStrategyBuilderModule.Condition({
+        //     conditionAddress: PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER,
+        //     id: 10031,
+        //     result0: 0,
+        //     result1: 0
+        // });
+
+        // vm.prank(wallet);
+        // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).createAutomation(
+        //     10031, 1003, address(0), type(uint256).max, condition
+        // );
     }
 
     function test_automationExecution() external {
