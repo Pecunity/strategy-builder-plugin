@@ -20,15 +20,15 @@ contract StrategyExecutionTest is Test {
 
     address wallet = 0x25cc8eE8efDFd50D063A717363D099E92EBc56b7;
 
-    address public constant STRATEGY_BUILDER_PLUGIN = 0x00FB707CCc491DB9b5bf556EeeD00CB83eD10E05;
+    address public constant STRATEGY_BUILDER_PLUGIN = 0x1B78A26cA48168338d547030e3609109E7100b4B;
     address public constant AAVE_V3_Actions = 0x8C262ec2db34a6CdA55ba9aDe792225191e0754C;
-    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0x76F20A078392bF5A8e68d4d3b6Dcede4C554c9B0;
+    address public constant PANCAKE_SWAP_V3_ONE_SIDED_LP_ACTIONS = 0xBCCB8E3F87E6aeE2E45323Ad7E71338825E3F028;
     address public constant PANCAKE_SWAP_V3_LP_ACTIONS = 0xE234Df5EfA5c5B1C04efc4F35d86F89B9A427509;
     address public constant PANCAKE_SWAP_V3_SWAP_ACTIONS = 0x51ba132B96607A4BfdCd212772aC2Ab3f5E1D851;
     address public constant TIME_CONDITION = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
-    address public constant MATH_ACTION = 0x4F9CC7B7fc7b71BE12ae8A9441D0d673d2b92e08;
+    address public constant MATH_ACTION = 0xAfD59e19A5E95cC9b3cBe90B9eF839D44C7896Af;
     address public constant ERC20_TOKEN_BALANCE_CONDITION = 0x9C736C92997F7C9d67c2CcDa6Ba24281498B8c64;
-    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0xe16875df74A38dB4d2A329589d18B7ccF0336F34;
+    address public constant PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER = 0x894B69Cf494A54a9991a3c88AC8D26eAd34945F9;
 
     address public constant PANCAKE_SWAP_V3_ROUTER = 0x13f4EA83D0bd40E75C8222255bc855a974568Dd4;
     address public constant PANCAKE_SWAP_V3_POSITION_MANAGER = 0x46A15B0b27311cedF172AB29E4f4766fbE7F4364;
@@ -105,7 +105,7 @@ contract StrategyExecutionTest is Test {
         uint32 conditionId = 10021;
 
         // uint32 automationId = 10021;
-        uint32 automationId = 10041;
+        uint32 automationId = 799176366;
 
         uint32 strategyId = 1001;
         vm.mockCall(
@@ -124,7 +124,9 @@ contract StrategyExecutionTest is Test {
 
         // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
         vm.prank(EXECUTOR);
-        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(automationId, wallet, EXECUTOR);
+        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(
+            automationId, 0x4f7b204684Ee671f9aC5B1467b00BADCc24C14D2, EXECUTOR
+        );
         // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeStrategy(strategyId);
 
         // vm.prank(wallet);
