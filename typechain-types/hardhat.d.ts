@@ -70,6 +70,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IPythEvents__factory>;
     getContractFactory(
+      name: "MathAction",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MathAction__factory>;
+    getContractFactory(
       name: "ActionRegistry",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ActionRegistry__factory>;
@@ -82,9 +86,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CoinOrERC20BalanceCondition__factory>;
     getContractFactory(
+      name: "DepositFeeHandler",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.DepositFeeHandler__factory>;
+    getContractFactory(
       name: "ICoinOrERC20BalanceCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ICoinOrERC20BalanceCondition__factory>;
+    getContractFactory(
+      name: "IDepositFeeHandler",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IDepositFeeHandler__factory>;
     getContractFactory(
       name: "ITimeCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -241,6 +253,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IPythEvents>;
     getContractAt(
+      name: "MathAction",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MathAction>;
+    getContractAt(
       name: "ActionRegistry",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -256,10 +273,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.CoinOrERC20BalanceCondition>;
     getContractAt(
+      name: "DepositFeeHandler",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.DepositFeeHandler>;
+    getContractAt(
       name: "ICoinOrERC20BalanceCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
+    getContractAt(
+      name: "IDepositFeeHandler",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IDepositFeeHandler>;
     getContractAt(
       name: "ITimeCondition",
       address: string | ethers.Addressable,
@@ -423,6 +450,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
     deployContract(
+      name: "MathAction",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MathAction>;
+    deployContract(
       name: "ActionRegistry",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ActionRegistry>;
@@ -435,9 +466,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.CoinOrERC20BalanceCondition>;
     deployContract(
+      name: "DepositFeeHandler",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.DepositFeeHandler>;
+    deployContract(
       name: "ICoinOrERC20BalanceCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
+    deployContract(
+      name: "IDepositFeeHandler",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IDepositFeeHandler>;
     deployContract(
       name: "ITimeCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -594,6 +633,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IPythEvents>;
     deployContract(
+      name: "MathAction",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MathAction>;
+    deployContract(
       name: "ActionRegistry",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -609,10 +653,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.CoinOrERC20BalanceCondition>;
     deployContract(
+      name: "DepositFeeHandler",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.DepositFeeHandler>;
+    deployContract(
       name: "ICoinOrERC20BalanceCondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICoinOrERC20BalanceCondition>;
+    deployContract(
+      name: "IDepositFeeHandler",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IDepositFeeHandler>;
     deployContract(
       name: "ITimeCondition",
       args: any[],

@@ -59,6 +59,9 @@ contract FeeHandler is Ownable, IFeeHandler {
     /// @notice Tracks withdrawable balances for each receiver adress and token
     mapping(address receiver => mapping(address token => uint256)) private withdrawableBalances;
 
+    /// @notice user deposits for a token (including native ETH under address(0))
+    mapping(address user => mapping(address token => uint256)) private deposits;
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃              Constructor            ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -113,7 +116,25 @@ contract FeeHandler is Ownable, IFeeHandler {
 
         // Collect total funds from sender
         uint256 requiredAmount = totalFee + burnAmount;
-        token.safeTransferFrom(msg.sender, address(this), requiredAmount);
+
+        uint256 remaining = requiredAmount;
+
+        uint256 depositAvailable = deposits[msg.sender][token];
+        if (depositAvailable > 0) {
+            if (depositAvailable >= remaining) {
+                deposits[msg.sender][token] = depositAvailable - remaining;
+                remaining = 0;
+            } else {
+                // use all deposit
+                remaining -= depositAvailable;
+                deposits[msg.sender][token] = 0;
+            }
+        }
+
+        if (remaining > 0) {
+            // pull remaining from sender
+            token.safeTransferFrom(msg.sender, address(this), remaining);
+        }
 
         emit FeeHandled(
             token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
@@ -123,14 +144,12 @@ contract FeeHandler is Ownable, IFeeHandler {
     }
 
     /// @inheritdoc IFeeHandler
-    function handleFeeETH(address beneficiary, address creator) external payable returns (uint256) {
+    function handleFeeETH(address beneficiary, address creator, uint256 amount) external payable returns (uint256) {
         if (!allowedTokens[address(0)]) {
             revert TokenNotAllowed();
         }
 
         _validateBeneficiary(beneficiary);
-
-        uint256 amount = msg.value;
         _validateAmount(amount);
 
         (uint256 totalFee, uint256 burnAmount) = _feeCalculation(amount, address(0));
@@ -150,10 +169,35 @@ contract FeeHandler is Ownable, IFeeHandler {
         }
 
         uint256 requiredAmount = totalFee + burnAmount;
-        uint256 excess = msg.value > requiredAmount ? msg.value - requiredAmount : 0;
 
-        if (excess > 0) {
-            msg.sender.safeTransferETH(excess);
+        uint256 remaining = requiredAmount;
+
+        // first try deposit
+        uint256 depositAvailable = deposits[msg.sender][address(0)];
+        if (depositAvailable > 0) {
+            if (depositAvailable >= remaining) {
+                deposits[msg.sender][address(0)] = depositAvailable - remaining;
+                remaining = 0;
+            } else {
+                remaining -= depositAvailable;
+                deposits[msg.sender][address(0)] = 0;
+            }
+        }
+
+        // then accept msg.value for the remainder
+        if (remaining > 0) {
+            if (msg.value < remaining) revert InvalidAmount(); // or custom error InsufficientPayment()
+            // if msg.value > remaining, refund excess
+            uint256 excess = msg.value - remaining;
+            if (excess > 0) {
+                // refund extra
+                msg.sender.safeTransferETH(excess);
+            }
+        } else {
+            // user sent ETH but deposit fully covered fee: refund entire msg.value
+            if (msg.value > 0) {
+                msg.sender.safeTransferETH(msg.value);
+            }
         }
 
         emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
@@ -229,6 +273,45 @@ contract FeeHandler is Ownable, IFeeHandler {
         allowedTokens[token] = allowed;
 
         emit UpdatedTokenAllowance(token, allowed);
+    }
+
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃    Account Functions     ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    /// @notice Deposit ERC20 tokens to be used for future fees
+    function depositToken(address token, uint256 amount) external {
+        _validateAmount(amount);
+        if (!allowedTokens[token]) revert TokenNotAllowed();
+
+        // transfer tokens from user into contract
+        token.safeTransferFrom(msg.sender, address(this), amount);
+
+        deposits[msg.sender][token] += amount;
+        emit Deposit(msg.sender, token, amount);
+    }
+
+    /// @notice Withdraw part or full of user's deposit for a token
+    function withdrawDeposit(address token, uint256 amount) external {
+        uint256 balance = deposits[msg.sender][token];
+        if (amount == 0 || amount > balance) revert InvalidAmount();
+
+        deposits[msg.sender][token] = balance - amount;
+
+        if (token == address(0)) {
+            msg.sender.safeTransferETH(amount);
+        } else {
+            token.safeTransfer(msg.sender, amount);
+        }
+        emit DepositWithdrawn(msg.sender, token, amount);
+    }
+
+    /// @notice Deposit native ETH to be used for future fees
+    function depositETH() external payable {
+        if (!allowedTokens[address(0)]) revert TokenNotAllowed();
+        _validateAmount(msg.value);
+        deposits[msg.sender][address(0)] += msg.value;
+        emit Deposit(msg.sender, address(0), msg.value);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -324,5 +407,10 @@ contract FeeHandler is Ownable, IFeeHandler {
     /// @inheritdoc IFeeHandler
     function getWithdrawableBalance(address user, address token) external view returns (uint256 balance) {
         return withdrawableBalances[user][token];
+    }
+
+    /// @notice Get deposit balance for user / token
+    function getDeposit(address user, address token) external view returns (uint256) {
+        return deposits[user][token];
     }
 }

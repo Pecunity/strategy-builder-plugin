@@ -25,6 +25,8 @@ interface IPriceOracle {
     /// @param oracleID The oracle feed ID associated with the token.
     event OracleSet(address indexed token, bytes32 oracleID);
 
+    event CustomOracleSet(address indexed token, address indexed oracle);
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃        External Functions        ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛

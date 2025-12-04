@@ -23,6 +23,9 @@ contract PriceOracle is Ownable, IPriceOracle {
     /// @dev Used to resolve the oracle price feed for a specific token.
     mapping(address token => bytes32 oracleID) private oracleIDs;
 
+    /// @notice Per-token custom fallback oracles
+    mapping(address token => address oracle) private customOracles;
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Constructor       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -44,6 +47,12 @@ contract PriceOracle is Ownable, IPriceOracle {
         oracleIDs[_token] = _oracleID;
 
         emit OracleSet(_token, _oracleID);
+    }
+
+    /// @notice Set a custom fallback oracle for a specific token
+    function setCustomOracle(address _token, address _oracle) external onlyOwner {
+        customOracles[_token] = _oracle;
+        emit CustomOracleSet(_token, _oracle);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -81,8 +90,17 @@ contract PriceOracle is Ownable, IPriceOracle {
             revert OracleNotExist(_token);
         }
 
-        // PythStructs.Price memory price = pythOracle.getPriceUnsafe(_oracleID);
-        // PythStructs.Price memory price = pythOracle.getPriceNoOlderThan(_oracleID, MAX_ORACLE_DELAY);
+        address _customOracle = customOracles[_token];
+
+        if (_customOracle != address(0)) {
+            try IPyth(_customOracle).getPriceNoOlderThan(_oracleID, maxOracleDelay) returns (
+                PythStructs.Price memory price
+            ) {
+                return _scalePythPrice(price.price, price.expo);
+            } catch {
+                return 0;
+            }
+        }
 
         try pythOracle.getPriceNoOlderThan(_oracleID, maxOracleDelay) returns (PythStructs.Price memory price) {
             return _scalePythPrice(price.price, price.expo);

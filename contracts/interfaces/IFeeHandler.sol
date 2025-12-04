@@ -44,6 +44,8 @@ interface IFeeHandler {
     event UpdatedTokenAllowance(address token, bool allowed);
     event UpdatedReduction(address reduction);
     event Withdrawn(address indexed receiver, address indexed token, uint256 amount);
+    event Deposit(address indexed user, address indexed token, uint256 amount);
+    event DepositWithdrawn(address indexed user, address indexed token, uint256 amount);
 
     /// @notice Handles ERC20 fee payment. Stores receivable amounts for beneficiary, creator, and vault.
     /// @param token The token address used for payment.
@@ -59,7 +61,8 @@ interface IFeeHandler {
     /// @param beneficiary The fee beneficiary address.
     /// @param creator Optional creator address.
     /// @return totalAmount Total fee + burn amount recorded.
-    function handleFeeETH(address beneficiary, address creator) external payable returns (uint256);
+    /// @param amount The total fee amount sent by the user.
+    function handleFeeETH(address beneficiary, address creator, uint256 amount) external payable returns (uint256);
 
     /// @notice Allows a user to withdraw their accumulated fee balance for a given token.
     /// @param token The token address to withdraw (use address(0) for ETH).
@@ -120,4 +123,6 @@ interface IFeeHandler {
     /// @param token The token address (use address(0) for ETH).
     /// @return balance The amount the user can withdraw.
     function getWithdrawableBalance(address user, address token) external view returns (uint256 balance);
+
+    function getDeposit(address user, address token) external view returns (uint256);
 }

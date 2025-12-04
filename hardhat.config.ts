@@ -28,12 +28,21 @@ const config: HardhatUserConfig = {
         enabled: true, // Enable optimization
         runs: 200, // Set the number of optimization runs (200 is a common balance)
       },
+      viaIR: true,
     },
   },
   networks: {
     arbitrumSepolia: {
       ...getNetwork(Network.ARBITRUM_SEPOLIA),
       chainId: 421614,
+    },
+    sepolia: {
+      ...getNetwork(Network.SEPOLIA),
+      chainId: 11155111,
+    },
+    bnbMainnet: {
+      ...getNetwork(Network.BNB),
+      chainId: 56,
     },
   },
   etherscan: {

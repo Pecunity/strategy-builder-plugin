@@ -31,12 +31,16 @@ export interface PriceOracleInterface extends Interface {
       | "oracleID"
       | "owner"
       | "renounceOwnership"
+      | "setCustomOracle"
       | "setOracleID"
       | "transferOwnership"
   ): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic: "OracleSet" | "OwnershipTransferred"
+    nameOrSignatureOrTopic:
+      | "CustomOracleSet"
+      | "OracleSet"
+      | "OwnershipTransferred"
   ): EventFragment;
 
   encodeFunctionData(
@@ -59,6 +63,10 @@ export interface PriceOracleInterface extends Interface {
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setCustomOracle",
+    values: [AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setOracleID",
@@ -88,6 +96,10 @@ export interface PriceOracleInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setCustomOracle",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setOracleID",
     data: BytesLike
   ): Result;
@@ -95,6 +107,19 @@ export interface PriceOracleInterface extends Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+}
+
+export namespace CustomOracleSetEvent {
+  export type InputTuple = [token: AddressLike, oracle: AddressLike];
+  export type OutputTuple = [token: string, oracle: string];
+  export interface OutputObject {
+    token: string;
+    oracle: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace OracleSetEvent {
@@ -178,6 +203,12 @@ export interface PriceOracle extends BaseContract {
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
+  setCustomOracle: TypedContractMethod<
+    [_token: AddressLike, _oracle: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   setOracleID: TypedContractMethod<
     [_token: AddressLike, _oracleID: BytesLike],
     [void],
@@ -213,6 +244,13 @@ export interface PriceOracle extends BaseContract {
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "setCustomOracle"
+  ): TypedContractMethod<
+    [_token: AddressLike, _oracle: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "setOracleID"
   ): TypedContractMethod<
     [_token: AddressLike, _oracleID: BytesLike],
@@ -223,6 +261,13 @@ export interface PriceOracle extends BaseContract {
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
 
+  getEvent(
+    key: "CustomOracleSet"
+  ): TypedContractEvent<
+    CustomOracleSetEvent.InputTuple,
+    CustomOracleSetEvent.OutputTuple,
+    CustomOracleSetEvent.OutputObject
+  >;
   getEvent(
     key: "OracleSet"
   ): TypedContractEvent<
@@ -239,6 +284,17 @@ export interface PriceOracle extends BaseContract {
   >;
 
   filters: {
+    "CustomOracleSet(address,address)": TypedContractEvent<
+      CustomOracleSetEvent.InputTuple,
+      CustomOracleSetEvent.OutputTuple,
+      CustomOracleSetEvent.OutputObject
+    >;
+    CustomOracleSet: TypedContractEvent<
+      CustomOracleSetEvent.InputTuple,
+      CustomOracleSetEvent.OutputTuple,
+      CustomOracleSetEvent.OutputObject
+    >;
+
     "OracleSet(address,bytes32)": TypedContractEvent<
       OracleSetEvent.InputTuple,
       OracleSetEvent.OutputTuple,

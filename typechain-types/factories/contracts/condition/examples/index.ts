@@ -3,4 +3,5 @@
 /* eslint-disable */
 export * as interfaces from "./interfaces";
 export { CoinOrERC20BalanceCondition__factory } from "./CoinOrERC20BalanceCondition__factory";
+export { DepositFeeHandler__factory } from "./DepositFeeHandler__factory";
 export { TimeCondition__factory } from "./TimeCondition__factory";

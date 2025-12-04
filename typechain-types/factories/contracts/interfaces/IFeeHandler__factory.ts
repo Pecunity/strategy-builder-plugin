@@ -50,6 +50,56 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Deposit",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "DepositWithdrawn",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
         name: "token",
         type: "address",
       },
@@ -333,6 +383,30 @@ const _abi = [
         type: "address",
       },
     ],
+    name: "getDeposit",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+    ],
     name: "getWithdrawableBalance",
     outputs: [
       {
@@ -389,6 +463,11 @@ const _abi = [
         internalType: "address",
         name: "creator",
         type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
       },
     ],
     name: "handleFeeETH",
