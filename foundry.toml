@@ -10,7 +10,7 @@ libs = ['lib']
 auto_detect_remappings = false
 ignored_error_codes = []
 via_ir = true
-evm_version = 'shanghai'
+
 
 remappings = [
   "@erc6900/reference-implementation/=lib/reference-implementation/src/",

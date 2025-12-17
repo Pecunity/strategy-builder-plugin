@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@erc6900/reference-implementation": "github:erc6900/reference-implementation#v0.8.0",
+    "@openzeppelin/contracts-upgradeable": "^5.4.0",
     "@pythnetwork/pyth-sdk-solidity": "^4.0.0",
     "account-abstraction": "github:eth-infinitism/account-abstraction#v0.7.0"
   }

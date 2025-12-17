@@ -1,7 +1,8 @@
 @erc6900/reference-implementation/=node_modules/@erc6900/reference-implementation/src/
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
-@openzeppelin/=lib/openzeppelin-contracts/
+@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
+@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
 solady/=lib/solady/src
 @pythnetwork/=node_modules/@pythnetwork/
 modular-account=lib/modular-account

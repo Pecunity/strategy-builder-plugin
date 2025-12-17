@@ -105,7 +105,7 @@ contract StrategyExecutionTest is Test {
         uint32 conditionId = 10021;
 
         // uint32 automationId = 10021;
-        uint32 automationId = 799176366;
+        uint32 automationId = 4042520397;
 
         uint32 strategyId = 1001;
         vm.mockCall(
@@ -125,7 +125,7 @@ contract StrategyExecutionTest is Test {
         // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
         vm.prank(EXECUTOR);
         IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(
-            automationId, 0x4f7b204684Ee671f9aC5B1467b00BADCc24C14D2, EXECUTOR
+            automationId, 0x4D1C9043E5bD5877F0d1708f8265ADBa853fBd3E, EXECUTOR
         );
         // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeStrategy(strategyId);
 
