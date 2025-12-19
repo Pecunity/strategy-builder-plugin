@@ -9,4 +9,5 @@ export { IFeeHandler__factory } from "./IFeeHandler__factory";
 export { IFeeReduction__factory } from "./IFeeReduction__factory";
 export { IPriceOracle__factory } from "./IPriceOracle__factory";
 export { IStrategyBuilderModule__factory } from "./IStrategyBuilderModule__factory";
+export { IStrategyVault__factory } from "./IStrategyVault__factory";
 export { ITokenGetter__factory } from "./ITokenGetter__factory";

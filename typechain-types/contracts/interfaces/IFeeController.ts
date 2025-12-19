@@ -48,6 +48,7 @@ export interface IFeeControllerInterface extends Interface {
       | "priceOracle"
       | "setFunctionFeeConfig"
       | "setGlobalTokenGetter"
+      | "setMinFeeInUSD"
       | "setTokenGetter"
       | "tokenGetter"
   ): FunctionFragment;
@@ -56,6 +57,7 @@ export interface IFeeControllerInterface extends Interface {
     nameOrSignatureOrTopic:
       | "FeeConfigSet"
       | "GlobalTokenGetterSet"
+      | "MinFeeInUSDUpdated"
       | "MinFeeSet"
       | "TokenGetterSet"
   ): EventFragment;
@@ -86,7 +88,7 @@ export interface IFeeControllerInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "minFeeInUSD",
-    values: [BigNumberish]
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "priceOracle",
@@ -99,6 +101,10 @@ export interface IFeeControllerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "setGlobalTokenGetter",
     values: [BytesLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setMinFeeInUSD",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setTokenGetter",
@@ -147,6 +153,10 @@ export interface IFeeControllerInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setMinFeeInUSD",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setTokenGetter",
     data: BytesLike
   ): Result;
@@ -184,6 +194,18 @@ export namespace GlobalTokenGetterSetEvent {
   export interface OutputObject {
     selector: string;
     tokenGetter: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace MinFeeInUSDUpdatedEvent {
+  export type InputTuple = [minFeeInUSD: BigNumberish];
+  export type OutputTuple = [minFeeInUSD: bigint];
+  export interface OutputObject {
+    minFeeInUSD: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -297,7 +319,7 @@ export interface IFeeController extends BaseContract {
 
   maxFeeLimit: TypedContractMethod<[feeType: BigNumberish], [bigint], "view">;
 
-  minFeeInUSD: TypedContractMethod<[feeType: BigNumberish], [bigint], "view">;
+  minFeeInUSD: TypedContractMethod<[], [bigint], "view">;
 
   priceOracle: TypedContractMethod<[], [string], "view">;
 
@@ -309,6 +331,12 @@ export interface IFeeController extends BaseContract {
 
   setGlobalTokenGetter: TypedContractMethod<
     [selector: BytesLike, tokenGetter: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  setMinFeeInUSD: TypedContractMethod<
+    [_minFeeInUSD: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -365,7 +393,7 @@ export interface IFeeController extends BaseContract {
   ): TypedContractMethod<[feeType: BigNumberish], [bigint], "view">;
   getFunction(
     nameOrSignature: "minFeeInUSD"
-  ): TypedContractMethod<[feeType: BigNumberish], [bigint], "view">;
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "priceOracle"
   ): TypedContractMethod<[], [string], "view">;
@@ -383,6 +411,9 @@ export interface IFeeController extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "setMinFeeInUSD"
+  ): TypedContractMethod<[_minFeeInUSD: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "setTokenGetter"
   ): TypedContractMethod<
@@ -411,6 +442,13 @@ export interface IFeeController extends BaseContract {
     GlobalTokenGetterSetEvent.InputTuple,
     GlobalTokenGetterSetEvent.OutputTuple,
     GlobalTokenGetterSetEvent.OutputObject
+  >;
+  getEvent(
+    key: "MinFeeInUSDUpdated"
+  ): TypedContractEvent<
+    MinFeeInUSDUpdatedEvent.InputTuple,
+    MinFeeInUSDUpdatedEvent.OutputTuple,
+    MinFeeInUSDUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "MinFeeSet"
@@ -448,6 +486,17 @@ export interface IFeeController extends BaseContract {
       GlobalTokenGetterSetEvent.InputTuple,
       GlobalTokenGetterSetEvent.OutputTuple,
       GlobalTokenGetterSetEvent.OutputObject
+    >;
+
+    "MinFeeInUSDUpdated(uint256)": TypedContractEvent<
+      MinFeeInUSDUpdatedEvent.InputTuple,
+      MinFeeInUSDUpdatedEvent.OutputTuple,
+      MinFeeInUSDUpdatedEvent.OutputObject
+    >;
+    MinFeeInUSDUpdated: TypedContractEvent<
+      MinFeeInUSDUpdatedEvent.InputTuple,
+      MinFeeInUSDUpdatedEvent.OutputTuple,
+      MinFeeInUSDUpdatedEvent.OutputObject
     >;
 
     "MinFeeSet(uint8,uint256)": TypedContractEvent<

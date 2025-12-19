@@ -34,10 +34,13 @@ export interface FeeHandlerInterface extends Interface {
       | "creatorPercentage"
       | "depositETH"
       | "depositToken"
+      | "depositTokenFor"
       | "getDeposit"
       | "getWithdrawableBalance"
       | "handleFee"
       | "handleFeeETH"
+      | "handleFeeWithVault"
+      | "handleFeeWithVaultETH"
       | "owner"
       | "primaryToken"
       | "primaryTokenActive"
@@ -108,6 +111,10 @@ export interface FeeHandlerInterface extends Interface {
     values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "depositTokenFor",
+    values: [AddressLike, AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getDeposit",
     values: [AddressLike, AddressLike]
   ): string;
@@ -122,6 +129,14 @@ export interface FeeHandlerInterface extends Interface {
   encodeFunctionData(
     functionFragment: "handleFeeETH",
     values: [AddressLike, AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "handleFeeWithVault",
+    values: [AddressLike, BigNumberish, AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "handleFeeWithVaultETH",
+    values: [BigNumberish, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -217,6 +232,10 @@ export interface FeeHandlerInterface extends Interface {
     functionFragment: "depositToken",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "depositTokenFor",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "getDeposit", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getWithdrawableBalance",
@@ -225,6 +244,14 @@ export interface FeeHandlerInterface extends Interface {
   decodeFunctionResult(functionFragment: "handleFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "handleFeeETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "handleFeeWithVault",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "handleFeeWithVaultETH",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -597,6 +624,12 @@ export interface FeeHandler extends BaseContract {
     "nonpayable"
   >;
 
+  depositTokenFor: TypedContractMethod<
+    [to: AddressLike, token: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   getDeposit: TypedContractMethod<
     [user: AddressLike, token: AddressLike],
     [bigint],
@@ -622,6 +655,23 @@ export interface FeeHandler extends BaseContract {
 
   handleFeeETH: TypedContractMethod<
     [beneficiary: AddressLike, creator: AddressLike, amount: BigNumberish],
+    [bigint],
+    "payable"
+  >;
+
+  handleFeeWithVault: TypedContractMethod<
+    [
+      token: AddressLike,
+      amount: BigNumberish,
+      beneficiary: AddressLike,
+      creator: AddressLike
+    ],
+    [bigint],
+    "nonpayable"
+  >;
+
+  handleFeeWithVaultETH: TypedContractMethod<
+    [amount: BigNumberish, beneficiary: AddressLike, creator: AddressLike],
     [bigint],
     "payable"
   >;
@@ -731,6 +781,13 @@ export interface FeeHandler extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "depositTokenFor"
+  ): TypedContractMethod<
+    [to: AddressLike, token: AddressLike, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "getDeposit"
   ): TypedContractMethod<
     [user: AddressLike, token: AddressLike],
@@ -760,6 +817,25 @@ export interface FeeHandler extends BaseContract {
     nameOrSignature: "handleFeeETH"
   ): TypedContractMethod<
     [beneficiary: AddressLike, creator: AddressLike, amount: BigNumberish],
+    [bigint],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "handleFeeWithVault"
+  ): TypedContractMethod<
+    [
+      token: AddressLike,
+      amount: BigNumberish,
+      beneficiary: AddressLike,
+      creator: AddressLike
+    ],
+    [bigint],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "handleFeeWithVaultETH"
+  ): TypedContractMethod<
+    [amount: BigNumberish, beneficiary: AddressLike, creator: AddressLike],
     [bigint],
     "payable"
   >;

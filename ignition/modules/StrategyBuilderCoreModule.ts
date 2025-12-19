@@ -60,12 +60,25 @@ const StrategBuilderCoreModule = buildModule(
       actionRegistry,
     ]);
 
+    //deploy strategy vault implementation and factory
+
+    const strategyVaultImplementation = m.contract("StrategyVault");
+
+    const strategyVaultFactory = m.contract("StrategyVaultFactory", [
+      feeController,
+      feeHandler,
+      actionRegistry,
+      strategyVaultImplementation,
+    ]);
+
     return {
       priceOracle,
       feeController,
       feeHandler,
       actionRegistry,
       strategyBuilderModule,
+      strategyVaultImplementation,
+      strategyVaultFactory,
     };
   }
 );

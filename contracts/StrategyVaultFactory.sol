@@ -83,48 +83,46 @@ contract StrategyVaultFactory is Ownable {
      * @dev Creates a minimal proxy that delegates to the implementation
      * Gas cost: ~30k (vs ~75k for full contract deployment)
      */
-    function deployVault() public returns (address proxyAddress) {
-        if (address(implementation) == address(0)) {
-            revert ImplementationNotDeployed();
-        }
+    // function deployVault() public returns (address proxyAddress) {
+    //     if (address(implementation) == address(0)) {
+    //         revert ImplementationNotDeployed();
+    //     }
 
-        // Create proxy with initialization data
+    //     // Create proxy with initialization data
+    //     bytes memory initData = abi.encodeCall(
+    //         StrategyVault.initialize, (msg.sender, address(feeController), address(feeHandler), address(actionRegistry))
+    //     );
+
+    //     // Deploy ERC1967 proxy (UUPS compatible)
+    //     ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
+    //     proxyAddress = address(proxy);
+
+    //     // Track deployment
+    //     deployedVaults.push(proxyAddress);
+    //     uint256 index = deployedVaults.length - 1;
+    //     vaultIndex[proxyAddress] = index;
+
+    //     // Track user's vaults
+    //     userVaults[msg.sender].push(proxyAddress);
+
+    //     emit VaultProxyDeployed(proxyAddress, msg.sender, index, block.timestamp);
+
+    //     return proxyAddress;
+    // }
+    function deployVaultDeterministic(bytes32 salt) external returns (address proxyAddress) {
         bytes memory initData = abi.encodeCall(
             StrategyVault.initialize, (msg.sender, address(feeController), address(feeHandler), address(actionRegistry))
         );
 
-        // Deploy ERC1967 proxy (UUPS compatible)
-        ERC1967Proxy proxy = new ERC1967Proxy(address(implementation), initData);
+        ERC1967Proxy proxy = new ERC1967Proxy{salt: salt}(address(implementation), initData);
+
         proxyAddress = address(proxy);
 
-        // Track deployment
         deployedVaults.push(proxyAddress);
-        uint256 index = deployedVaults.length - 1;
-        vaultIndex[proxyAddress] = index;
-
-        // Track user's vaults
+        vaultIndex[proxyAddress] = deployedVaults.length - 1;
         userVaults[msg.sender].push(proxyAddress);
 
-        emit VaultProxyDeployed(proxyAddress, msg.sender, index, block.timestamp);
-
-        return proxyAddress;
-    }
-
-    /**
-     * @notice Deploy multiple vaults in one transaction
-     * @param count Number of vaults to deploy
-     * @return vaults Array of deployed proxy addresses
-     */
-    function deployMultipleVaults(uint256 count) external returns (address[] memory vaults) {
-        if (count == 0 || count > 50) revert InvalidConfiguration();
-
-        vaults = new address[](count);
-
-        for (uint256 i = 0; i < count; i++) {
-            vaults[i] = deployVault();
-        }
-
-        return vaults;
+        emit VaultProxyDeployed(proxyAddress, msg.sender, vaultIndex[proxyAddress], block.timestamp);
     }
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓

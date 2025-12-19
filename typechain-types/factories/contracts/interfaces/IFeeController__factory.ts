@@ -78,6 +78,19 @@ const _abi = [
     inputs: [
       {
         indexed: false,
+        internalType: "uint256",
+        name: "minFeeInUSD",
+        type: "uint256",
+      },
+    ],
+    name: "MinFeeInUSDUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         internalType: "enum IFeeController.FeeType",
         name: "feeType",
         type: "uint8",
@@ -274,13 +287,7 @@ const _abi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "enum IFeeController.FeeType",
-        name: "feeType",
-        type: "uint8",
-      },
-    ],
+    inputs: [],
     name: "minFeeInUSD",
     outputs: [
       {
@@ -342,6 +349,19 @@ const _abi = [
       },
     ],
     name: "setGlobalTokenGetter",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_minFeeInUSD",
+        type: "uint256",
+      },
+    ],
+    name: "setMinFeeInUSD",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

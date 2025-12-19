@@ -31,6 +31,9 @@ export interface IFeeHandlerInterface extends Interface {
       | "getWithdrawableBalance"
       | "handleFee"
       | "handleFeeETH"
+      | "handleFeeWithVault"
+      | "handleFeeWithVaultETH"
+      | "primaryToken"
       | "primaryTokenActive"
       | "tokenAllowed"
       | "updatePercentages"
@@ -76,6 +79,18 @@ export interface IFeeHandlerInterface extends Interface {
     values: [AddressLike, AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "handleFeeWithVault",
+    values: [AddressLike, BigNumberish, AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "handleFeeWithVaultETH",
+    values: [BigNumberish, AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "primaryToken",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "primaryTokenActive",
     values?: undefined
   ): string;
@@ -116,6 +131,18 @@ export interface IFeeHandlerInterface extends Interface {
   decodeFunctionResult(functionFragment: "handleFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "handleFeeETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "handleFeeWithVault",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "handleFeeWithVaultETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "primaryToken",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -450,6 +477,25 @@ export interface IFeeHandler extends BaseContract {
     "payable"
   >;
 
+  handleFeeWithVault: TypedContractMethod<
+    [
+      token: AddressLike,
+      amount: BigNumberish,
+      beneficiary: AddressLike,
+      creator: AddressLike
+    ],
+    [bigint],
+    "nonpayable"
+  >;
+
+  handleFeeWithVaultETH: TypedContractMethod<
+    [amount: BigNumberish, beneficiary: AddressLike, creator: AddressLike],
+    [bigint],
+    "payable"
+  >;
+
+  primaryToken: TypedContractMethod<[], [string], "nonpayable">;
+
   primaryTokenActive: TypedContractMethod<[], [boolean], "view">;
 
   tokenAllowed: TypedContractMethod<[token: AddressLike], [boolean], "view">;
@@ -526,6 +572,28 @@ export interface IFeeHandler extends BaseContract {
     [bigint],
     "payable"
   >;
+  getFunction(
+    nameOrSignature: "handleFeeWithVault"
+  ): TypedContractMethod<
+    [
+      token: AddressLike,
+      amount: BigNumberish,
+      beneficiary: AddressLike,
+      creator: AddressLike
+    ],
+    [bigint],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "handleFeeWithVaultETH"
+  ): TypedContractMethod<
+    [amount: BigNumberish, beneficiary: AddressLike, creator: AddressLike],
+    [bigint],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "primaryToken"
+  ): TypedContractMethod<[], [string], "nonpayable">;
   getFunction(
     nameOrSignature: "primaryTokenActive"
   ): TypedContractMethod<[], [boolean], "view">;

@@ -46,7 +46,9 @@ contract StrategyVaultTest is Test {
         factory = new StrategyVaultFactory(feeController, feeHandler, actionRegistry, address(vaultImplementation));
 
         vm.prank(owner1);
-        vault1 = StrategyVault(payable(factory.deployVault()));
+        bytes32 salt = keccak256(abi.encode(msg.sender, uint256(1)));
+
+        vault1 = StrategyVault(payable(factory.deployVaultDeterministic(salt)));
 
         deal(address(owner1), 100 ether);
     }
