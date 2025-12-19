@@ -17,26 +17,24 @@ contract FeeControllerTest is Test {
     address public ORACLE = makeAddr("oracle");
 
     uint256[] public maxFeeLimits = [500, 1000, 200];
-    uint256[] public minFeesInUSD = [1e18, 2e18, 0.5e18];
+    uint256 public minFeeInUSD = 1e18;
 
     function setUp() external {
         vm.prank(OWNER);
-        controller = new FeeController(OWNER, ORACLE, maxFeeLimits, minFeesInUSD);
+        controller = new FeeController(OWNER, ORACLE, maxFeeLimits, minFeeInUSD);
     }
 
     function test_deployment_Success() external {
-        FeeController _newController = new FeeController(OWNER, ORACLE, maxFeeLimits, minFeesInUSD);
+        FeeController _newController = new FeeController(OWNER, ORACLE, maxFeeLimits, minFeeInUSD);
 
         assertEq(_newController.priceOracle(), ORACLE);
 
-        assertEq(_newController.minFeeInUSD(IFeeController.FeeType.Withdraw), 2e18);
-        assertEq(_newController.minFeeInUSD(IFeeController.FeeType.Deposit), 1e18);
-        assertEq(_newController.minFeeInUSD(IFeeController.FeeType.Reward), 0.5e18);
+        assertEq(_newController.minFeeInUSD(), minFeeInUSD);
     }
 
     function test_deployment_OracleZeroAddress() external {
         vm.expectRevert(IFeeController.ZeroAddressNotValid.selector);
-        new FeeController(OWNER, address(0), maxFeeLimits, minFeesInUSD);
+        new FeeController(OWNER, address(0), maxFeeLimits, minFeeInUSD);
     }
 
     function test_setFunctionFeeConfig_Success(bytes4 _selector) external {
@@ -176,7 +174,7 @@ contract FeeControllerTest is Test {
     function test_calculateFee_NoOracle(address _token, bytes4 _selector, uint256 _volume) external {
         vm.mockCall(ORACLE, abi.encodeCall(IPriceOracle.oracleID, (_token)), abi.encode(bytes32(0)));
 
-        uint256 _minFee = controller.minFeeInUSD(controller.functionFeeConfig(_selector).feeType);
+        uint256 _minFee = controller.minFeeInUSD();
 
         assertEq(controller.calculateFee(_token, _selector, _volume), _minFee);
     }
@@ -190,7 +188,7 @@ contract FeeControllerTest is Test {
         vm.prank(OWNER);
         controller.setFunctionFeeConfig(_selector, _feeType, _feePercentage);
 
-        uint256 _minFee = controller.minFeeInUSD(controller.functionFeeConfig(_selector).feeType);
+        uint256 _minFee = controller.minFeeInUSD();
 
         uint256 _volumeInUSD = (controller.PERCENTAGE_DIVISOR() * _minFee / _feePercentage) - uint256(1);
 
@@ -213,7 +211,7 @@ contract FeeControllerTest is Test {
         vm.prank(OWNER);
         controller.setFunctionFeeConfig(_selector, _feeType, _feePercentage);
 
-        uint256 _minFee = controller.minFeeInUSD(controller.functionFeeConfig(_selector).feeType);
+        uint256 _minFee = controller.minFeeInUSD();
 
         uint256 _volume = (controller.PERCENTAGE_DIVISOR() * _minFee / _feePercentage) + uint256(2);
 

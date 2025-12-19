@@ -102,31 +102,31 @@ contract StrategyExecutionTest is Test {
     }
 
     function test_activate_automation() external {
-        uint32 conditionId = 10021;
+        // uint32 conditionId = 10021;
 
-        // uint32 automationId = 10021;
-        uint32 automationId = 4042520397;
+        // // uint32 automationId = 10021;
+        // uint32 automationId = 4042520397;
 
-        uint32 strategyId = 1001;
-        vm.mockCall(
-            0xAFE192c2A7A98950BF9eB7F45A1ac263fA8b0B50,
-            abi.encodeWithSelector(ICondition.checkCondition.selector),
-            abi.encode(1)
-        );
+        // uint32 strategyId = 1001;
+        // vm.mockCall(
+        //     0xAFE192c2A7A98950BF9eB7F45A1ac263fA8b0B50,
+        //     abi.encodeWithSelector(ICondition.checkCondition.selector),
+        //     abi.encode(1)
+        // );
 
-        bytes32 contextId = 0x000000000000000000000000000000000000636f6e7465787449445f4c594c50;
+        // bytes32 contextId = 0x000000000000000000000000000000000000636f6e7465787449445f4c594c50;
 
-        //     conditionAddress: 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d,
-        //     result0: 0,
-        //     result1: 1,
-        //     id: conditionId
-        // });
+        // //     conditionAddress: 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d,
+        // //     result0: 0,
+        // //     result1: 1,
+        // //     id: conditionId
+        // // });
 
-        // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
-        vm.prank(EXECUTOR);
-        IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(
-            automationId, 0x4D1C9043E5bD5877F0d1708f8265ADBa853fBd3E, EXECUTOR
-        );
+        // // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
+        // vm.prank(EXECUTOR);
+        // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(
+        //     automationId, 0x4D1C9043E5bD5877F0d1708f8265ADBa853fBd3E, EXECUTOR
+        // );
         // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeStrategy(strategyId);
 
         // vm.prank(wallet);

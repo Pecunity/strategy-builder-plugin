@@ -85,51 +85,21 @@ contract FeeHandler is Ownable, IFeeHandler {
     // ┃      Public Functions     ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-    /// @inheritdoc IFeeHandler
-    function handleFee(address token, uint256 amount, address beneficiary, address creator)
+    function handleFeeWithVault(address token, uint256 amount, address beneficiary, address creator)
         external
         returns (uint256)
     {
-        _validateAmount(amount);
-        _validateBeneficiary(beneficiary);
+        // check the owner of the sender contract
+        address vaultOwner = Ownable(msg.sender).owner();
 
-        if (!allowedTokens[token]) {
-            revert TokenNotAllowed();
-        }
-
-        (uint256 totalFee, uint256 burnAmount) = _feeCalculation(amount, token);
-
-        (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount) = _tokenDistribution(totalFee);
-
-        withdrawableBalances[beneficiary][token] += beneficiaryAmount;
-
-        if (creator != address(0)) {
-            withdrawableBalances[creator][token] += creatorAmount;
-            withdrawableBalances[vault][token] += vaultAmount;
-        } else {
-            withdrawableBalances[vault][token] += vaultAmount + creatorAmount;
-        }
-
-        if (burnAmount > 0) {
-            withdrawableBalances[burnerAddress][token] += burnAmount;
-        }
-
-        // Collect total funds from sender
-        uint256 requiredAmount = totalFee + burnAmount;
-
-        uint256 remaining = requiredAmount;
-
-        uint256 depositAvailable = deposits[msg.sender][token];
-        if (depositAvailable > 0) {
-            if (depositAvailable >= remaining) {
-                deposits[msg.sender][token] = depositAvailable - remaining;
-                remaining = 0;
-            } else {
-                // use all deposit
-                remaining -= depositAvailable;
-                deposits[msg.sender][token] = 0;
-            }
-        }
+        (
+            uint256 remaining,
+            uint256 totalFee,
+            uint256 beneficiaryAmount,
+            uint256 creatorAmount,
+            uint256 vaultAmount,
+            uint256 burnAmount
+        ) = _handleFee(vaultOwner, token, amount, beneficiary, creator);
 
         if (remaining > 0) {
             // pull remaining from sender
@@ -140,49 +110,25 @@ contract FeeHandler is Ownable, IFeeHandler {
             token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
         );
 
-        return requiredAmount;
+        return totalFee + burnAmount;
     }
 
-    /// @inheritdoc IFeeHandler
-    function handleFeeETH(address beneficiary, address creator, uint256 amount) external payable returns (uint256) {
-        if (!allowedTokens[address(0)]) {
-            revert TokenNotAllowed();
-        }
+    function handleFeeWithVaultETH(uint256 amount, address beneficiary, address creator)
+        external
+        payable
+        returns (uint256)
+    {
+        // check the owner of the sender contract
+        address vaultOwner = Ownable(msg.sender).owner();
 
-        _validateBeneficiary(beneficiary);
-        _validateAmount(amount);
-
-        (uint256 totalFee, uint256 burnAmount) = _feeCalculation(amount, address(0));
-        (uint256 beneficiaryAmount, uint256 creatorAmount, uint256 vaultAmount) = _tokenDistribution(totalFee);
-
-        withdrawableBalances[beneficiary][address(0)] += beneficiaryAmount;
-
-        if (creator != address(0)) {
-            withdrawableBalances[creator][address(0)] += creatorAmount;
-            withdrawableBalances[vault][address(0)] += vaultAmount;
-        } else {
-            withdrawableBalances[vault][address(0)] += vaultAmount + creatorAmount;
-        }
-
-        if (burnAmount > 0) {
-            withdrawableBalances[burnerAddress][address(0)] += burnAmount;
-        }
-
-        uint256 requiredAmount = totalFee + burnAmount;
-
-        uint256 remaining = requiredAmount;
-
-        // first try deposit
-        uint256 depositAvailable = deposits[msg.sender][address(0)];
-        if (depositAvailable > 0) {
-            if (depositAvailable >= remaining) {
-                deposits[msg.sender][address(0)] = depositAvailable - remaining;
-                remaining = 0;
-            } else {
-                remaining -= depositAvailable;
-                deposits[msg.sender][address(0)] = 0;
-            }
-        }
+        (
+            uint256 remaining,
+            uint256 totalFee,
+            uint256 beneficiaryAmount,
+            uint256 creatorAmount,
+            uint256 vaultAmount,
+            uint256 burnAmount
+        ) = _handleFee(vaultOwner, address(0), amount, beneficiary, creator);
 
         // then accept msg.value for the remainder
         if (remaining > 0) {
@@ -202,7 +148,65 @@ contract FeeHandler is Ownable, IFeeHandler {
 
         emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
 
-        return requiredAmount;
+        return totalFee + burnAmount;
+    }
+
+    /// @inheritdoc IFeeHandler
+    function handleFee(address token, uint256 amount, address beneficiary, address creator)
+        external
+        returns (uint256)
+    {
+        (
+            uint256 remaining,
+            uint256 totalFee,
+            uint256 beneficiaryAmount,
+            uint256 creatorAmount,
+            uint256 vaultAmount,
+            uint256 burnAmount
+        ) = _handleFee(msg.sender, token, amount, beneficiary, creator);
+
+        if (remaining > 0) {
+            // pull remaining from sender
+            token.safeTransferFrom(msg.sender, address(this), remaining);
+        }
+
+        emit FeeHandled(
+            token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
+        );
+
+        return totalFee + burnAmount;
+    }
+
+    /// @inheritdoc IFeeHandler
+    function handleFeeETH(address beneficiary, address creator, uint256 amount) external payable returns (uint256) {
+        (
+            uint256 remaining,
+            uint256 totalFee,
+            uint256 beneficiaryAmount,
+            uint256 creatorAmount,
+            uint256 vaultAmount,
+            uint256 burnAmount
+        ) = _handleFee(msg.sender, address(0), amount, beneficiary, creator);
+
+        // then accept msg.value for the remainder
+        if (remaining > 0) {
+            if (msg.value < remaining) revert InvalidAmount(); // or custom error InsufficientPayment()
+            // if msg.value > remaining, refund excess
+            uint256 excess = msg.value - remaining;
+            if (excess > 0) {
+                // refund extra
+                msg.sender.safeTransferETH(excess);
+            }
+        } else {
+            // user sent ETH but deposit fully covered fee: refund entire msg.value
+            if (msg.value > 0) {
+                msg.sender.safeTransferETH(msg.value);
+            }
+        }
+
+        emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
+
+        return totalFee + burnAmount;
     }
 
     /// @inheritdoc IFeeHandler
@@ -291,6 +295,17 @@ contract FeeHandler is Ownable, IFeeHandler {
         emit Deposit(msg.sender, token, amount);
     }
 
+    function depositTokenFor(address to, address token, uint256 amount) external {
+        _validateAmount(amount);
+        if (!allowedTokens[token]) revert TokenNotAllowed();
+
+        // transfer tokens from user into contract
+        token.safeTransferFrom(msg.sender, address(this), amount);
+
+        deposits[to][token] += amount;
+        emit Deposit(to, token, amount);
+    }
+
     /// @notice Withdraw part or full of user's deposit for a token
     function withdrawDeposit(address token, uint256 amount) external {
         uint256 balance = deposits[msg.sender][token];
@@ -317,6 +332,61 @@ contract FeeHandler is Ownable, IFeeHandler {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃    Internal Functions     ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    function _handleFee(address feePayer, address token, uint256 amount, address beneficiary, address creator)
+        internal
+        returns (
+            uint256 remaining,
+            uint256 totalFee,
+            uint256 beneficiaryAmount,
+            uint256 creatorAmount,
+            uint256 vaultAmount,
+            uint256 burnAmount
+        )
+    {
+        _validateAmount(amount);
+        _validateBeneficiary(beneficiary);
+
+        if (!allowedTokens[token]) {
+            revert TokenNotAllowed();
+        }
+
+        (totalFee, burnAmount) = _feeCalculation(amount, token);
+
+        (beneficiaryAmount, creatorAmount, vaultAmount) = _tokenDistribution(totalFee);
+
+        withdrawableBalances[beneficiary][token] += beneficiaryAmount;
+
+        if (creator != address(0)) {
+            withdrawableBalances[creator][token] += creatorAmount;
+            withdrawableBalances[vault][token] += vaultAmount;
+        } else {
+            withdrawableBalances[vault][token] += vaultAmount + creatorAmount;
+        }
+
+        if (burnAmount > 0) {
+            withdrawableBalances[burnerAddress][token] += burnAmount;
+        }
+
+        // Collect total funds from sender
+        uint256 requiredAmount = totalFee + burnAmount;
+
+        remaining = requiredAmount;
+
+        //Check if there is the primary token deposited
+
+        uint256 depositAvailable = deposits[feePayer][token];
+        if (depositAvailable > 0) {
+            if (depositAvailable >= remaining) {
+                deposits[feePayer][token] = depositAvailable - remaining;
+                remaining = 0;
+            } else {
+                // use all deposit
+                remaining -= depositAvailable;
+                deposits[feePayer][token] = 0;
+            }
+        }
+    }
 
     function _updateVault(address _vault) internal {
         _validateAddress(_vault);

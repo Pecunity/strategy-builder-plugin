@@ -63,6 +63,8 @@ interface IFeeController {
     /// @param minFeeUSD The minimum fee amount in USD (18 decimals).
     event MinFeeSet(FeeType feeType, uint256 minFeeUSD);
 
+    event MinFeeInUSDUpdated(uint256 minFeeInUSD);
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃            Admin Functions          ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -83,6 +85,8 @@ interface IFeeController {
     /// @param selector Function selector for which the global token getter is set.
     /// @param tokenGetter Address of the token getter contract.
     function setGlobalTokenGetter(bytes4 selector, address tokenGetter) external;
+
+    function setMinFeeInUSD(uint256 _minFeeInUSD) external;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃          View / Utility             ┃
@@ -130,10 +134,9 @@ interface IFeeController {
     /// @return Maximum fee percentage allowed.
     function maxFeeLimit(FeeType feeType) external view returns (uint256);
 
-    /// @notice Returns the minimum fee amount in USD for a specific FeeType.
-    /// @param feeType FeeType enum value.
+    /// @notice Returns the minimum fee amount in USD.
     /// @return Minimum fee in USD (18 decimals).
-    function minFeeInUSD(FeeType feeType) external view returns (uint256);
+    function minFeeInUSD() external view returns (uint256);
 
     /// @notice Checks if a given token has an associated price oracle.
     /// @param token Address of the token.

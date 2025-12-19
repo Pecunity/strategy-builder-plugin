@@ -64,6 +64,15 @@ interface IFeeHandler {
     /// @param amount The total fee amount sent by the user.
     function handleFeeETH(address beneficiary, address creator, uint256 amount) external payable returns (uint256);
 
+    function handleFeeWithVault(address token, uint256 amount, address beneficiary, address creator)
+        external
+        returns (uint256);
+
+    function handleFeeWithVaultETH(uint256 amount, address beneficiary, address creator)
+        external
+        payable
+        returns (uint256);
+
     /// @notice Allows a user to withdraw their accumulated fee balance for a given token.
     /// @param token The token address to withdraw (use address(0) for ETH).
     function withdraw(address token) external;
@@ -85,6 +94,8 @@ interface IFeeHandler {
         uint256 primaryTokenBurn,
         uint256 tokenBurn
     ) external;
+
+    function primaryToken() external returns (address);
 
     /// @notice Updates vault address.
     /// @param vault New vault address.

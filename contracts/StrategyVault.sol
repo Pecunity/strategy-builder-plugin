@@ -13,12 +13,19 @@ import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {TokenReceiver} from "./utils/TokenReceiver.sol";
 
 /**
  * @title StrategyVault
  * @dev A module for creating, executing, and managing automated strategies based on predefined conditions and actions.
  */
-contract StrategyVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable, IStrategyVault {
+contract StrategyVault is
+    Initializable,
+    TokenReceiver,
+    ReentrancyGuardUpgradeable,
+    OwnableUpgradeable,
+    IStrategyVault
+{
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariable       ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -515,7 +522,7 @@ contract StrategyVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
 
             feeInUSD = feeController.calculateFee(tokenToTrack, _action.selector, volume);
         } else {
-            feeInUSD = feeController.minFeeInUSD(feeType);
+            feeInUSD = feeController.minFeeInUSD();
         }
 
         emit ActionExecuted(_action);
@@ -672,7 +679,19 @@ contract StrategyVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
 
         if (feeInToken == 0) return 0;
 
-        uint256 deposit = feeHandler.getDeposit(address(this), paymentToken);
+        //Check if primary Token is active and check the amount, if feeInPrimaryToken is lower than deposited, than pay with primary token
+        if (feeHandler.primaryTokenActive()) {
+            address primaryToken = feeHandler.primaryToken();
+            uint256 feeInPrimaryToken = feeController.calculateTokenAmount(primaryToken, feeInUSD);
+            uint256 primaryTokenDeposit = feeHandler.getDeposit(owner(), primaryToken);
+            if (primaryTokenDeposit >= feeInPrimaryToken) {
+                return IFeeHandler(address(feeHandler)).handleFeeWithVault(
+                    primaryToken, feeInPrimaryToken, beneficiary, creator
+                );
+            }
+        }
+
+        uint256 deposit = feeHandler.getDeposit(owner(), paymentToken);
 
         uint256 remaining = deposit > feeInToken ? 0 : feeInToken - deposit;
 
@@ -681,8 +700,8 @@ contract StrategyVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
         }
 
         uint256 totalFee = paymentToken != address(0)
-            ? IFeeHandler(address(feeHandler)).handleFee(paymentToken, feeInToken, beneficiary, creator)
-            : IFeeHandler(address(feeHandler)).handleFeeETH{value: remaining}(beneficiary, creator, feeInToken);
+            ? IFeeHandler(address(feeHandler)).handleFeeWithVault(paymentToken, feeInToken, beneficiary, creator)
+            : IFeeHandler(address(feeHandler)).handleFeeWithVaultETH{value: remaining}(feeInToken, beneficiary, creator);
 
         return totalFee;
     }
@@ -793,8 +812,8 @@ contract StrategyVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
         return automations[id];
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
-        return interfaceId == type(IStrategyVault).interfaceId;
+    function supportsInterface(bytes4 interfaceId) public view virtual override(TokenReceiver) returns (bool) {
+        return interfaceId == type(IStrategyVault).interfaceId || super.supportsInterface(interfaceId);
     }
 
     function getContextVariable(bytes32 contextId, bytes32 key) external view returns (bytes memory) {

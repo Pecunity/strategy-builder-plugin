@@ -505,7 +505,7 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
 
             feeInUSD = feeController.calculateFee(tokenToTrack, _action.selector, volume);
         } else {
-            feeInUSD = feeController.minFeeInUSD(feeType);
+            feeInUSD = feeController.minFeeInUSD();
         }
 
         emit ActionExecuted(_wallet, _action);
@@ -677,6 +677,18 @@ contract StrategyBuilderModule is ReentrancyGuard, Ownable, IStrategyBuilderModu
         uint256 feeInToken = feeController.calculateTokenAmount(paymentToken, feeInUSD);
 
         if (feeInToken == 0) return 0;
+
+        if (feeHandler.primaryTokenActive()) {
+            address primaryToken = feeHandler.primaryToken();
+            uint256 feeInPrimaryToken = feeController.calculateTokenAmount(primaryToken, feeInUSD);
+            uint256 primaryTokenDeposit = feeHandler.getDeposit(owner(), primaryToken);
+            if (primaryTokenDeposit >= feeInPrimaryToken) {
+                bytes memory _data =
+                    abi.encodeCall(IFeeHandler.handleFee, (primaryToken, feeInPrimaryToken, beneficiary, creator));
+
+                return abi.decode(IModularAccount(wallet).execute(address(feeHandler), 0, _data), (uint256));
+            }
+        }
 
         uint256 deposit = feeHandler.getDeposit(wallet, paymentToken);
 

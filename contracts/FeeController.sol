@@ -34,8 +34,8 @@ contract FeeController is Ownable, IFeeController {
     /// @notice Maps FeeType to its maximum allowed fee percentage.
     mapping(FeeType => uint256) private maxFeeLimits;
 
-    /// @notice Maps FeeType to its minimum fee amount in USD (18 decimals).
-    mapping(FeeType => uint256) private minFeesInUSD;
+    /// @notice Global minimum fee in USD (18 decimals)
+    uint256 public minFeeInUSD;
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃              Constructor            ┃
@@ -44,15 +44,17 @@ contract FeeController is Ownable, IFeeController {
     /// @notice Initializes the FeeController contract.
     /// @param _oracle Address of the price oracle contract.
     /// @param _maxFeeLimits Array of maximum fee percentages for Deposit, Withdraw, and Reward types.
-    /// @param _minFeesInUSD Array of minimum fee amounts in USD for Deposit, Withdraw, and Reward types.
-    constructor(address initialOwner, address _oracle, uint256[] memory _maxFeeLimits, uint256[] memory _minFeesInUSD)
+    /// @param _minFeeInUSD Global minimum fee in USD (18 decimals)
+    ///
+    /// @dev Example: _minFeeInUSD = 1e18 means $1 minimum for ALL fee types
+    constructor(address initialOwner, address _oracle, uint256[] memory _maxFeeLimits, uint256 _minFeeInUSD)
         Ownable(initialOwner)
     {
         if (_oracle == address(0)) {
             revert ZeroAddressNotValid();
         }
 
-        if (_maxFeeLimits.length != 3 || _minFeesInUSD.length != 3) {
+        if (_maxFeeLimits.length != 3) {
             revert InvalidArrayLength();
         }
 
@@ -64,9 +66,7 @@ contract FeeController is Ownable, IFeeController {
         maxFeeLimits[FeeType.Reward] = _maxFeeLimits[2];
 
         // Default min fees in USD (18 decimals, e.g., 1e18 = $1)
-        minFeesInUSD[FeeType.Deposit] = _minFeesInUSD[0]; // $1
-        minFeesInUSD[FeeType.Withdraw] = _minFeesInUSD[1]; // $2
-        minFeesInUSD[FeeType.Reward] = _minFeesInUSD[2]; // $0.50
+        minFeeInUSD = _minFeeInUSD;
     }
 
     /// @inheritdoc IFeeController
@@ -100,6 +100,11 @@ contract FeeController is Ownable, IFeeController {
         emit GlobalTokenGetterSet(_selector, _tokenGetter);
     }
 
+    function setMinFeeInUSD(uint256 _minFeeInUSD) external onlyOwner {
+        minFeeInUSD = _minFeeInUSD;
+        emit MinFeeInUSDUpdated(_minFeeInUSD);
+    }
+
     function _getTokenDecimals(address token) internal view returns (uint8) {
         (bool success, bytes memory data) = token.staticcall(abi.encodeWithSelector(IERC20Metadata.decimals.selector));
 
@@ -115,10 +120,8 @@ contract FeeController is Ownable, IFeeController {
         bytes32 _oracleID = oracle.oracleID(_token);
         FeeConfig memory _config = functionFeeConfigs[_selector];
 
-        uint256 _minFeeInUSD = minFeesInUSD[_config.feeType];
-
         if (_oracleID == bytes32(0) || _config.feePercentage == 0) {
-            return _minFeeInUSD;
+            return minFeeInUSD;
         }
 
         uint256 _tokenPrice = oracle.getTokenPrice(_token);
@@ -139,7 +142,7 @@ contract FeeController is Ownable, IFeeController {
 
         uint256 _feeInUSD = _normalizedFee * _tokenPrice / (10 ** oracle.PRICE_DECIMALS());
 
-        return _feeInUSD < _minFeeInUSD ? _minFeeInUSD : _feeInUSD;
+        return _feeInUSD < minFeeInUSD ? minFeeInUSD : _feeInUSD;
     }
 
     /// @inheritdoc IFeeController
@@ -193,11 +196,6 @@ contract FeeController is Ownable, IFeeController {
     /// @inheritdoc IFeeController
     function maxFeeLimit(FeeType _type) external view returns (uint256) {
         return maxFeeLimits[_type];
-    }
-
-    /// @inheritdoc IFeeController
-    function minFeeInUSD(FeeType _type) external view returns (uint256) {
-        return minFeesInUSD[_type];
     }
 
     /// @inheritdoc IFeeController
