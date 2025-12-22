@@ -130,6 +130,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MathAction__factory>;
     getContractFactory(
+      name: "MathActionVault",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MathActionVault__factory>;
+    getContractFactory(
       name: "ActionRegistry",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ActionRegistry__factory>;
@@ -400,6 +404,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.MathAction>;
     getContractAt(
+      name: "MathActionVault",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MathActionVault>;
+    getContractAt(
       name: "ActionRegistry",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -672,6 +681,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MathAction>;
     deployContract(
+      name: "MathActionVault",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MathActionVault>;
+    deployContract(
       name: "ActionRegistry",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ActionRegistry>;
@@ -941,6 +954,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MathAction>;
+    deployContract(
+      name: "MathActionVault",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MathActionVault>;
     deployContract(
       name: "ActionRegistry",
       args: any[],

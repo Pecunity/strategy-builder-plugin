@@ -7,5 +7,7 @@
   "StrategyBuilderCoreModule#StrategyVault": "0x072fBa8474625883D4894D1D8031df9C0f63b1e4",
   "StrategyBuilderCoreModule#FeeController": "0xEAccF85Cdf6750451623fAa1EAb0fA6B1b05D4e1",
   "StrategyBuilderCoreModule#StrategyBuilderModule": "0x32Ab11EB7fdf61D46432445091Cb6f52d9c8a130",
-  "StrategyBuilderCoreModule#StrategyVaultFactory": "0xc245f625b416F8Da96dD0Bfc3d190cd9FeC262A3"
+  "StrategyBuilderCoreModule#StrategyVaultFactory": "0xc245f625b416F8Da96dD0Bfc3d190cd9FeC262A3",
+  "MathActionModule#MathAction": "0x2A287E7C1B5CC39a24569723bA73D470D9e1b46e",
+  "MathActionModule#MathActionVault": "0x5718B9bA5Dfa9374e9418C484983A2F2Cb41c8a8"
 }

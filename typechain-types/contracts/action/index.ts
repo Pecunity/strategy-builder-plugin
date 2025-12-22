@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { MathAction } from "./MathAction";
+export type { MathActionVault } from "./MathActionVault";

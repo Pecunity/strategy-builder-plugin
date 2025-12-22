@@ -246,6 +246,13 @@ interface IStrategyVault {
     /// @param value Raw bytes value to store in the context
     function storeConextVariable(bytes32 contextId, bytes32 key, ParamType paramType, bytes memory value) external;
 
+    function execute(address target, uint256 value, bytes calldata data)
+        external
+        payable
+        returns (bytes memory result);
+
+    function executeBatch(Call[] calldata calls) external payable returns (bytes[] memory results);
+
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃     View Functions      ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛

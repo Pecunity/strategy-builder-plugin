@@ -2,3 +2,4 @@
 /* tslint:disable */
 /* eslint-disable */
 export { MathAction__factory } from "./MathAction__factory";
+export { MathActionVault__factory } from "./MathActionVault__factory";

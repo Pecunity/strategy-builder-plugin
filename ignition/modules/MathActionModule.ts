@@ -4,7 +4,10 @@ const MathActionModule = buildModule("MathActionModule", (m) => {
   const strategyBuilder = m.getParameter("strategyBuilderModule");
 
   const mathAction = m.contract("MathAction", [strategyBuilder]);
-  return { mathAction };
+
+  const mathActionVault = m.contract("MathActionVault");
+
+  return { mathAction, mathActionVault };
 });
 
 export default MathActionModule;

@@ -70,6 +70,8 @@ export type { IPythEvents } from "./@pythnetwork/pyth-sdk-solidity/IPythEvents";
 export { IPythEvents__factory } from "./factories/@pythnetwork/pyth-sdk-solidity/IPythEvents__factory";
 export type { MathAction } from "./contracts/action/MathAction";
 export { MathAction__factory } from "./factories/contracts/action/MathAction__factory";
+export type { MathActionVault } from "./contracts/action/MathActionVault";
+export { MathActionVault__factory } from "./factories/contracts/action/MathActionVault__factory";
 export type { ActionRegistry } from "./contracts/ActionRegistry";
 export { ActionRegistry__factory } from "./factories/contracts/ActionRegistry__factory";
 export type { BaseCondition } from "./contracts/condition/BaseCondition";

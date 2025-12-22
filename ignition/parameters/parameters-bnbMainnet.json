@@ -12,7 +12,7 @@
     "ethOracleID": "0x2f95862b045670cd22bee3114c39763a4a08beeb663b145d283c31d7d1101c4f"
   },
   "MathActionModule": {
-    "strategyBuilderModule": "0x1B78A26cA48168338d547030e3609109E7100b4B"
+    "strategyBuilderModule": "0x32Ab11EB7fdf61D46432445091Cb6f52d9c8a130"
   },
   "DepositFeeHandlerModule": {
     "feeHandler": "0xB24ac9a3fCB32E9C77cE384a7eDfE227D1c2aead"
