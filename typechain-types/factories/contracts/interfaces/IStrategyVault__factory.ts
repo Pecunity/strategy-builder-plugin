@@ -1190,6 +1190,35 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "target",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
+      },
+      {
+        internalType: "bytes",
+        name: "data",
+        type: "bytes",
+      },
+    ],
+    name: "execute",
+    outputs: [
+      {
+        internalType: "bytes",
+        name: "result",
+        type: "bytes",
+      },
+    ],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint32",
         name: "id",
         type: "uint32",
@@ -1203,6 +1232,42 @@ const _abi = [
     name: "executeAutomation",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "target",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "value",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "data",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct IStrategyVault.Call[]",
+        name: "calls",
+        type: "tuple[]",
+      },
+    ],
+    name: "executeBatch",
+    outputs: [
+      {
+        internalType: "bytes[]",
+        name: "results",
+        type: "bytes[]",
+      },
+    ],
+    stateMutability: "payable",
     type: "function",
   },
   {

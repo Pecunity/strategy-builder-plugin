@@ -111,13 +111,18 @@ contract StrategyVaultExecutionTest is Test {
         deal(address(vault), AMOUNT);
     }
 
-    function test_activate_automation() external {
+    function test_activate_automation_vault() external {
         // uint32 conditionId = 10021;
 
         // // uint32 automationId = 10021;
         // uint32 automationId = 4042520397;
 
-        // uint32 strategyId = 1001;
+        uint32 strategyId = 467773257;
+        address _vault = 0x4646dcfFBe5C558fBD56EbeB669Daa012c69A4E8;
+
+        vm.prank(wallet);
+        IStrategyVault(_vault).executeStrategy(strategyId);
+
         // vm.mockCall(
         //     0xAFE192c2A7A98950BF9eB7F45A1ac263fA8b0B50,
         //     abi.encodeWithSelector(ICondition.checkCondition.selector),

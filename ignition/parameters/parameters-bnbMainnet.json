@@ -15,6 +15,6 @@
     "strategyBuilderModule": "0x32Ab11EB7fdf61D46432445091Cb6f52d9c8a130"
   },
   "DepositFeeHandlerModule": {
-    "feeHandler": "0xB24ac9a3fCB32E9C77cE384a7eDfE227D1c2aead"
+    "feeHandler": "0x6C78713C0a6054ff66CFc33A651e9eDCA774Ce82"
   }
 }

@@ -146,6 +146,18 @@ export declare namespace IStrategyVault {
     paymentToken: string;
     maxFeeAmount: bigint;
   };
+
+  export type CallStruct = {
+    target: AddressLike;
+    value: BigNumberish;
+    data: BytesLike;
+  };
+
+  export type CallStructOutput = [
+    target: string,
+    value: bigint,
+    data: string
+  ] & { target: string; value: bigint; data: string };
 }
 
 export interface IStrategyVaultInterface extends Interface {
@@ -157,7 +169,9 @@ export interface IStrategyVaultInterface extends Interface {
       | "createStrategyWithExistingContext"
       | "deleteAutomation"
       | "deleteStrategy"
+      | "execute"
       | "executeAutomation"
+      | "executeBatch"
       | "executeStrategy"
       | "getContextVariable"
       | "storeConextVariable"
@@ -214,8 +228,16 @@ export interface IStrategyVaultInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "execute",
+    values: [AddressLike, BigNumberish, BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "executeAutomation",
     values: [BigNumberish, AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "executeBatch",
+    values: [IStrategyVault.CallStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "executeStrategy",
@@ -255,8 +277,13 @@ export interface IStrategyVaultInterface extends Interface {
     functionFragment: "deleteStrategy",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "executeAutomation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "executeBatch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -542,10 +569,22 @@ export interface IStrategyVault extends BaseContract {
 
   deleteStrategy: TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
 
+  execute: TypedContractMethod<
+    [target: AddressLike, value: BigNumberish, data: BytesLike],
+    [string],
+    "payable"
+  >;
+
   executeAutomation: TypedContractMethod<
     [id: BigNumberish, beneficary: AddressLike],
     [void],
     "nonpayable"
+  >;
+
+  executeBatch: TypedContractMethod<
+    [calls: IStrategyVault.CallStruct[]],
+    [string[]],
+    "payable"
   >;
 
   executeStrategy: TypedContractMethod<
@@ -631,11 +670,25 @@ export interface IStrategyVault extends BaseContract {
     nameOrSignature: "deleteStrategy"
   ): TypedContractMethod<[id: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "execute"
+  ): TypedContractMethod<
+    [target: AddressLike, value: BigNumberish, data: BytesLike],
+    [string],
+    "payable"
+  >;
+  getFunction(
     nameOrSignature: "executeAutomation"
   ): TypedContractMethod<
     [id: BigNumberish, beneficary: AddressLike],
     [void],
     "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "executeBatch"
+  ): TypedContractMethod<
+    [calls: IStrategyVault.CallStruct[]],
+    [string[]],
+    "payable"
   >;
   getFunction(
     nameOrSignature: "executeStrategy"
