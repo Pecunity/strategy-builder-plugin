@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import {Test, console2} from "forge-std/Test.sol";
 import {StrategyVaultFactory} from "../contracts/StrategyVaultFactory.sol";
 import {IStrategyVault} from "../contracts/interfaces/IStrategyVault.sol";
+import {StrategyVault} from "../contracts/StrategyVault.sol";
 import {IAction} from "../../contracts/interfaces/IAction.sol";
 import {ITokenGetter} from "../../contracts/interfaces/ITokenGetter.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -14,6 +15,7 @@ import {ICoinOrERC20BalanceCondition} from
     "../../contracts/condition/examples/interfaces/ICoinOrERC20BalanceCondition.sol";
 import {MathAction} from "../../contracts/action/MathAction.sol";
 import {ICondition} from "../../contracts/interfaces/ICondition.sol";
+import {FeeHandler} from "../contracts/FeeHandler.sol";
 
 contract StrategyVaultExecutionTest is Test {
     string BNB_FORK = vm.envString("BNB_FORK");
@@ -116,18 +118,25 @@ contract StrategyVaultExecutionTest is Test {
 
         // // uint32 automationId = 10021;
         // uint32 automationId = 4042520397;
+        address conditionAddress = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
+        uint32 strategyId = 4292903065;
+        address _vault = 0x0f7C25547241A7F9ffF90Aa54564Ff23703cAA04;
 
-        uint32 strategyId = 467773257;
-        address _vault = 0x4646dcfFBe5C558fBD56EbeB669Daa012c69A4E8;
+        // address owner = StrategyVault(payable(_vault)).owner();
+
+        // deal(wBNB, wallet, 20 ether);
+
+        // address feeHandler = address(StrategyVault(payable(_vault)).feeHandler());
+
+        vm.mockCall(conditionAddress, abi.encodeWithSelector(ICondition.checkCondition.selector), abi.encode(1));
+
+        // vm.startPrank(wallet);
+        // IERC20(wBNB).approve(feeHandler, 5 ether);
+        // FeeHandler(feeHandler).depositTokenFor(owner, wBNB, 5 ether);
+        // vm.stopPrank();
 
         vm.prank(wallet);
-        IStrategyVault(_vault).executeStrategy(strategyId);
-
-        // vm.mockCall(
-        //     0xAFE192c2A7A98950BF9eB7F45A1ac263fA8b0B50,
-        //     abi.encodeWithSelector(ICondition.checkCondition.selector),
-        //     abi.encode(1)
-        // );
+        IStrategyVault(_vault).executeAutomation(strategyId, wallet);
 
         // bytes32 contextId = 0x000000000000000000000000000000000000636f6e7465787449445f4c594c50;
 

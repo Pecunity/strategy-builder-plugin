@@ -19,20 +19,13 @@ task("execute-automation", "Executes an automation")
 
       const { chainId } = await hre.ethers.provider.getNetwork();
 
-      const strategyBuilderPluginAddress = getDeployedAddress(
-        "StrategyBuilderCoreModule",
-        "StrategyBuilderModule",
-        Number(chainId)
-      );
-
       const strategyBuilderPlugin = await hre.ethers.getContractAt(
-        "StrategyBuilderModule",
-        strategyBuilderPluginAddress
+        "StrategyVault",
+        wallet
       );
       const signer = (await hre.ethers.getSigners())[0];
       const trx = await strategyBuilderPlugin.executeAutomation(
         automationId,
-        wallet,
         signer.address
       );
 

@@ -22,6 +22,7 @@ interface IDepositFeeHandler {
     }
 
     struct Condition {
+        address account;
         address depositToken;
         uint256 amount;
         Comparison comparison;

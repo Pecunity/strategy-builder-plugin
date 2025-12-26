@@ -25,6 +25,7 @@ import type {
 
 export declare namespace IDepositFeeHandler {
   export type ConditionStruct = {
+    account: AddressLike;
     depositToken: AddressLike;
     amount: BigNumberish;
     comparison: BigNumberish;
@@ -32,11 +33,13 @@ export declare namespace IDepositFeeHandler {
   };
 
   export type ConditionStructOutput = [
+    account: string,
     depositToken: string,
     amount: bigint,
     comparison: bigint,
     updateable: boolean
   ] & {
+    account: string;
     depositToken: string;
     amount: bigint;
     comparison: bigint;

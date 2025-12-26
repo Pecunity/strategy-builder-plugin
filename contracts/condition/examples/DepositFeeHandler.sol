@@ -65,7 +65,7 @@ contract DepositFeeHandler is BaseCondition, IDepositFeeHandler {
         Condition memory condition = conditions[wallet][id];
 
         //Get the actual health factor of the wallet
-        uint256 tokenBalance = IFeeHandler(feeHandler).getDeposit(wallet, condition.depositToken);
+        uint256 tokenBalance = IFeeHandler(feeHandler).getDeposit(condition.account, condition.depositToken);
 
         if (condition.comparison == Comparison.GREATER || condition.comparison == Comparison.GREATER_OR_EQUAL) {
             if (tokenBalance > condition.amount) {

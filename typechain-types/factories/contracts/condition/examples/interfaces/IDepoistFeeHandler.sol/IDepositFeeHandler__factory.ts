@@ -38,6 +38,11 @@ const _abi = [
         components: [
           {
             internalType: "address",
+            name: "account",
+            type: "address",
+          },
+          {
+            internalType: "address",
             name: "depositToken",
             type: "address",
           },
