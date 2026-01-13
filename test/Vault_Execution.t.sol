@@ -119,8 +119,8 @@ contract StrategyVaultExecutionTest is Test {
         // // uint32 automationId = 10021;
         // uint32 automationId = 4042520397;
         address conditionAddress = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
-        uint32 strategyId = 4292903065;
-        address _vault = 0x0f7C25547241A7F9ffF90Aa54564Ff23703cAA04;
+        uint32 strategyId = 3797737133;
+        address _vault = 0xbA70B15cFE7082cCc1E5Ad8C0A877e3383C6231B;
 
         // address owner = StrategyVault(payable(_vault)).owner();
 
