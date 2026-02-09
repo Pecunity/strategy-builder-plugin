@@ -10,5 +10,6 @@
   "StrategyBuilderCoreModule#StrategyVaultFactory": "0xc245f625b416F8Da96dD0Bfc3d190cd9FeC262A3",
   "MathActionModule#MathAction": "0x2A287E7C1B5CC39a24569723bA73D470D9e1b46e",
   "MathActionModule#MathActionVault": "0x5718B9bA5Dfa9374e9418C484983A2F2Cb41c8a8",
-  "DepositFeeHandlerModule#DepositFeeHandler": "0xae482a66B089432a21614FB9b1CC1e36083c9508"
+  "DepositFeeHandlerModule#DepositFeeHandler": "0xae482a66B089432a21614FB9b1CC1e36083c9508",
+  "PecunityOracleModule#PecunityOracle": "0x7585033A91747369cC8108F307FB1eE12857772B"
 }

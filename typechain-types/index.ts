@@ -112,6 +112,8 @@ export type { IStrategyVault } from "./contracts/interfaces/IStrategyVault";
 export { IStrategyVault__factory } from "./factories/contracts/interfaces/IStrategyVault__factory";
 export type { ITokenGetter } from "./contracts/interfaces/ITokenGetter";
 export { ITokenGetter__factory } from "./factories/contracts/interfaces/ITokenGetter__factory";
+export type { PecunityOracle } from "./contracts/oracles/PecunityOracle";
+export { PecunityOracle__factory } from "./factories/contracts/oracles/PecunityOracle__factory";
 export type { PriceOracle } from "./contracts/PriceOracle";
 export { PriceOracle__factory } from "./factories/contracts/PriceOracle__factory";
 export type { StrategyBuilderModule } from "./contracts/StrategyBuilderModule";

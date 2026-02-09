@@ -4,6 +4,7 @@
 export * as action from "./action";
 export * as condition from "./condition";
 export * as interfaces from "./interfaces";
+export * as oracles from "./oracles";
 export * as test from "./test";
 export * as utils from "./utils";
 export { ActionRegistry__factory } from "./ActionRegistry__factory";

@@ -214,6 +214,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ITokenGetter__factory>;
     getContractFactory(
+      name: "PecunityOracle",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.PecunityOracle__factory>;
+    getContractFactory(
       name: "PriceOracle",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PriceOracle__factory>;
@@ -509,6 +513,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ITokenGetter>;
     getContractAt(
+      name: "PecunityOracle",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.PecunityOracle>;
+    getContractAt(
       name: "PriceOracle",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -765,6 +774,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ITokenGetter>;
     deployContract(
+      name: "PecunityOracle",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.PecunityOracle>;
+    deployContract(
       name: "PriceOracle",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.PriceOracle>;
@@ -1059,6 +1072,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ITokenGetter>;
+    deployContract(
+      name: "PecunityOracle",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.PecunityOracle>;
     deployContract(
       name: "PriceOracle",
       args: any[],

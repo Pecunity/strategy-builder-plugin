@@ -6,3 +6,5 @@ export * from "./deploy-token";
 export * from "./register-action";
 export * from "./change-fees";
 export * from "./deposit-for-account";
+export * from "./set-token-getter";
+export * from "./set-fee-config";

@@ -19,7 +19,8 @@
     "verify": "npx hardhat ignition verify chain-$CHAIN_ID --include-unrelated-contracts",
     "deploy:core": "hardhat compile && hardhat run scripts/deploy-core.ts --network $NETWORK",
     "deploy:conditions": "hardhat compile &&  hardhat run scripts/deploy-conditions.ts --network $NETWORK",
-    "deploy:math-action": "hardhat compile && hardhat run scripts/deploy-math-action.ts --network $NETWORK"
+    "deploy:math-action": "hardhat compile && hardhat run scripts/deploy-math-action.ts --network $NETWORK",
+    "deploy:pecunity-oracle": "hardhat compile && hardhat run scripts/deploy-pecunity-protocol.ts --network $NETWORK"
   },
   "keywords": [],
   "author": "3Blocks",
