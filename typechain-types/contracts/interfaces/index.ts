@@ -4,10 +4,13 @@
 export type { IAction } from "./IAction";
 export type { IActionRegistry } from "./IActionRegistry";
 export type { ICondition } from "./ICondition";
+export type { IERC20Burnable } from "./IERC20Burnable";
 export type { IFeeController } from "./IFeeController";
 export type { IFeeHandler } from "./IFeeHandler";
 export type { IFeeReduction } from "./IFeeReduction";
 export type { IPriceOracle } from "./IPriceOracle";
 export type { IStrategyBuilderModule } from "./IStrategyBuilderModule";
 export type { IStrategyVault } from "./IStrategyVault";
+export type { ISwapRouter } from "./ISwapRouter";
+export type { ITokenBurner } from "./ITokenBurner";
 export type { ITokenGetter } from "./ITokenGetter";

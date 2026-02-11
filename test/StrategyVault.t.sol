@@ -53,6 +53,12 @@ contract StrategyVaultTest is Test {
         deal(address(owner1), 100 ether);
     }
 
+    function test_supportsInterface() external {
+        console.logBytes4(type(IStrategyVault).interfaceId);
+
+        assertTrue(vault1.supportsInterface(type(IStrategyVault).interfaceId));
+    }
+
     ////////////////////////////////
     ////// createStrategy //////////
     ////////////////////////////////

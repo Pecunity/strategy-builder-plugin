@@ -19,5 +19,10 @@
   },
   "PecunityOracleModule": {
     "updater": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123"
+  },
+  "TokenBurnerModule": {
+    "swapRouter": "0x13f4EA83D0bd40E75C8222255bc855a974568Dd4",
+    "burnToken": "0x413c2834f02003752d6Cc0Bcd1cE85Af04D62fBE",
+    "feeHandler": "0x6C78713C0a6054ff66CFc33A651e9eDCA774Ce82"
   }
 }

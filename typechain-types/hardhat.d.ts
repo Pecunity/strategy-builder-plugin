@@ -138,6 +138,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ActionRegistry__factory>;
     getContractFactory(
+      name: "TokenBurner",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TokenBurner__factory>;
+    getContractFactory(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.BaseCondition__factory>;
@@ -186,6 +190,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ICondition__factory>;
     getContractFactory(
+      name: "IERC20Burnable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Burnable__factory>;
+    getContractFactory(
       name: "IFeeController",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IFeeController__factory>;
@@ -209,6 +217,14 @@ declare module "hardhat/types/runtime" {
       name: "IStrategyVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IStrategyVault__factory>;
+    getContractFactory(
+      name: "ISwapRouter",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ISwapRouter__factory>;
+    getContractFactory(
+      name: "ITokenBurner",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ITokenBurner__factory>;
     getContractFactory(
       name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -418,6 +434,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ActionRegistry>;
     getContractAt(
+      name: "TokenBurner",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TokenBurner>;
+    getContractAt(
       name: "BaseCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -478,6 +499,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ICondition>;
     getContractAt(
+      name: "IERC20Burnable",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Burnable>;
+    getContractAt(
       name: "IFeeController",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -507,6 +533,16 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IStrategyVault>;
+    getContractAt(
+      name: "ISwapRouter",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ISwapRouter>;
+    getContractAt(
+      name: "ITokenBurner",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ITokenBurner>;
     getContractAt(
       name: "ITokenGetter",
       address: string | ethers.Addressable,
@@ -698,6 +734,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ActionRegistry>;
     deployContract(
+      name: "TokenBurner",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TokenBurner>;
+    deployContract(
       name: "BaseCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.BaseCondition>;
@@ -746,6 +786,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICondition>;
     deployContract(
+      name: "IERC20Burnable",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Burnable>;
+    deployContract(
       name: "IFeeController",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IFeeController>;
@@ -769,6 +813,14 @@ declare module "hardhat/types/runtime" {
       name: "IStrategyVault",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyVault>;
+    deployContract(
+      name: "ISwapRouter",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ISwapRouter>;
+    deployContract(
+      name: "ITokenBurner",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITokenBurner>;
     deployContract(
       name: "ITokenGetter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -978,6 +1030,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ActionRegistry>;
     deployContract(
+      name: "TokenBurner",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TokenBurner>;
+    deployContract(
       name: "BaseCondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -1038,6 +1095,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ICondition>;
     deployContract(
+      name: "IERC20Burnable",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IERC20Burnable>;
+    deployContract(
       name: "IFeeController",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -1067,6 +1129,16 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyVault>;
+    deployContract(
+      name: "ISwapRouter",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ISwapRouter>;
+    deployContract(
+      name: "ITokenBurner",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITokenBurner>;
     deployContract(
       name: "ITokenGetter",
       args: any[],

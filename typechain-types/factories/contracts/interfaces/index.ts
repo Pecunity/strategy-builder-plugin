@@ -4,10 +4,13 @@
 export { IAction__factory } from "./IAction__factory";
 export { IActionRegistry__factory } from "./IActionRegistry__factory";
 export { ICondition__factory } from "./ICondition__factory";
+export { IERC20Burnable__factory } from "./IERC20Burnable__factory";
 export { IFeeController__factory } from "./IFeeController__factory";
 export { IFeeHandler__factory } from "./IFeeHandler__factory";
 export { IFeeReduction__factory } from "./IFeeReduction__factory";
 export { IPriceOracle__factory } from "./IPriceOracle__factory";
 export { IStrategyBuilderModule__factory } from "./IStrategyBuilderModule__factory";
 export { IStrategyVault__factory } from "./IStrategyVault__factory";
+export { ISwapRouter__factory } from "./ISwapRouter__factory";
+export { ITokenBurner__factory } from "./ITokenBurner__factory";
 export { ITokenGetter__factory } from "./ITokenGetter__factory";

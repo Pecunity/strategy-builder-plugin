@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as action from "./action";
 export type { action };
+import type * as burn from "./burn";
+export type { burn };
 import type * as condition from "./condition";
 export type { condition };
 import type * as interfaces from "./interfaces";

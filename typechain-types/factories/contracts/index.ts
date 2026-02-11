@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as action from "./action";
+export * as burn from "./burn";
 export * as condition from "./condition";
 export * as interfaces from "./interfaces";
 export * as oracles from "./oracles";
