@@ -10,3 +10,5 @@ export * from "./set-token-getter";
 export * from "./set-fee-config";
 export * from "./set-custom-oracle";
 export * from "./swap-and-burn";
+export * from "./update-reduction";
+export * from "./activate-primary-token";
