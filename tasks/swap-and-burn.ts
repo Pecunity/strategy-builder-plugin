@@ -24,6 +24,10 @@ task("swap-and-burn", "Swaps tokens and burns them")
         ["address", "uint24", "address", "uint24", "address"],
         [BTC, 100, USDC, 500, PEC],
       ),
+      [PEC]: hre.ethers.solidityPacked(
+        ["address", "uint24", "address", "uint24", "address"],
+        [PEC, 500, USDC, 500, PEC],
+      ),
     };
 
     const { token, amount } = taskArgs;
