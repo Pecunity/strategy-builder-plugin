@@ -5,3 +5,4 @@ import type * as iDepoistFeeHandlerSol from "./IDepoistFeeHandler.sol";
 export type { iDepoistFeeHandlerSol };
 export type { ICoinOrERC20BalanceCondition } from "./ICoinOrERC20BalanceCondition";
 export type { ITimeCondition } from "./ITimeCondition";
+export type { ITimerCondition } from "./ITimerCondition";

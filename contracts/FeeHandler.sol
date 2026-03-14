@@ -5,6 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IFeeReduction} from "./interfaces/IFeeReduction.sol";
+import {IStrategyVaultFactory} from "./interfaces/IStrategyVaultFactory.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 /// @title FeeHandler
@@ -34,6 +35,8 @@ contract FeeHandler is Ownable, IFeeHandler {
 
     /// @notice Address of the reduction contract for user-specific fee reduction.
     address public reduction;
+
+    address public strategyVaultFactory;
 
     /// @notice Percentage share for the fee beneficiary.
     uint256 public beneficiaryPercentage;
@@ -89,6 +92,16 @@ contract FeeHandler is Ownable, IFeeHandler {
         external
         returns (uint256)
     {
+        if (strategyVaultFactory == address(0)) {
+            revert StrategyVaultFactoryNotSet();
+        }
+
+        bool isStrategyVault = IStrategyVaultFactory(strategyVaultFactory).isDeployedVault(msg.sender);
+
+        if (!isStrategyVault) {
+            revert InvalidStrategyVault();
+        }
+
         // check the owner of the sender contract
         address vaultOwner = Ownable(msg.sender).owner();
 
@@ -107,7 +120,16 @@ contract FeeHandler is Ownable, IFeeHandler {
         }
 
         emit FeeHandled(
-            token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
+            vaultOwner,
+            msg.sender,
+            token,
+            totalFee,
+            beneficiary,
+            creator,
+            beneficiaryAmount,
+            creatorAmount,
+            vaultAmount,
+            burnAmount
         );
 
         return totalFee + burnAmount;
@@ -118,6 +140,16 @@ contract FeeHandler is Ownable, IFeeHandler {
         payable
         returns (uint256)
     {
+        if (strategyVaultFactory == address(0)) {
+            revert StrategyVaultFactoryNotSet();
+        }
+
+        bool isStrategyVault = IStrategyVaultFactory(strategyVaultFactory).isDeployedVault(msg.sender);
+
+        if (!isStrategyVault) {
+            revert InvalidStrategyVault();
+        }
+
         // check the owner of the sender contract
         address vaultOwner = Ownable(msg.sender).owner();
 
@@ -146,7 +178,17 @@ contract FeeHandler is Ownable, IFeeHandler {
             }
         }
 
-        emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
+        emit FeeHandledETH(
+            vaultOwner,
+            msg.sender,
+            totalFee,
+            beneficiary,
+            creator,
+            beneficiaryAmount,
+            creatorAmount,
+            vaultAmount,
+            burnAmount
+        );
 
         return totalFee + burnAmount;
     }
@@ -171,7 +213,16 @@ contract FeeHandler is Ownable, IFeeHandler {
         }
 
         emit FeeHandled(
-            token, totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount
+            msg.sender,
+            msg.sender,
+            token,
+            totalFee,
+            beneficiary,
+            creator,
+            beneficiaryAmount,
+            creatorAmount,
+            vaultAmount,
+            burnAmount
         );
 
         return totalFee + burnAmount;
@@ -204,7 +255,17 @@ contract FeeHandler is Ownable, IFeeHandler {
             }
         }
 
-        emit FeeHandledETH(totalFee, beneficiary, creator, beneficiaryAmount, creatorAmount, vaultAmount, burnAmount);
+        emit FeeHandledETH(
+            msg.sender,
+            msg.sender,
+            totalFee,
+            beneficiary,
+            creator,
+            beneficiaryAmount,
+            creatorAmount,
+            vaultAmount,
+            burnAmount
+        );
 
         return totalFee + burnAmount;
     }
@@ -254,6 +315,10 @@ contract FeeHandler is Ownable, IFeeHandler {
     /// @inheritdoc IFeeHandler
     function updateVault(address _vault) external onlyOwner {
         _updateVault(_vault);
+    }
+
+    function updateStrategyVaultFactory(address _strategyVaultFactory) external onlyOwner {
+        _updateStrategyVaultFactory(_strategyVaultFactory);
     }
 
     /// @inheritdoc IFeeHandler
@@ -351,7 +416,7 @@ contract FeeHandler is Ownable, IFeeHandler {
             revert TokenNotAllowed();
         }
 
-        (totalFee, burnAmount) = _feeCalculation(amount, token);
+        (totalFee, burnAmount) = _feeCalculation(feePayer, amount, token);
 
         (beneficiaryAmount, creatorAmount, vaultAmount) = _tokenDistribution(totalFee);
 
@@ -394,6 +459,12 @@ contract FeeHandler is Ownable, IFeeHandler {
         emit UpdatedVault(_vault);
     }
 
+    function _updateStrategyVaultFactory(address _strategyVaultFactory) internal {
+        _validateAddress(_strategyVaultFactory);
+        strategyVaultFactory = _strategyVaultFactory;
+        emit UpdatedStrategyVaultFactory(_strategyVaultFactory);
+    }
+
     function _updateBurnerAddress(address _burnerAddress) internal {
         _validateAddress(_burnerAddress);
         burnerAddress = _burnerAddress;
@@ -418,7 +489,7 @@ contract FeeHandler is Ownable, IFeeHandler {
         vaultAmount = amount - beneficiaryAmount - creatorAmount;
     }
 
-    function _feeCalculation(uint256 amount, address token)
+    function _feeCalculation(address feePayer, uint256 amount, address token)
         internal
         view
         returns (uint256 totalFee, uint256 burnAmount)
@@ -426,7 +497,7 @@ contract FeeHandler is Ownable, IFeeHandler {
         totalFee = amount;
 
         if (reduction != address(0)) {
-            uint256 reductionPercentage = IFeeReduction(reduction).getFeeReduction(msg.sender);
+            uint256 reductionPercentage = IFeeReduction(reduction).getFeeReduction(feePayer);
             totalFee = totalFee - totalFee * reductionPercentage / PERCENTAGE_DIVISOR;
         }
 

@@ -4,3 +4,4 @@
 export * as iDepoistFeeHandlerSol from "./IDepoistFeeHandler.sol";
 export { ICoinOrERC20BalanceCondition__factory } from "./ICoinOrERC20BalanceCondition__factory";
 export { ITimeCondition__factory } from "./ITimeCondition__factory";
+export { ITimerCondition__factory } from "./ITimerCondition__factory";

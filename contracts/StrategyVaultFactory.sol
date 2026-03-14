@@ -6,6 +6,7 @@ import {StrategyVault} from "./StrategyVault.sol";
 import {IFeeController} from "./interfaces/IFeeController.sol";
 import {IFeeHandler} from "./interfaces/IFeeHandler.sol";
 import {IActionRegistry} from "./interfaces/IActionRegistry.sol";
+import {IStrategyVaultFactory} from "./interfaces/IStrategyVaultFactory.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -13,7 +14,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * @dev Factory for deploying UUPS proxy instances of StrategyVault
  * Gas-efficient: ~30k per vault after first deployment
  */
-contract StrategyVaultFactory is Ownable {
+contract StrategyVaultFactory is Ownable, IStrategyVaultFactory {
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       StateVariables      ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -38,20 +39,6 @@ contract StrategyVaultFactory is Ownable {
 
     /// @notice Map vault address to its index
     mapping(address => uint256) public vaultIndex;
-
-    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-    // ┃         Events            ┃
-    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-    event VaultProxyDeployed(
-        address indexed proxyAddress, address indexed owner, uint256 vaultIndex, uint256 timestamp
-    );
-
-    event ImplementationDeployed(address indexed implementation, uint256 timestamp);
-
-    event ImplementationUpgraded(address indexed newImplementation, uint256 timestamp);
-
-    event ConfigurationUpdated(address feeController, address feeHandler, address actionRegistry);
 
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃       Custom Errors       ┃

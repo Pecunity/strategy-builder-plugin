@@ -166,9 +166,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ITimeCondition__factory>;
     getContractFactory(
+      name: "ITimerCondition",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ITimerCondition__factory>;
+    getContractFactory(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TimeCondition__factory>;
+    getContractFactory(
+      name: "TimerCondition",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TimerCondition__factory>;
     getContractFactory(
       name: "FeeController",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -217,6 +225,10 @@ declare module "hardhat/types/runtime" {
       name: "IStrategyVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IStrategyVault__factory>;
+    getContractFactory(
+      name: "IStrategyVaultFactory",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IStrategyVaultFactory__factory>;
     getContractFactory(
       name: "ISwapRouter",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -469,10 +481,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ITimeCondition>;
     getContractAt(
+      name: "ITimerCondition",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ITimerCondition>;
+    getContractAt(
       name: "TimeCondition",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.TimeCondition>;
+    getContractAt(
+      name: "TimerCondition",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TimerCondition>;
     getContractAt(
       name: "FeeController",
       address: string | ethers.Addressable,
@@ -533,6 +555,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IStrategyVault>;
+    getContractAt(
+      name: "IStrategyVaultFactory",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IStrategyVaultFactory>;
     getContractAt(
       name: "ISwapRouter",
       address: string | ethers.Addressable,
@@ -762,9 +789,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ITimeCondition>;
     deployContract(
+      name: "ITimerCondition",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITimerCondition>;
+    deployContract(
       name: "TimeCondition",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TimeCondition>;
+    deployContract(
+      name: "TimerCondition",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TimerCondition>;
     deployContract(
       name: "FeeController",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -813,6 +848,10 @@ declare module "hardhat/types/runtime" {
       name: "IStrategyVault",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyVault>;
+    deployContract(
+      name: "IStrategyVaultFactory",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStrategyVaultFactory>;
     deployContract(
       name: "ISwapRouter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -1065,10 +1104,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ITimeCondition>;
     deployContract(
+      name: "ITimerCondition",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITimerCondition>;
+    deployContract(
       name: "TimeCondition",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TimeCondition>;
+    deployContract(
+      name: "TimerCondition",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TimerCondition>;
     deployContract(
       name: "FeeController",
       args: any[],
@@ -1129,6 +1178,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IStrategyVault>;
+    deployContract(
+      name: "IStrategyVaultFactory",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStrategyVaultFactory>;
     deployContract(
       name: "ISwapRouter",
       args: any[],

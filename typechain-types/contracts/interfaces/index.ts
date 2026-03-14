@@ -11,6 +11,7 @@ export type { IFeeReduction } from "./IFeeReduction";
 export type { IPriceOracle } from "./IPriceOracle";
 export type { IStrategyBuilderModule } from "./IStrategyBuilderModule";
 export type { IStrategyVault } from "./IStrategyVault";
+export type { IStrategyVaultFactory } from "./IStrategyVaultFactory";
 export type { ISwapRouter } from "./ISwapRouter";
 export type { ITokenBurner } from "./ITokenBurner";
 export type { ITokenGetter } from "./ITokenGetter";

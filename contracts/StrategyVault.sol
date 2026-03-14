@@ -244,12 +244,14 @@ contract StrategyVault is
         }
 
         address _strategyCreator = strategies[_automation.strategyId].creator;
-        uint256 feeInToken =
-            feeInUSD > 0 ? _payAutomation(_automation.paymentToken, feeInUSD, beneficary, _strategyCreator) : 0;
+        (uint256 feeInToken, bool payedPrimary) =
+            feeInUSD > 0 ? _payAutomation(_automation.paymentToken, feeInUSD, beneficary, _strategyCreator) : (0, false);
 
         _updateCondition(_automation.condition, id);
 
-        emit AutomationExecuted(id, _automation.paymentToken, feeInToken, feeInUSD);
+        emit AutomationExecuted(
+            id, payedPrimary ? feeHandler.primaryToken() : _automation.paymentToken, feeInToken, feeInUSD
+        );
     }
 
     function storeConextVariable(bytes32 contextId, bytes32 key, ParamType paramType, bytes memory value) external {
@@ -669,15 +671,15 @@ contract StrategyVault is
 
     function _payAutomation(address paymentToken, uint256 feeInUSD, address beneficiary, address creator)
         internal
-        returns (uint256)
+        returns (uint256, bool)
     {
         if (feeInUSD == 0) {
-            return 0; // Early return for zero or disabled fees
+            return (0, false); // Early return for zero or disabled fees
         }
 
         uint256 feeInToken = feeController.calculateTokenAmount(paymentToken, feeInUSD);
 
-        if (feeInToken == 0) return 0;
+        if (feeInToken == 0) return (0, false);
 
         //Check if primary Token is active and check the amount, if feeInPrimaryToken is lower than deposited, than pay with primary token
         if (feeHandler.primaryTokenActive()) {
@@ -685,8 +687,11 @@ contract StrategyVault is
             uint256 feeInPrimaryToken = feeController.calculateTokenAmount(primaryToken, feeInUSD);
             uint256 primaryTokenDeposit = feeHandler.getDeposit(owner(), primaryToken);
             if (primaryTokenDeposit >= feeInPrimaryToken) {
-                return IFeeHandler(address(feeHandler)).handleFeeWithVault(
-                    primaryToken, feeInPrimaryToken, beneficiary, creator
+                return (
+                    IFeeHandler(address(feeHandler)).handleFeeWithVault(
+                        primaryToken, feeInPrimaryToken, beneficiary, creator
+                    ),
+                    true
                 );
             }
         }
@@ -703,7 +708,7 @@ contract StrategyVault is
             ? IFeeHandler(address(feeHandler)).handleFeeWithVault(paymentToken, feeInToken, beneficiary, creator)
             : IFeeHandler(address(feeHandler)).handleFeeWithVaultETH{value: remaining}(feeInToken, beneficiary, creator);
 
-        return totalFee;
+        return (totalFee, false);
     }
 
     function _updateCondition(Condition memory _condition, uint32 automationId) internal {

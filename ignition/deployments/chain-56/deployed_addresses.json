@@ -12,5 +12,6 @@
   "MathActionModule#MathActionVault": "0x5718B9bA5Dfa9374e9418C484983A2F2Cb41c8a8",
   "DepositFeeHandlerModule#DepositFeeHandler": "0xae482a66B089432a21614FB9b1CC1e36083c9508",
   "PecunityOracleModule#PecunityOracle": "0x7585033A91747369cC8108F307FB1eE12857772B",
-  "TokenBurnerModule#TokenBurner": "0x0E2E12C6D45Ca493C27b7F4c31d7332fB48D0B0F"
+  "TokenBurnerModule#TokenBurner": "0x0E2E12C6D45Ca493C27b7F4c31d7332fB48D0B0F",
+  "TimerConditionModule#TimerCondition": "0xb0b737E104640C7BDe2730f7FDcD2050504ac8c6"
 }

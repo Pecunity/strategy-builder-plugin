@@ -88,8 +88,12 @@ export type { IDepositFeeHandler } from "./contracts/condition/examples/interfac
 export { IDepositFeeHandler__factory } from "./factories/contracts/condition/examples/interfaces/IDepoistFeeHandler.sol/IDepositFeeHandler__factory";
 export type { ITimeCondition } from "./contracts/condition/examples/interfaces/ITimeCondition";
 export { ITimeCondition__factory } from "./factories/contracts/condition/examples/interfaces/ITimeCondition__factory";
+export type { ITimerCondition } from "./contracts/condition/examples/interfaces/ITimerCondition";
+export { ITimerCondition__factory } from "./factories/contracts/condition/examples/interfaces/ITimerCondition__factory";
 export type { TimeCondition } from "./contracts/condition/examples/TimeCondition";
 export { TimeCondition__factory } from "./factories/contracts/condition/examples/TimeCondition__factory";
+export type { TimerCondition } from "./contracts/condition/examples/TimerCondition";
+export { TimerCondition__factory } from "./factories/contracts/condition/examples/TimerCondition__factory";
 export type { FeeController } from "./contracts/FeeController";
 export { FeeController__factory } from "./factories/contracts/FeeController__factory";
 export type { FeeHandler } from "./contracts/FeeHandler";
@@ -114,6 +118,8 @@ export type { IStrategyBuilderModule } from "./contracts/interfaces/IStrategyBui
 export { IStrategyBuilderModule__factory } from "./factories/contracts/interfaces/IStrategyBuilderModule__factory";
 export type { IStrategyVault } from "./contracts/interfaces/IStrategyVault";
 export { IStrategyVault__factory } from "./factories/contracts/interfaces/IStrategyVault__factory";
+export type { IStrategyVaultFactory } from "./contracts/interfaces/IStrategyVaultFactory";
+export { IStrategyVaultFactory__factory } from "./factories/contracts/interfaces/IStrategyVaultFactory__factory";
 export type { ISwapRouter } from "./contracts/interfaces/ISwapRouter";
 export { ISwapRouter__factory } from "./factories/contracts/interfaces/ISwapRouter__factory";
 export type { ITokenBurner } from "./contracts/interfaces/ITokenBurner";

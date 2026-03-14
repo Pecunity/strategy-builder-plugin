@@ -11,6 +11,7 @@ export { IFeeReduction__factory } from "./IFeeReduction__factory";
 export { IPriceOracle__factory } from "./IPriceOracle__factory";
 export { IStrategyBuilderModule__factory } from "./IStrategyBuilderModule__factory";
 export { IStrategyVault__factory } from "./IStrategyVault__factory";
+export { IStrategyVaultFactory__factory } from "./IStrategyVaultFactory__factory";
 export { ISwapRouter__factory } from "./ISwapRouter__factory";
 export { ITokenBurner__factory } from "./ITokenBurner__factory";
 export { ITokenGetter__factory } from "./ITokenGetter__factory";

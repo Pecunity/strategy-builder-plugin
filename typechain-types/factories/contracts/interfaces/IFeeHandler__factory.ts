@@ -31,7 +31,17 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "InvalidStrategyVault",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "PrimaryTokenAlreadyActivated",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "StrategyVaultFactoryNotSet",
     type: "error",
   },
   {
@@ -100,6 +110,18 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
+        name: "feePayer",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "caller",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
         name: "token",
         type: "address",
       },
@@ -152,6 +174,18 @@ const _abi = [
   {
     anonymous: false,
     inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "feePayer",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "caller",
+        type: "address",
+      },
       {
         indexed: false,
         internalType: "uint256",
@@ -278,6 +312,19 @@ const _abi = [
       },
     ],
     name: "UpdatedReduction",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "strategyVaultFactory",
+        type: "address",
+      },
+    ],
+    name: "UpdatedStrategyVaultFactory",
     type: "event",
   },
   {

@@ -16,6 +16,8 @@ contract FeeHandlerTest is Test {
 
     address public VAULT = makeAddr("vault");
 
+    address public STRATEGY_VAULT_FACTORY = makeAddr("strategy-vault-factory");
+
     uint256 BENEFICARY_PERCENTAGE = 2000;
     uint256 CREATOR_PERCENTAGE = 500;
     uint256 VAULT_PERCENTAGE = 7500;

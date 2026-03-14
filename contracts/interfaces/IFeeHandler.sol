@@ -13,13 +13,17 @@ interface IFeeHandler {
     error InvalidPercentageDistribution();
     error TokenNotAllowed();
     error InvalidPercentage();
+    error InvalidStrategyVault();
+    error StrategyVaultFactoryNotSet();
 
     // ┏━━━━━━━━━━━━━━━━━━┓
     // ┃     Events       ┃
     // ┗━━━━━━━━━━━━━━━━━━┛
 
     event FeeHandled(
-        address indexed token,
+        address indexed feePayer,
+        address indexed caller,
+        address token,
         uint256 totalFee,
         address beneficiary,
         address creator,
@@ -29,6 +33,8 @@ interface IFeeHandler {
         uint256 burnAmount
     );
     event FeeHandledETH(
+        address indexed feePayer,
+        address indexed caller,
         uint256 totalFee,
         address beneficiary,
         address creator,
@@ -43,6 +49,7 @@ interface IFeeHandler {
     event UpdatedPercentages(uint256 beneficiary, uint256 creator, uint256 vault);
     event UpdatedTokenAllowance(address token, bool allowed);
     event UpdatedReduction(address reduction);
+    event UpdatedStrategyVaultFactory(address strategyVaultFactory);
     event Withdrawn(address indexed receiver, address indexed token, uint256 amount);
     event Deposit(address indexed user, address indexed token, uint256 amount);
     event DepositWithdrawn(address indexed user, address indexed token, uint256 amount);

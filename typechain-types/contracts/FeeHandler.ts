@@ -48,12 +48,14 @@ export interface FeeHandlerInterface extends Interface {
       | "primaryTokenDiscount"
       | "reduction"
       | "renounceOwnership"
+      | "strategyVaultFactory"
       | "tokenAllowed"
       | "tokenBurn"
       | "transferOwnership"
       | "updateBurnerAddress"
       | "updatePercentages"
       | "updateReduction"
+      | "updateStrategyVaultFactory"
       | "updateTokenAllowance"
       | "updateVault"
       | "vault"
@@ -73,6 +75,7 @@ export interface FeeHandlerInterface extends Interface {
       | "UpdatedBurnerAddress"
       | "UpdatedPercentages"
       | "UpdatedReduction"
+      | "UpdatedStrategyVaultFactory"
       | "UpdatedTokenAllowance"
       | "UpdatedVault"
       | "Withdrawn"
@@ -161,6 +164,10 @@ export interface FeeHandlerInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "strategyVaultFactory",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "tokenAllowed",
     values: [AddressLike]
   ): string;
@@ -179,6 +186,10 @@ export interface FeeHandlerInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "updateReduction",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateStrategyVaultFactory",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
@@ -277,6 +288,10 @@ export interface FeeHandlerInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "strategyVaultFactory",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "tokenAllowed",
     data: BytesLike
   ): Result;
@@ -295,6 +310,10 @@ export interface FeeHandlerInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "updateReduction",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateStrategyVaultFactory",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -355,6 +374,8 @@ export namespace DepositWithdrawnEvent {
 
 export namespace FeeHandledEvent {
   export type InputTuple = [
+    feePayer: AddressLike,
+    caller: AddressLike,
     token: AddressLike,
     totalFee: BigNumberish,
     beneficiary: AddressLike,
@@ -365,6 +386,8 @@ export namespace FeeHandledEvent {
     burnAmount: BigNumberish
   ];
   export type OutputTuple = [
+    feePayer: string,
+    caller: string,
     token: string,
     totalFee: bigint,
     beneficiary: string,
@@ -375,6 +398,8 @@ export namespace FeeHandledEvent {
     burnAmount: bigint
   ];
   export interface OutputObject {
+    feePayer: string;
+    caller: string;
     token: string;
     totalFee: bigint;
     beneficiary: string;
@@ -392,6 +417,8 @@ export namespace FeeHandledEvent {
 
 export namespace FeeHandledETHEvent {
   export type InputTuple = [
+    feePayer: AddressLike,
+    caller: AddressLike,
     totalFee: BigNumberish,
     beneficiary: AddressLike,
     creator: AddressLike,
@@ -401,6 +428,8 @@ export namespace FeeHandledETHEvent {
     burnAmount: BigNumberish
   ];
   export type OutputTuple = [
+    feePayer: string,
+    caller: string,
     totalFee: bigint,
     beneficiary: string,
     creator: string,
@@ -410,6 +439,8 @@ export namespace FeeHandledETHEvent {
     burnAmount: bigint
   ];
   export interface OutputObject {
+    feePayer: string;
+    caller: string;
     totalFee: bigint;
     beneficiary: string;
     creator: string;
@@ -501,6 +532,18 @@ export namespace UpdatedReductionEvent {
   export type OutputTuple = [reduction: string];
   export interface OutputObject {
     reduction: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UpdatedStrategyVaultFactoryEvent {
+  export type InputTuple = [strategyVaultFactory: AddressLike];
+  export type OutputTuple = [strategyVaultFactory: string];
+  export interface OutputObject {
+    strategyVaultFactory: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -690,6 +733,8 @@ export interface FeeHandler extends BaseContract {
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
+  strategyVaultFactory: TypedContractMethod<[], [string], "view">;
+
   tokenAllowed: TypedContractMethod<[token: AddressLike], [boolean], "view">;
 
   tokenBurn: TypedContractMethod<[], [bigint], "view">;
@@ -714,6 +759,12 @@ export interface FeeHandler extends BaseContract {
 
   updateReduction: TypedContractMethod<
     [_reduction: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  updateStrategyVaultFactory: TypedContractMethod<
+    [_strategyVaultFactory: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -861,6 +912,9 @@ export interface FeeHandler extends BaseContract {
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "strategyVaultFactory"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "tokenAllowed"
   ): TypedContractMethod<[token: AddressLike], [boolean], "view">;
   getFunction(
@@ -882,6 +936,13 @@ export interface FeeHandler extends BaseContract {
   getFunction(
     nameOrSignature: "updateReduction"
   ): TypedContractMethod<[_reduction: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "updateStrategyVaultFactory"
+  ): TypedContractMethod<
+    [_strategyVaultFactory: AddressLike],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "updateTokenAllowance"
   ): TypedContractMethod<
@@ -973,6 +1034,13 @@ export interface FeeHandler extends BaseContract {
     UpdatedReductionEvent.OutputObject
   >;
   getEvent(
+    key: "UpdatedStrategyVaultFactory"
+  ): TypedContractEvent<
+    UpdatedStrategyVaultFactoryEvent.InputTuple,
+    UpdatedStrategyVaultFactoryEvent.OutputTuple,
+    UpdatedStrategyVaultFactoryEvent.OutputObject
+  >;
+  getEvent(
     key: "UpdatedTokenAllowance"
   ): TypedContractEvent<
     UpdatedTokenAllowanceEvent.InputTuple,
@@ -1017,7 +1085,7 @@ export interface FeeHandler extends BaseContract {
       DepositWithdrawnEvent.OutputObject
     >;
 
-    "FeeHandled(address,uint256,address,address,uint256,uint256,uint256,uint256)": TypedContractEvent<
+    "FeeHandled(address,address,address,uint256,address,address,uint256,uint256,uint256,uint256)": TypedContractEvent<
       FeeHandledEvent.InputTuple,
       FeeHandledEvent.OutputTuple,
       FeeHandledEvent.OutputObject
@@ -1028,7 +1096,7 @@ export interface FeeHandler extends BaseContract {
       FeeHandledEvent.OutputObject
     >;
 
-    "FeeHandledETH(uint256,address,address,uint256,uint256,uint256,uint256)": TypedContractEvent<
+    "FeeHandledETH(address,address,uint256,address,address,uint256,uint256,uint256,uint256)": TypedContractEvent<
       FeeHandledETHEvent.InputTuple,
       FeeHandledETHEvent.OutputTuple,
       FeeHandledETHEvent.OutputObject
@@ -1092,6 +1160,17 @@ export interface FeeHandler extends BaseContract {
       UpdatedReductionEvent.InputTuple,
       UpdatedReductionEvent.OutputTuple,
       UpdatedReductionEvent.OutputObject
+    >;
+
+    "UpdatedStrategyVaultFactory(address)": TypedContractEvent<
+      UpdatedStrategyVaultFactoryEvent.InputTuple,
+      UpdatedStrategyVaultFactoryEvent.OutputTuple,
+      UpdatedStrategyVaultFactoryEvent.OutputObject
+    >;
+    UpdatedStrategyVaultFactory: TypedContractEvent<
+      UpdatedStrategyVaultFactoryEvent.InputTuple,
+      UpdatedStrategyVaultFactoryEvent.OutputTuple,
+      UpdatedStrategyVaultFactoryEvent.OutputObject
     >;
 
     "UpdatedTokenAllowance(address,bool)": TypedContractEvent<
