@@ -36,5 +36,8 @@
     "feeController": "0xEAccF85Cdf6750451623fAa1EAb0fA6B1b05D4e1",
     "feeHandler": "noch nicht bekannt",
     "actionRegistry": "0xce48C044FD1C4c7EFC8bDbB8f0694C03BD10b29c"
+  },
+  "MockVaultModule": {
+    "owner": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123"
   }
 }

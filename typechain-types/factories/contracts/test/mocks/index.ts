@@ -5,4 +5,5 @@ export * as mockTokenSol from "./MockToken.sol";
 export { MockAction__factory } from "./MockAction__factory";
 export { MockCondition__factory } from "./MockCondition__factory";
 export { MockPythReverting__factory } from "./MockPythReverting__factory";
+export { MockVault__factory } from "./MockVault__factory";
 export { WrongInterfaceContract__factory } from "./WrongInterfaceContract__factory";

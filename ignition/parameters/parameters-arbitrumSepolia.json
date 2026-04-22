@@ -14,5 +14,8 @@
     "creatorPercentage": 500,
     "vaultPercentage": 8500,
     "ethOracleID": "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace"
+  },
+  "MockVaultModule": {
+    "owner": "0xd4Fa4ee93D7D27c1c4Be36bfBa67183dD4320123"
   }
 }

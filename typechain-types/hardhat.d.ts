@@ -278,6 +278,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Token__factory>;
     getContractFactory(
+      name: "MockVault",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockVault__factory>;
+    getContractFactory(
       name: "WrongInterfaceContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.WrongInterfaceContract__factory>;
@@ -621,6 +625,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Token>;
     getContractAt(
+      name: "MockVault",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockVault>;
+    getContractAt(
       name: "WrongInterfaceContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -901,6 +910,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Token>;
     deployContract(
+      name: "MockVault",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockVault>;
+    deployContract(
       name: "WrongInterfaceContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.WrongInterfaceContract>;
@@ -1243,6 +1256,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Token>;
+    deployContract(
+      name: "MockVault",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockVault>;
     deployContract(
       name: "WrongInterfaceContract",
       args: any[],

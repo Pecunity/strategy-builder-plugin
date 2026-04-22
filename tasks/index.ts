@@ -12,3 +12,6 @@ export * from "./set-custom-oracle";
 export * from "./swap-and-burn";
 export * from "./update-reduction";
 export * from "./activate-primary-token";
+export * from "./create-wallet";
+export * from "./mock-vault-set-owner";
+export * from "./mock-vault-handle-fee";

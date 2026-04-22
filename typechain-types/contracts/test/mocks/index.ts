@@ -6,4 +6,5 @@ export type { mockTokenSol };
 export type { MockAction } from "./MockAction";
 export type { MockCondition } from "./MockCondition";
 export type { MockPythReverting } from "./MockPythReverting";
+export type { MockVault } from "./MockVault";
 export type { WrongInterfaceContract } from "./WrongInterfaceContract";

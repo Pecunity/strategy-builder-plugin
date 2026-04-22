@@ -114,67 +114,24 @@ contract StrategyVaultExecutionTest is Test {
     }
 
     function test_activate_automation_vault() external {
-        // uint32 conditionId = 10021;
+        // address conditionAddress = 0xb0b737E104640C7BDe2730f7FDcD2050504ac8c6; // Timer Condition
+        address conditionAddress = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d; // Interval Condition
+        // address conditionAddress = 0xAFE192c2A7A98950BF9eB7F45A1ac263fA8b0B50; // HF Condition
+        // address conditionAddress = 0xea97E6d13Dc7878b7876516a7a8DCeD5d8f8eBB7; // Range Condition
+        // uint32 strategyId = 3730214253; //Timer Condition ID
+        uint32 strategyId = 4169096106; //Interval Condition ID
+        // uint32 strategyId = 3954981277; //Range Condition ID
+        address _vault = 0xBA40317F1B31dEd4BAd379836a4530597415C070;
 
-        // // uint32 automationId = 10021;
-        // uint32 automationId = 4042520397;
-        address conditionAddress = 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d;
-        uint32 strategyId = 3684279595;
-        address _vault = 0x40B3f798e24D367f8020A663cEeFBE4753Ab26Bf;
-
-        // address owner = StrategyVault(payable(_vault)).owner();
-
-        // deal(wBNB, wallet, 20 ether);
-
-        // address feeHandler = address(StrategyVault(payable(_vault)).feeHandler());
-
-        vm.mockCall(conditionAddress, abi.encodeWithSelector(ICondition.checkCondition.selector), abi.encode(1));
-
-        // vm.startPrank(wallet);
-        // IERC20(wBNB).approve(feeHandler, 5 ether);
-        // FeeHandler(feeHandler).depositTokenFor(owner, wBNB, 5 ether);
-        // vm.stopPrank();
+        // vm.mockCall(conditionAddress, abi.encodeWithSelector(ICondition.checkCondition.selector), abi.encode(1));
+        // vm.mockCall(
+        //     0xea97E6d13Dc7878b7876516a7a8DCeD5d8f8eBB7,
+        //     abi.encodeWithSelector(ICondition.checkCondition.selector),
+        //     abi.encode(0)
+        // );
 
         vm.prank(wallet);
         IStrategyVault(_vault).executeAutomation(strategyId, wallet);
-
-        // bytes32 contextId = 0x000000000000000000000000000000000000636f6e7465787449445f4c594c50;
-
-        // //     conditionAddress: 0x43FB488Eaa15deE312283d27d4cf89Cd26d01d0d,
-        // //     result0: 0,
-        // //     result1: 1,
-        // //     id: conditionId
-        // // });
-
-        // // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
-        // vm.prank(EXECUTOR);
-        // IStrategyVault(vault).executeAutomation(
-        //     automationId, 0x4D1C9043E5bD5877F0d1708f8265ADBa853fBd3E, EXECUTOR
-        // );
-        // IStrategyVault(vault).executeStrategy(strategyId);
-
-        // vm.prank(wallet);
-        // IPancakeSwapV3PositionRangeChecker(PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER).addCondition(
-        //     10031,
-        //     IPancakeSwapV3PositionRangeChecker.Condition({
-        //         contextId: contextId,
-        //         contextKey: LP_POSITION_KEY,
-        //         rangeCheck: IPancakeSwapV3PositionRangeChecker.PositionRangeStatusCheck.UnderLowerRange,
-        //         updateable: true
-        //     })
-        // );
-
-        // IStrategyVault.Condition memory condition = IStrategyVault.Condition({
-        //     conditionAddress: PANCAKE_SWAP_V3_POSITION_RANGE_CHECKER,
-        //     id: 10031,
-        //     result0: 0,
-        //     result1: 0
-        // });
-
-        // vm.prank(wallet);
-        // IStrategyVault(vault).createAutomation(
-        //     10031, 1003, address(0), type(uint256).max, condition
-        // );
     }
 
     function test_automationExecution_vault() external {

@@ -124,9 +124,9 @@ contract StrategyExecutionTest is Test {
 
         // // address multisig = 0x56B2cC86A6d1Da4Bc5567B4925dbeb8d746e5E86;
         // vm.prank(EXECUTOR);
-        // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeAutomation(
-        //     automationId, 0x4D1C9043E5bD5877F0d1708f8265ADBa853fBd3E, EXECUTOR
-        // );
+        IStrategyBuilderModule(0x32Ab11EB7fdf61D46432445091Cb6f52d9c8a130).executeAutomation(
+            757463292, 0x4f7b204684Ee671f9aC5B1467b00BADCc24C14D2, EXECUTOR
+        );
         // IStrategyBuilderModule(STRATEGY_BUILDER_PLUGIN).executeStrategy(strategyId);
 
         // vm.prank(wallet);

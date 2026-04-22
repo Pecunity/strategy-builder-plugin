@@ -144,6 +144,8 @@ export type { MockPythReverting } from "./contracts/test/mocks/MockPythReverting
 export { MockPythReverting__factory } from "./factories/contracts/test/mocks/MockPythReverting__factory";
 export type { Token } from "./contracts/test/mocks/MockToken.sol/Token";
 export { Token__factory } from "./factories/contracts/test/mocks/MockToken.sol/Token__factory";
+export type { MockVault } from "./contracts/test/mocks/MockVault";
+export { MockVault__factory } from "./factories/contracts/test/mocks/MockVault__factory";
 export type { WrongInterfaceContract } from "./contracts/test/mocks/WrongInterfaceContract";
 export { WrongInterfaceContract__factory } from "./factories/contracts/test/mocks/WrongInterfaceContract__factory";
 export type { TokenReceiver } from "./contracts/utils/TokenReceiver";
